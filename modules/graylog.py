@@ -1,0 +1,163 @@
+import requests
+import base64
+import json
+from datetime import datetime
+from config import GRAYLOG_URL, GRAYLOG_USERNAME, GRAYLOG_PASSWORD
+
+def extract_nested_json(message_str: str) -> dict:
+    """
+    Extract and parse nested JSON from message string.
+    
+    Args:
+        message_str (str): Raw message string containing process ID and JSON
+        
+    Returns:
+        dict: Parsed JSON data with process_id added, or None if parsing fails
+        
+    Example input: '3248 - { "formsSessionName": "...", ...}'
+    """
+    try:
+        dash_pos = message_str.find('-')
+        if dash_pos == -1:
+            return None
+            
+        # Extract process ID and find JSON
+        process_id = message_str[:dash_pos].strip()
+        json_start = message_str.find('{', dash_pos)
+        
+        if json_start != -1:
+            json_str = message_str[json_start:]
+            data = json.loads(json_str)
+            data['process_id'] = process_id
+            return data
+            
+        return None
+    except json.JSONDecodeError:
+        return None
+
+def parse_log_message(raw_message) -> dict:
+    """
+    Parse raw log message and extract all relevant fields.
+    
+    Args:
+        raw_message (str|dict): Raw message from Graylog
+        
+    Returns:
+        dict: Structured log data with extracted fields
+    """
+    try:
+        # Parse outer JSON if needed
+        message_data = json.loads(raw_message) if isinstance(raw_message, str) else raw_message
+        inner_message = message_data.get('message', '')
+        nested_data = extract_nested_json(str(inner_message))
+        
+        if nested_data:
+            return {
+                'process_id': nested_data.get('process_id'),
+                'formssessionname': nested_data.get('formsSessionName'),
+                'formsformname': nested_data.get('formsFormName'),
+                'formsdbsessionid': nested_data.get('formsDbSessionId'),
+                'formsusername': nested_data.get('formsUsername'),
+                'callsite': nested_data.get('callSite'),
+                'thread': nested_data.get('thread'),
+                'type': nested_data.get('type', 'INFO'),
+                'message': nested_data.get('message', '').strip()
+            }
+        
+        return {'message': inner_message}
+        
+    except (json.JSONDecodeError, AttributeError) as e:
+        print(f"Error parsing message: {e}")
+        return {'message': str(raw_message)}
+
+def get_logs(time_range_minutes: int = 5) -> dict:
+    """
+    Fetch and process logs from Graylog.
+    
+    Args:
+        time_range_minutes (int): Time range in minutes to fetch logs for
+        
+    Returns:
+        dict: Processed logs with statistics and metadata
+    """
+    # Setup auth and headers
+    credentials = f"{GRAYLOG_USERNAME}:{GRAYLOG_PASSWORD}"
+    headers = {
+        "Authorization": f"Basic {base64.b64encode(credentials.encode()).decode()}",
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+    
+    try:
+        # Fetch logs from Graylog
+        response = requests.get(
+            f"{GRAYLOG_URL}/api/search/universal/relative",
+            headers=headers,
+            params={"query": "*", "range": time_range_minutes * 60},
+            verify=False
+        )
+        response.raise_for_status()
+        
+        # Process messages
+        data = response.json()
+        processed_messages = []
+        
+        for msg in data.get("messages", []):
+            # Parse message content
+            parsed_data = parse_log_message(msg.get("message", {}))
+            
+            # Format timestamp
+            timestamp = msg.get("timestamp")
+            formatted_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            if timestamp:
+                try:
+                    dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                    formatted_time = dt.strftime('%Y-%m-%d %H:%M:%S')
+                except (ValueError, AttributeError):
+                    pass
+
+            # Determine severity and category
+            actual_message = parsed_data.get('message', '').lower()
+            level = parsed_data.get('type', 'INFO').upper()
+            
+            severity = ("high" if level == "ERROR" or "error" in actual_message else
+                       "medium" if level == "WARN" or "warning" in actual_message else
+                       "low")
+
+            category = ("System Error" if "error" in actual_message else
+                       "Security Alert" if any(k in actual_message for k in ["unauthorized", "forbidden", "denied"]) else
+                       "Performance Issue" if any(k in actual_message for k in ["timeout", "slow", "performance"]) else
+                       "Service Status" if any(k in actual_message for k in ["service", "started", "stopped"]) else
+                       "General Warning")
+
+            # Add processed message
+            processed_messages.append({
+                "timestamp": formatted_time,
+                "level": level,
+                "severity": severity,
+                "category": category,
+                "details": {k: v for k, v in parsed_data.items() if k != 'message' and v is not None},
+                "message": parsed_data.get('message', '').strip()
+            })
+
+        # Sort messages and calculate stats
+        severity_order = {"high": 0, "medium": 1, "low": 2}
+        processed_messages.sort(key=lambda x: (severity_order[x["severity"]], x["timestamp"]))
+        
+        stats = {
+            "error_count": sum(1 for msg in processed_messages if msg["severity"] == "high"),
+            "warn_count": sum(1 for msg in processed_messages if msg["severity"] == "medium"),
+            "info_count": sum(1 for msg in processed_messages if msg["severity"] == "low"),
+        }
+
+        return {
+            "logs": processed_messages,
+            "total_results": len(processed_messages),
+            "time_range": f"Last {time_range_minutes} minutes",
+            "query_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            "stats": stats
+        }
+
+    except requests.exceptions.RequestException as e:
+        print(f"Request error: {e}")
+        return {"error": str(e)}

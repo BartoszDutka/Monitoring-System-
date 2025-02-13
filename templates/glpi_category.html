@@ -1,0 +1,156 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>{{ category_title }}</h1>
+    <div class="header-actions">
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" 
+                   id="deviceSearch" 
+                   class="device-search" 
+                   placeholder="Szukaj urządzeń..." 
+                   autocomplete="off">
+        </div>
+        <div class="refresh-controls">
+            <button id="refresh-current" class="refresh-button">
+                <i class="fas fa-sync-alt"></i> Refresh {{ category_title }}
+            </button>
+            <button id="refresh-all" class="refresh-button secondary">
+                <i class="fas fa-sync-alt"></i> Refresh All
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="hosts-container">
+    {% for device in devices %} 
+    <div class="host-card">
+        <div class="card-content">
+            <h3>{{ device.name }}</h3>
+            <div class="device-details">
+                {% if device.serial %}
+                <p><strong>Serial:</strong> {{ device.serial }}</p>
+                {% endif %}
+                {% if device.otherserial %}
+                <p><strong>Inventory Number:</strong> {{ device.otherserial }}</p>
+                {% endif %}
+                {% if device.computermodels_id %}
+                <p><strong>Model:</strong> {{ device.computermodels_id }}</p>
+                {% endif %}
+                {% if device.location_name %}
+                <p><strong>Location:</strong> {{ device.location_name }}</p>
+                {% endif %}
+                {% if device.ip_address %}
+                <p><strong>IP Address:</strong> {{ device.ip_address }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Dodaj przycisk VNC tylko dla Workstations i Terminals -->
+        {% if category_title in ['Workstations (KS)', 'Terminals (KT)'] %}
+        <div class="device-actions">
+            <button class="vnc-button" onclick="connectToVNC('{{ device.name }}')"
+                    title="Connect to {{ device.name }} via UltraVNC">
+                <i class="fas fa-desktop"></i> Connect UltraVNC
+            </button>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+// Dodaj funkcję wyszukiwania
+function filterDevices() {
+    const searchTerm = document.getElementById('deviceSearch').value.toLowerCase();
+    const cards = document.querySelectorAll('.host-card');
+    let hasResults = false;
+
+    cards.forEach(card => {
+        const name = card.querySelector('h3').textContent.toLowerCase();
+        const details = card.querySelector('.device-details').textContent.toLowerCase();
+        const isVisible = name.includes(searchTerm) || details.includes(searchTerm);
+        
+        card.style.display = isVisible ? '' : 'none';
+        if (isVisible) hasResults = true;
+    });
+
+    // Pokaż informację gdy nie ma wyników
+    const noResults = document.getElementById('noResults');
+    if (!hasResults && searchTerm) {
+        if (!noResults) {
+            const message = document.createElement('div');
+            message.id = 'noResults';
+            message.className = 'no-results';
+            message.innerHTML = '<i class="fas fa-search"></i> Nie znaleziono urządzeń';
+            document.querySelector('.hosts-container').appendChild(message);
+        }
+    } else if (noResults) {
+        noResults.remove();
+    }
+}
+
+// Dodaj nasłuchiwanie na input
+document.getElementById('deviceSearch').addEventListener('input', filterDevices);
+
+function refreshData(type) {
+    const currentButton = document.getElementById('refresh-current');
+    const allButton = document.getElementById('refresh-all');
+    const buttons = [currentButton, allButton];
+    
+    // Disable both buttons
+    buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.dataset.originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+    });
+
+    const category = '{{ request.path.split("/")[-1] }}';
+    const url = type === 'current' 
+        ? `/api/glpi/refresh/${category}`
+        : '/api/glpi/refresh';
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.reload();
+            } else {
+                throw new Error('Refresh failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error refreshing data:', error);
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.innerHTML = btn.dataset.originalText;
+            });
+        });
+}
+
+document.getElementById('refresh-current').addEventListener('click', () => refreshData('current'));
+document.getElementById('refresh-all').addEventListener('click', () => refreshData('all'));
+
+function connectToVNC(hostname) {
+    fetch('/connect_vnc', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ hostname: hostname })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('VNC connection initiated');
+        } else {
+            alert('Error connecting to VNC: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to connect to VNC');
+    });
+}
+</script>
+{% endblock %}

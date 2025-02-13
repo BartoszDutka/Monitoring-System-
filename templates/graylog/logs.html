@@ -1,0 +1,231 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>System Logs Monitor</h1>
+</div>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card graylog-card full-width">
+        <div class="card-header">
+            <i class="fas fa-shield-alt"></i>
+            <h2>Critical System Events</h2>
+            <div class="header-actions">
+                <div class="logs-summary">
+                    <div class="log-stat error">
+                        <span class="stat-label">Critical Events</span>
+                        <span class="stat-count">{{ graylog.stats.error_count }}</span>
+                        <div class="stat-content">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                    </div>
+                    <div class="log-stat warning">
+                        <span class="stat-label">Warnings</span>
+                        <span class="stat-count">{{ graylog.stats.warn_count }}</span>
+                        <div class="stat-content">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                    <div class="log-stat info">
+                        <span class="stat-label">Alerts</span>
+                        <span class="stat-count">{{ graylog.stats.info_count }}</span>
+                        <div class="stat-content">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <button class="refresh-button" onclick="refreshLogs()">
+                    <i class="fas fa-sync"></i>
+                    Refresh
+                </button>
+            </div>
+        </div>
+        <div class="card-content">
+            <div class="logs-header">
+                <div class="time-info">
+                    <i class="fas fa-clock"></i>
+                    <span class="time-range">{{ graylog.time_range }}</span>
+                </div>
+            </div>
+            
+            <div class="logs-categories">
+                {% set categories = {
+                    'System Error': {'icon': 'fas fa-exclamation-circle', 'class': 'error'},
+                    'Security Alert': {'icon': 'fas fa-shield-alt', 'class': 'security'},
+                    'Performance Issue': {'icon': 'fas fa-tachometer-alt', 'class': 'performance'},
+                    'Service Status': {'icon': 'fas fa-server', 'class': 'service'},
+                    'General Warning': {'icon': 'fas fa-exclamation-triangle', 'class': 'warning'}
+                } %}
+
+                {% for category_name, meta in categories.items() %}
+                    {% set category_logs = graylog.logs|selectattr('category', 'equalto', category_name)|list %}
+                    {% if category_logs %}
+                        <div class="log-category {{ meta.class }}">
+                            <div class="category-header" onclick="toggleCategory(this)">
+                                <i class="{{ meta.icon }}"></i>
+                                <span>{{ category_name }}</span>
+                                <span class="count">{{ category_logs|length }}</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="category-content">
+                                {% for log in category_logs %}
+                                    <div class="log-entry {{ log.severity }}">
+                                        <div class="log-entry-header">
+                                            <div class="header-left">
+                                                <span class="timestamp">
+                                                    <i class="fas fa-clock"></i>
+                                                    {{ log.timestamp }}
+                                                </span>
+                                                <span class="source">
+                                                    <i class="fas fa-user"></i>
+                                                    {{ log.details.formsusername if log.details.formsusername else 'Unknown' }}
+                                                </span>
+                                            </div>
+                                            <span class="severity-badge {{ log.severity }}">
+                                                {{ log.level }}
+                                            </span>
+                                        </div>
+                                        <div class="log-details">
+                                            <!-- Session Information -->
+                                            {% if log.details.formssessionname or log.details.formsdbsessionid %}
+                                            <div class="detail-section">
+                                                <div class="section-header">
+                                                    <i class="fas fa-id-card"></i>
+                                                    Session Details
+                                                </div>
+                                                <div class="section-content">
+                                                    {% if log.details.formssessionname %}
+                                                    <div class="detail-field">
+                                                        <span class="field-label">Session Name</span>
+                                                        <span class="field-value code">{{ log.details.formssessionname }}</span>
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if log.details.formsdbsessionid %}
+                                                    <div class="detail-field">
+                                                        <span class="field-label">DB Session ID</span>
+                                                        <span class="field-value code">{{ log.details.formsdbsessionid }}</span>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            <!-- Form Information -->
+                                            {% if log.details.formsformname %}
+                                            <div class="detail-section">
+                                                <div class="section-header">
+                                                    <i class="fas fa-file-alt"></i>
+                                                    Form Details
+                                                </div>
+                                                <div class="section-content">
+                                                    <div class="detail-field">
+                                                        <span class="field-label">Form Name</span>
+                                                        <span class="field-value">{{ log.details.formsformname }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            <!-- Technical Information -->
+                                            {% if log.details.thread or log.details.callsite %}
+                                            <div class="detail-section">
+                                                <div class="section-header">
+                                                    <i class="fas fa-code"></i>
+                                                    Technical Details
+                                                </div>
+                                                <div class="section-content">
+                                                    {% if log.details.thread %}
+                                                    <div class="detail-field">
+                                                        <span class="field-label">Thread ID</span>
+                                                        <span class="field-value code">{{ log.details.thread }}</span>
+                                                    </div>
+                                                    {% endif %}
+                                                    {% if log.details.callsite %}
+                                                    <div class="detail-field">
+                                                        <span class="field-label">Call Site</span>
+                                                        <span class="field-value code">{{ log.details.callsite }}</span>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            <!-- Message Content -->
+                                            {% if log.message %}
+                                            <div class="detail-section message-section">
+                                                <div class="message-box {{ log.severity }}">
+                                                    <div class="message-header">
+                                                        <i class="fas fa-comment-alt"></i>
+                                                        <span class="message-type">Error Message</span>
+                                                        <span class="message-time">
+                                                            <i class="fas fa-clock"></i>
+                                                            {{ log.timestamp }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="message-body">
+                                                        {{ log.message }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleCategory(header) {
+    const content = header.nextElementSibling;
+    const icon = header.querySelector('.fa-chevron-down');
+    
+    if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+        icon.style.transform = 'rotate(0deg)';
+    } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+        icon.style.transform = 'rotate(180deg)';
+    }
+}
+
+function refreshLogs() {
+    const button = document.querySelector('.refresh-button');
+    const icon = button.querySelector('i');
+    button.disabled = true;
+    icon.classList.add('fa-spin');
+    
+    fetch('/graylog/logs')
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Odśwież sekcję logów
+            const newContent = doc.querySelector('.logs-categories');
+            document.querySelector('.logs-categories').innerHTML = newContent.innerHTML;
+
+            // Odśwież statystyki
+            const newStats = doc.querySelector('.logs-summary');
+            document.querySelector('.logs-summary').innerHTML = newStats.innerHTML;
+
+            // Odśwież timestamp
+            const timeRange = doc.querySelector('.time-range');
+            document.querySelector('.time-range').textContent = timeRange.textContent;
+        })
+        .catch(error => console.error('Error:', error))
+        .finally(() => {
+            button.disabled = false;
+            icon.classList.remove('fa-spin');
+        });
+}
+
+// Auto-refresh every 5 minutes
+setInterval(refreshLogs, 300000);
+</script>
+{% endblock %}
