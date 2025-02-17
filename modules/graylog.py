@@ -1,7 +1,9 @@
 import requests
 import base64
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
+import threading
+import time
 from config import GRAYLOG_URL, GRAYLOG_USERNAME, GRAYLOG_PASSWORD
 
 def extract_nested_json(message_str: str) -> dict:
@@ -70,17 +72,58 @@ def parse_log_message(raw_message) -> dict:
         print(f"Error parsing message: {e}")
         return {'message': str(raw_message)}
 
+class GraylogBuffer:
+    def __init__(self):
+        self.buffer = {}
+        self.lock = threading.Lock()
+        self.MAX_BUFFER_AGE = 24 * 60 * 60  # 24 godziny w sekundach
+        
+        # Uruchom wątek czyszczący stare dane
+        self.cleanup_thread = threading.Thread(target=self._cleanup_old_data, daemon=True)
+        self.cleanup_thread.start()
+    
+    def add_logs(self, time_range, logs_data):
+        with self.lock:
+            self.buffer[time_range] = {
+                'data': logs_data,
+                'timestamp': datetime.now(),
+                'expires': datetime.now() + timedelta(hours=24)
+            }
+    
+    def get_logs(self, time_range):
+        with self.lock:
+            if time_range in self.buffer:
+                buffer_data = self.buffer[time_range]
+                if datetime.now() < buffer_data['expires']:
+                    return buffer_data['data']
+                else:
+                    del self.buffer[time_range]
+            return None
+    
+    def _cleanup_old_data(self):
+        while True:
+            time.sleep(300)  # Sprawdzaj co 5 minut
+            with self.lock:
+                current_time = datetime.now()
+                expired_ranges = [
+                    tr for tr, data in self.buffer.items() 
+                    if current_time >= data['expires']
+                ]
+                for tr in expired_ranges:
+                    del self.buffer[tr]
+
+# Utworzenie globalnego bufora
+graylog_buffer = GraylogBuffer()
+
 def get_logs(time_range_minutes: int = 5) -> dict:
     """
-    Fetch and process logs from Graylog.
-    
-    Args:
-        time_range_minutes (int): Time range in minutes to fetch logs for
-        
-    Returns:
-        dict: Processed logs with statistics and metadata
+    Fetch and process logs from Graylog with buffering and pagination.
     """
-    # Setup auth and headers
+    # Sprawdź bufor najpierw
+    buffered_data = graylog_buffer.get_logs(time_range_minutes)
+    if buffered_data:
+        return buffered_data
+
     credentials = f"{GRAYLOG_USERNAME}:{GRAYLOG_PASSWORD}"
     headers = {
         "Authorization": f"Basic {base64.b64encode(credentials.encode()).decode()}",
@@ -89,74 +132,97 @@ def get_logs(time_range_minutes: int = 5) -> dict:
     }
     
     try:
-        # Fetch logs from Graylog
-        response = requests.get(
-            f"{GRAYLOG_URL}/api/search/universal/relative",
-            headers=headers,
-            params={"query": "*", "range": time_range_minutes * 60},
-            verify=False
-        )
-        response.raise_for_status()
-        
-        # Process messages
-        data = response.json()
-        processed_messages = []
-        
-        for msg in data.get("messages", []):
-            # Parse message content
-            parsed_data = parse_log_message(msg.get("message", {}))
+        all_messages = []
+        page = 0
+        page_size = 150
+        total_desired = 1000  # Maksymalna liczba logów do pobrania
+
+        while len(all_messages) < total_desired:
+            # Dodaj parametry paginacji do zapytania
+            response = requests.get(
+                f"{GRAYLOG_URL}/api/search/universal/relative",
+                headers=headers,
+                params={
+                    "query": "*",
+                    "range": time_range_minutes * 60,
+                    "limit": page_size,
+                    "offset": page * page_size
+                },
+                verify=False
+            )
+            response.raise_for_status()
             
-            # Format timestamp
-            timestamp = msg.get("timestamp")
-            formatted_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            if timestamp:
-                try:
-                    dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
-                    formatted_time = dt.strftime('%Y-%m-%d %H:%M:%S')
-                except (ValueError, AttributeError):
-                    pass
-
-            # Determine severity and category
-            actual_message = parsed_data.get('message', '').lower()
-            level = parsed_data.get('type', 'INFO').upper()
+            data = response.json()
+            messages = data.get("messages", [])
             
-            severity = ("high" if level == "ERROR" or "error" in actual_message else
-                       "medium" if level == "WARN" or "warning" in actual_message else
-                       "low")
+            if not messages:  # Jeśli nie ma więcej wiadomości, przerwij
+                break
+                
+            processed_batch = []
+            for msg in messages:
+                # Parse message content
+                parsed_data = parse_log_message(msg.get("message", {}))
+                
+                # Format timestamp
+                timestamp = msg.get("timestamp")
+                formatted_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                if timestamp:
+                    try:
+                        dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                        formatted_time = dt.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                    except (ValueError, AttributeError):
+                        pass
 
-            category = ("System Error" if "error" in actual_message else
-                       "Security Alert" if any(k in actual_message for k in ["unauthorized", "forbidden", "denied"]) else
-                       "Performance Issue" if any(k in actual_message for k in ["timeout", "slow", "performance"]) else
-                       "Service Status" if any(k in actual_message for k in ["service", "started", "stopped"]) else
-                       "General Warning")
+                # Determine severity and category
+                actual_message = parsed_data.get('message', '').lower()
+                level = parsed_data.get('type', 'INFO').upper()
+                
+                severity = ("high" if level == "ERROR" or "error" in actual_message else
+                           "medium" if level == "WARN" or "warning" in actual_message else
+                           "low")
 
-            # Add processed message
-            processed_messages.append({
-                "timestamp": formatted_time,
-                "level": level,
-                "severity": severity,
-                "category": category,
-                "details": {k: v for k, v in parsed_data.items() if k != 'message' and v is not None},
-                "message": parsed_data.get('message', '').strip()
-            })
+                category = ("System Error" if "error" in actual_message else
+                           "Security Alert" if any(k in actual_message for k in ["unauthorized", "forbidden", "denied"]) else
+                           "Performance Issue" if any(k in actual_message for k in ["timeout", "slow", "performance"]) else
+                           "Service Status" if any(k in actual_message for k in ["service", "started", "stopped"]) else
+                           "General Warning")
+
+                processed_batch.append({
+                    "timestamp": formatted_time,
+                    "level": level,
+                    "severity": severity,
+                    "category": category,
+                    "details": {k: v for k, v in parsed_data.items() if k != 'message' and v is not None},
+                    "message": parsed_data.get('message', '').strip()
+                })
+
+            all_messages.extend(processed_batch)
+            print(f"Fetched batch {page + 1}, total messages: {len(all_messages)}")
+            
+            page += 1
+            if len(messages) < page_size:  # Jeśli otrzymaliśmy mniej wiadomości niż rozmiar strony
+                break
 
         # Sort messages and calculate stats
         severity_order = {"high": 0, "medium": 1, "low": 2}
-        processed_messages.sort(key=lambda x: (severity_order[x["severity"]], x["timestamp"]))
+        all_messages.sort(key=lambda x: (x["timestamp"], severity_order[x["severity"]]))
         
         stats = {
-            "error_count": sum(1 for msg in processed_messages if msg["severity"] == "high"),
-            "warn_count": sum(1 for msg in processed_messages if msg["severity"] == "medium"),
-            "info_count": sum(1 for msg in processed_messages if msg["severity"] == "low"),
+            "error_count": sum(1 for msg in all_messages if msg["severity"] == "high"),
+            "warn_count": sum(1 for msg in all_messages if msg["severity"] == "medium"),
+            "info_count": sum(1 for msg in all_messages if msg["severity"] == "low"),
         }
 
-        return {
-            "logs": processed_messages,
-            "total_results": len(processed_messages),
+        result = {
+            "logs": all_messages,
+            "total_results": len(all_messages),
             "time_range": f"Last {time_range_minutes} minutes",
             "query_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             "stats": stats
         }
+        
+        graylog_buffer.add_logs(time_range_minutes, result)
+        return result
 
     except requests.exceptions.RequestException as e:
         print(f"Request error: {e}")

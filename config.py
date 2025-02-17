@@ -12,5 +12,13 @@ GLPI_URL = "http://192.168.100.23/glpi"
 GLPI_USER_TOKEN = "nab65xEvogp9F6ml4lRqj07c5MHv6C2xZoI0mEvA"
 GLPI_APP_TOKEN = "VahsVvfYb3nGG6Qp4aBjBKuAOvMLaaK9pTk1Dgkm"
 
+# Konfiguracja LDAP
+LDAP_SERVER = "192.168.100.9"
+LDAP_PORT = 389
+LDAP_BASE_DN = "DC=igrabka,DC=instytut"
+LDAP_DOMAIN = "igrabka.instytut"
+LDAP_SERVICE_USER = "bdutka"  # Zmienione z pełnej nazwy na samą nazwę użytkownika
+LDAP_SERVICE_PASSWORD = "Naskar1234!"
+
 
 

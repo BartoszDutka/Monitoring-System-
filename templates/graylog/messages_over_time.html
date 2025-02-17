@@ -1,0 +1,187 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Messages Over Time</h1>
+</div>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card graylog-card full-width">
+        <div class="card-header">
+            <i class="fas fa-chart-line"></i>
+            <h2>Message Timeline</h2>
+            <div class="header-actions">
+                <div class="time-range-selector">
+                    <select id="timeRange" onchange="updateTimeRange()">
+                        <option value="15">Last 15 minutes</option>
+                        <option value="30">Last 30 minutes</option>
+                        <option value="60" selected>Last hour</option>
+                        <option value="180">Last 3 hours</option>
+                        <option value="360">Last 6 hours</option>
+                        <option value="720">Last 12 hours</option>
+                        <option value="1440">Last 24 hours</option>
+                    </select>
+                </div>
+                <button class="refresh-button" onclick="refreshTimeline()">
+                    <i class="fas fa-sync"></i>
+                    Refresh
+                </button>
+            </div>
+        </div>
+        <div class="card-content">
+            <div class="chart-container">
+                <canvas id="messageTimeline"></canvas>
+            </div>
+            <div class="timeline-stats">
+                <div class="stat-box">
+                    <h3>Total Messages</h3>
+                    <span class="stat-value">{{ graylog.total_results }}</span>
+                </div>
+                <div class="stat-box error">
+                    <h3>Errors</h3>
+                    <span class="stat-value">{{ graylog.stats.error_count }}</span>
+                </div>
+                <div class="stat-box warning">
+                    <h3>Warnings</h3>
+                    <span class="stat-value">{{ graylog.stats.warn_count }}</span>
+                </div>
+                <div class="stat-box info">
+                    <h3>Info</h3>
+                    <span class="stat-value">{{ graylog.stats.info_count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment"></script>
+<script>
+let timelineChart;
+let currentData = {{ graylog|tojson|safe }};  // Inicjalizuj currentData z danymi z serwera
+
+function createTimeline(data) {
+    if (!data || !data.stats) {
+        console.error('Invalid data format:', data);
+        return;
+    }
+
+    const ctx = document.getElementById('messageTimeline').getContext('2d');
+    
+    if (timelineChart) {
+        timelineChart.destroy();
+    }
+
+    // Użyj bezpośrednio statystyk
+    const chartData = {
+        labels: ['Current Period'],
+        datasets: [
+            {
+                label: 'Errors',
+                data: [data.stats.error_count],
+                borderColor: '#FF0000', // Intensywny czerwony
+                backgroundColor: 'rgba(255, 0, 0, 0.5)', // Półprzezroczysty czerwony
+                fill: true
+            },
+            {
+                label: 'Warnings',
+                data: [data.stats.warn_count],
+                borderColor: '#FFD700', // Intensywny złoty
+                backgroundColor: 'rgba(255, 215, 0, 0.5)', // Półprzezroczysty złoty
+                fill: true
+            },
+            {
+                label: 'Info',
+                data: [data.stats.info_count],
+                borderColor: '#00FF00', // Intensywny zielony
+                backgroundColor: 'rgba(0, 255, 0, 0.5)', // Półprzezroczysty zielony
+                fill: true
+            }
+        ]
+    };
+
+    timelineChart = new Chart(ctx, {
+        type: 'bar', // Zmienione na wykres słupkowy
+        data: chartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            barPercentage: 0.5,
+            categoryPercentage: 0.8
+        }
+    });
+}
+
+function updateTimeRange() {
+    const timeRange = document.getElementById('timeRange').value;
+    const button = document.querySelector('.refresh-button');
+    const icon = button.querySelector('i');
+    button.disabled = true;
+    icon.classList.add('fa-spin');
+
+    fetch(`/api/graylog/messages?timeRange=${timeRange}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('API error:', data.error);
+                return;
+            }
+            // Zachowaj dane w zmiennej
+            currentData = data;
+            createTimeline(data);
+            updateStats(data);
+        })
+        .catch(error => console.error('Error fetching data:', error))
+        .finally(() => {
+            button.disabled = false;
+            icon.classList.remove('fa-spin');
+        });
+}
+
+function refreshTimeline() {
+    if (currentData) {
+        createTimeline(currentData);
+        updateStats(currentData);
+    }
+    // Pobierz nowe dane tylko jeśli są potrzebne
+    updateTimeRange();
+}
+
+// Zmodyfikuj inicjalizację
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        if (currentData) {
+            console.log('Using initial server data:', currentData);
+            createTimeline(currentData);
+        }
+        
+        // Ustaw odświeżanie co 5 minut
+        setInterval(refreshTimeline, 300000);
+    } catch (e) {
+        console.error('Error in initialization:', e);
+    }
+});
+
+function updateStats(data) {
+    if (!data || !data.stats) return;
+    
+    document.querySelector('.stat-box .stat-value').textContent = data.total_results || 0;
+    document.querySelector('.stat-box.error .stat-value').textContent = data.stats.error_count || 0;
+    document.querySelector('.stat-box.warning .stat-value').textContent = data.stats.warn_count || 0;
+    document.querySelector('.stat-box.info .stat-value').textContent = data.stats.info_count || 0;
+}
+</script>
+{% endblock %}

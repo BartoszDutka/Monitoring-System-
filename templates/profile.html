@@ -1,0 +1,114 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>User Profile</h1>
+</div>
+
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {% if user_info and user_info.avatar %}
+                    <img src="{{ url_for('static', filename='avatars/' + user_info.avatar) }}?t={{ time.time() }}" alt="Profile Picture">
+                {% else %}
+                    <i class="fas fa-user-circle"></i>
+                {% endif %}
+            </div>
+            <div class="avatar-upload">
+                <form action="{{ url_for('upload_avatar') }}" method="POST" enctype="multipart/form-data" id="avatarForm">
+                    <label for="avatar" class="btn-upload">
+                        <i class="fas fa-camera"></i>
+                        Zmień zdjęcie
+                    </label>
+                    <input type="file" id="avatar" name="avatar" accept="image/png,image/jpeg,image/gif" style="display: none" onchange="validateAndSubmit(this)">
+                </form>
+                <div class="upload-requirements">
+                    <p><i class="fas fa-info-circle"></i> Wymagania dla zdjęcia:</p>
+                    <ul>
+                        <li>Maksymalny rozmiar: 5MB</li>
+                        <li>Dozwolone formaty: PNG, JPG, JPEG, GIF</li>
+                        <li>Zalecane wymiary: min. 200x200px</li>
+                    </ul>
+                </div>
+            </div>
+            <h2>{{ user_info.displayName }}</h2>
+            <span class="profile-username">@{{ username }}</span>
+        </div>
+        
+        <div class="profile-details">
+            <div class="detail-group">
+                <label><i class="fas fa-envelope"></i> Email</label>
+                <span>{{ user_info.mail if user_info.mail else 'Not available' }}</span>
+            </div>
+            
+            <div class="detail-group">
+                <label><i class="fas fa-building"></i> Department</label>
+                <span>{{ user_info.department if user_info.department else 'Not available' }}</span>
+            </div>
+            
+            <div class="detail-group">
+                <label><i class="fas fa-id-badge"></i> Title</label>
+                <span>{{ user_info.title if user_info.title else 'Not available' }}</span>
+            </div>
+        </div>
+        
+        <div class="profile-actions">
+            <button class="btn-profile" onclick="location.href='{{ url_for('logout') }}'">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function validateAndSubmit(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        // Sprawdź rozmiar
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            alert('Plik jest za duży. Maksymalny rozmiar to 5MB.');
+            input.value = '';
+            return;
+        }
+
+        // Sprawdź typ pliku
+        const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
+        if (!validTypes.includes(file.type)) {
+            alert('Niedozwolony typ pliku. Dozwolone typy: PNG, JPG, JPEG, GIF');
+            input.value = '';
+            return;
+        }
+
+        // Pokaż loading indicator
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'loading-indicator';
+        loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Przesyłanie...';
+        document.body.appendChild(loadingIndicator);
+
+        // Wyślij formularz
+        const form = document.getElementById('avatarForm');
+        form.submit();
+    }
+
+    // Podłącz funkcję do inputa
+    const avatarInput = document.getElementById('avatar');
+    if (avatarInput) {
+        avatarInput.addEventListener('change', function() {
+            validateAndSubmit(this);
+        });
+    }
+
+    // Obsługa komunikatów flash
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            alert('{{ messages[0] }}');
+        {% endif %}
+    {% endwith %}
+});
+</script>
+{% endblock %}
