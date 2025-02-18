@@ -2,6 +2,7 @@ import requests
 from config import ZABBIX_URL, ZABBIX_TOKEN
 from collections import defaultdict
 from datetime import datetime
+from modules.database import log_system_event, archive_metrics, archive_host_status
 
 def get_hosts():
     headers = {
@@ -50,6 +51,8 @@ def get_hosts():
                     interface = next((i for i in host.get('interfaces', []) if i['type'] == '1'), None)
                     if interface:
                         host['availability'] = 'Available' if interface['available'] == '1' else 'Unavailable'
+                    else:
+                        host['availability'] = 'unknown'
                     
                     # Przetwarzanie itemów
                     for item in host.get('items', []):
@@ -89,12 +92,39 @@ def get_hosts():
                         'last_occurrence': datetime.fromtimestamp(max(timestamps)).strftime('%Y-%m-%d %H:%M:%S')
                     } for desc, timestamps in alert_groups.items()]
                     
+                    # Log alerts to system_logs
+                    if 'alerts' in host:
+                        for alert in host['alerts']:
+                            severity = 'critical' if 'critical' in alert['description'].lower() else 'warning'
+                            log_system_event(
+                                source='zabbix',
+                                severity=severity,
+                                host_name=host['name'],
+                                message=alert['description']
+                            )
+                    
+                    # Log status changes
+                    if host.get('availability') == 'Unavailable':
+                        log_system_event(
+                            source='zabbix',
+                            severity='error',
+                            host_name=host['name'],
+                            message=f"Host became unavailable"
+                        )
+                    
+                    # Archiwizuj tylko jeśli mamy podstawowe dane
+                    if 'hostid' in host and 'name' in host:
+                        if 'metrics' in host:
+                            archive_metrics(host['hostid'], host['metrics'])
+                        archive_host_status(host)
+                    
                 return data
             
         return {"result": [], "error": "No data received"}
         
-    except requests.exceptions.RequestException as e:
+    except Exception as e:
         print(f"Request error: {e}")
+        log_system_event('zabbix', 'error', 'system', f"Error fetching hosts: {str(e)}")
         return {"error": str(e)}
 
 def get_unknown_hosts():

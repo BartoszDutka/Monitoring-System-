@@ -3,31 +3,40 @@
 {% block content %}
 <div class="dashboard-header">
     <h1>Messages Over Time</h1>
+    <div class="header-controls">
+        <div class="time-controls">
+            <div class="control-group">
+                <label>Time Range:</label>
+                <div class="select-group">
+                    <select id="timeRangeValue" onchange="updateChart()">
+                        <option value="15">15</option>
+                        <option value="30">30</option>
+                        <option value="45">45</option>
+                        <option value="60">60</option>
+                    </select>
+                    <select id="timeRangeUnit" onchange="updateTimeOptions()">
+                        <option value="minutes">Minutes</option>
+                        <option value="hours">Hours</option>
+                        <option value="days">Days</option>
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label>Interval:</label>
+                <select id="timeInterval" onchange="updateChart()">
+                    <!-- Opcje będą dodawane dynamicznie -->
+                </select>
+            </div>
+            <button class="refresh-button" onclick="refreshChart()">
+                <i class="fas fa-sync"></i>
+                Refresh
+            </button>
+        </div>
+    </div>
 </div>
 
 <div class="dashboard-grid">
     <div class="dashboard-card graylog-card full-width">
-        <div class="card-header">
-            <i class="fas fa-chart-line"></i>
-            <h2>Message Timeline</h2>
-            <div class="header-actions">
-                <div class="time-range-selector">
-                    <select id="timeRange" onchange="updateTimeRange()">
-                        <option value="15">Last 15 minutes</option>
-                        <option value="30">Last 30 minutes</option>
-                        <option value="60" selected>Last hour</option>
-                        <option value="180">Last 3 hours</option>
-                        <option value="360">Last 6 hours</option>
-                        <option value="720">Last 12 hours</option>
-                        <option value="1440">Last 24 hours</option>
-                    </select>
-                </div>
-                <button class="refresh-button" onclick="refreshTimeline()">
-                    <i class="fas fa-sync"></i>
-                    Refresh
-                </button>
-            </div>
-        </div>
         <div class="card-content">
             <div class="chart-container">
                 <canvas id="messageTimeline"></canvas>
@@ -54,134 +63,193 @@
     </div>
 </div>
 
+<style>
+.time-controls {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.control-group label {
+    font-weight: 500;
+    color: white;
+    white-space: nowrap;
+}
+
+.select-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.time-controls select {
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
+    min-width: 100px;
+}
+
+.refresh-button {
+    margin-left: auto;
+}
+
+@media (max-width: 768px) {
+    .time-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .control-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .refresh-button {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment"></script>
 <script>
 let timelineChart;
-let currentData = {{ graylog|tojson|safe }};  // Inicjalizuj currentData z danymi z serwera
 
-function createTimeline(data) {
-    if (!data || !data.stats) {
-        console.error('Invalid data format:', data);
-        return;
-    }
-
-    const ctx = document.getElementById('messageTimeline').getContext('2d');
+function updateTimeOptions() {
+    const rangeUnit = document.getElementById('timeRangeUnit').value;
+    const rangeSelect = document.getElementById('timeRangeValue');
+    const intervalSelect = document.getElementById('timeInterval');
     
-    if (timelineChart) {
-        timelineChart.destroy();
+    // Wyczyść opcje
+    rangeSelect.innerHTML = '';
+    intervalSelect.innerHTML = '';
+    
+    // Ustaw opcje zakresu czasu i interwałów w zależności od wybranej jednostki
+    if (rangeUnit === 'minutes') {
+        [15, 30, 45, 60].forEach(val => {
+            rangeSelect.add(new Option(`${val}`, val));
+        });
+        // Dla minut pokazuj interwały 1-5 minut
+        [1, 2, 5, 10, 15].forEach(val => {
+            intervalSelect.add(new Option(`${val} minute${val > 1 ? 's' : ''}`, `${val} minutes`));
+        });
+    } else if (rangeUnit === 'hours') {
+        [1, 2, 3, 6, 12, 24].forEach(val => {
+            rangeSelect.add(new Option(`${val}`, val));
+        });
+        // Dla godzin pokazuj interwały 15-60 minut
+        [15, 30, 60].forEach(val => {
+            intervalSelect.add(new Option(`${val} minutes`, `${val} minutes`));
+        });
+    } else { // days
+        [1, 2, 3, 7, 14, 30].forEach(val => {
+            rangeSelect.add(new Option(`${val}`, val));
+        });
+        // Dla dni pokazuj interwały w dniach
+        [1].forEach(val => {
+            intervalSelect.add(new Option(`${val} day`, `${val} day`));
+        });
     }
-
-    // Użyj bezpośrednio statystyk
-    const chartData = {
-        labels: ['Current Period'],
-        datasets: [
-            {
-                label: 'Errors',
-                data: [data.stats.error_count],
-                borderColor: '#FF0000', // Intensywny czerwony
-                backgroundColor: 'rgba(255, 0, 0, 0.5)', // Półprzezroczysty czerwony
-                fill: true
-            },
-            {
-                label: 'Warnings',
-                data: [data.stats.warn_count],
-                borderColor: '#FFD700', // Intensywny złoty
-                backgroundColor: 'rgba(255, 215, 0, 0.5)', // Półprzezroczysty złoty
-                fill: true
-            },
-            {
-                label: 'Info',
-                data: [data.stats.info_count],
-                borderColor: '#00FF00', // Intensywny zielony
-                backgroundColor: 'rgba(0, 255, 0, 0.5)', // Półprzezroczysty zielony
-                fill: true
-            }
-        ]
-    };
-
-    timelineChart = new Chart(ctx, {
-        type: 'bar', // Zmienione na wykres słupkowy
-        data: chartData,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'top'
-                }
-            },
-            barPercentage: 0.5,
-            categoryPercentage: 0.8
-        }
-    });
+    
+    updateChart();
 }
 
-function updateTimeRange() {
-    const timeRange = document.getElementById('timeRange').value;
+function updateChart() {
+    const rangeValue = document.getElementById('timeRangeValue').value;
+    const rangeUnit = document.getElementById('timeRangeUnit').value;
+    const interval = document.getElementById('timeInterval').value;
     const button = document.querySelector('.refresh-button');
     const icon = button.querySelector('i');
+    
     button.disabled = true;
     icon.classList.add('fa-spin');
-
-    fetch(`/api/graylog/messages?timeRange=${timeRange}`)
+    
+    fetch(`/api/graylog/timeline?range=${rangeValue}&range_type=${rangeUnit}&interval=${interval}`)
         .then(response => response.json())
         .then(data => {
-            if (data.error) {
-                console.error('API error:', data.error);
-                return;
+            if (timelineChart) {
+                timelineChart.destroy();
             }
-            // Zachowaj dane w zmiennej
-            currentData = data;
-            createTimeline(data);
+            
+            const ctx = document.getElementById('messageTimeline').getContext('2d');
+            timelineChart = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        title: {
+                            display: true,
+                            text: `Message Distribution (Last ${rangeValue} ${rangeUnit})`
+                        }
+                    }
+                }
+            });
+            
             updateStats(data);
         })
-        .catch(error => console.error('Error fetching data:', error))
+        .catch(error => console.error('Error updating chart:', error))
         .finally(() => {
             button.disabled = false;
             icon.classList.remove('fa-spin');
         });
 }
 
-function refreshTimeline() {
-    if (currentData) {
-        createTimeline(currentData);
-        updateStats(currentData);
-    }
-    // Pobierz nowe dane tylko jeśli są potrzebne
-    updateTimeRange();
-}
-
-// Zmodyfikuj inicjalizację
-document.addEventListener('DOMContentLoaded', () => {
-    try {
-        if (currentData) {
-            console.log('Using initial server data:', currentData);
-            createTimeline(currentData);
-        }
-        
-        // Ustaw odświeżanie co 5 minut
-        setInterval(refreshTimeline, 300000);
-    } catch (e) {
-        console.error('Error in initialization:', e);
-    }
-});
-
 function updateStats(data) {
-    if (!data || !data.stats) return;
+    const total = data.datasets.reduce((acc, dataset) => 
+        acc + dataset.data.reduce((sum, val) => sum + val, 0), 0);
     
-    document.querySelector('.stat-box .stat-value').textContent = data.total_results || 0;
-    document.querySelector('.stat-box.error .stat-value').textContent = data.stats.error_count || 0;
-    document.querySelector('.stat-box.warning .stat-value').textContent = data.stats.warn_count || 0;
-    document.querySelector('.stat-box.info .stat-value').textContent = data.stats.info_count || 0;
+    document.querySelector('.stat-box .stat-value').textContent = total;
+    document.querySelector('.stat-box.error .stat-value').textContent = 
+        data.datasets[0].data.reduce((sum, val) => sum + val, 0);
+    document.querySelector('.stat-box.warning .stat-value').textContent = 
+        data.datasets[1].data.reduce((sum, val) => sum + val, 0);
+    document.querySelector('.stat-box.info .stat-value').textContent = 
+        data.datasets[2].data.reduce((sum, val) => sum + val, 0);
 }
+
+function refreshChart() {
+    updateChart();
+}
+
+// Inicjalizacja
+document.addEventListener('DOMContentLoaded', () => {
+    updateTimeOptions();
+    
+    // Nasłuchuj zmian zakresu czasu
+    document.getElementById('timeRangeUnit').addEventListener('change', updateTimeOptions);
+    
+    // Odświeżaj co 5 minut
+    setInterval(refreshChart, 300000);
+});
 </script>
 {% endblock %}

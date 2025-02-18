@@ -18,14 +18,14 @@
         {% if session.logged_in %}
         <div class="nav-items">
             <a href="{{ url_for('profile') }}" class="user-info">
-                {% if session.user_info and session.user_info.avatar %}
-                    <img src="{{ url_for('static', filename='avatars/' + session.user_info.avatar) }}?v={{ time.time() }}" alt="Profile" class="nav-avatar">
+                {% if session.user_info and session.user_info.avatar_path %}
+                    <img src="{{ url_for('static', filename='avatars/' + session.user_info.avatar_path) }}?v={{ time.time() }}" alt="Profile" class="nav-avatar">
                 {% else %}
                     <div class="nav-avatar-placeholder">
                         <i class="fas fa-user-circle"></i>
                     </div>
                 {% endif %}
-                <span class="nav-username">{{ session.user_info.displayName if session.user_info.displayName else session.username }}</span>
+                <span class="nav-username">{{ session.user_info.display_name if session.user_info.display_name else session.username }}</span>
             </a>
             <button class="theme-toggle" onclick="toggleTheme()">
                 <i class="fas fa-moon"></i>
@@ -119,7 +119,7 @@
             </div>
             <div class="footer-section">
                 <h4>Contact</h4>
-                <p>support@monitoring.com</p>
+                <p>bartosz.dutka82@student.pk.edu.pl</p>
             </div>
         </div>
         <div class="footer-bottom">

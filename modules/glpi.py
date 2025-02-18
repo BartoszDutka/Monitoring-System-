@@ -3,6 +3,9 @@ from requests.exceptions import RequestException, Timeout
 import time
 from config import GLPI_URL, GLPI_USER_TOKEN, GLPI_APP_TOKEN
 from flask import session
+from modules.database import archive_asset, get_db_cursor
+import json
+from datetime import datetime
 
 class GLPIClient:
     def __init__(self):
@@ -273,6 +276,25 @@ class GLPIClient:
             # Kategoryzujemy komputery
             categorized_computers = self.categorize_computers(computers)
 
+            # Archiwizuj dane o urządzeniach
+            for computer in computers:
+                asset_data = {
+                    'name': computer.get('name'),
+                    'type': 'workstation',
+                    'serial': computer.get('serial'),
+                    'model': computer.get('computermodels_id'),
+                    'manufacturer': computer.get('manufacturers_id'),
+                    'location': computer.get('location_name'),
+                    'ip': self.get_device_ip(computer['id'], headers),
+                    'mac': computer.get('mac'),
+                    'os_info': {
+                        'os': computer.get('operatingsystems_id'),
+                        'version': computer.get('operatingsystemversions_id')
+                    },
+                    'specs': computer
+                }
+                archive_asset(asset_data)
+
             return {
                 'computers': computers,
                 'categorized': categorized_computers,
@@ -324,10 +346,126 @@ class GLPIClient:
             }
         }
 
-def get_glpi_data():
+    def get_devices_from_db(self):
+        """Get devices from local database"""
+        try:
+            with get_db_cursor() as cursor:
+                # Get all assets from database
+                cursor.execute("""
+                    SELECT *, UNIX_TIMESTAMP(last_seen) as last_refresh 
+                    FROM assets 
+                    WHERE last_seen >= NOW() - INTERVAL 24 HOUR
+                """)
+                assets = cursor.fetchall()
+
+                # Categorize assets
+                categorized = {
+                    'workstations': [],
+                    'terminals': [],
+                    'servers': [],
+                    'other': []
+                }
+                network_devices = []
+                printers = []
+                monitors = []
+                racks = []
+
+                for asset in assets:
+                    # Convert JSON strings back to dictionaries
+                    asset['os_info'] = json.loads(asset['os_info']) if asset['os_info'] else {}
+                    asset['specifications'] = json.loads(asset['specifications']) if asset['specifications'] else {}
+                    
+                    asset_with_specs = {**asset, **asset['specifications']}
+                    name = asset['name'].upper() if asset['name'] else ''
+                    
+                    device_type = asset['type'].lower()
+                    if device_type == 'workstation':
+                        if name.startswith('KS'):
+                            categorized['workstations'].append(asset_with_specs)
+                        elif name.startswith('KT'):
+                            categorized['terminals'].append(asset_with_specs)
+                        elif name.startswith('SRV'):
+                            categorized['servers'].append(asset_with_specs)
+                        else:
+                            categorized['other'].append(asset_with_specs)
+                    elif device_type == 'network':
+                        network_devices.append(asset_with_specs)
+                    elif device_type == 'printer':
+                        printers.append(asset_with_specs)
+                    elif device_type == 'monitor':
+                        monitors.append(asset_with_specs)
+                    elif device_type == 'rack':
+                        racks.append(asset_with_specs)
+
+                response_data = {
+                    'computers': [*categorized['workstations'], *categorized['terminals'], 
+                                *categorized['servers'], *categorized['other']],
+                    'categorized': categorized,
+                    'network_devices': network_devices,
+                    'printers': printers,
+                    'monitors': monitors,
+                    'racks': racks,
+                    'total_count': len(assets),
+                    'category_counts': {
+                        'workstations': len(categorized['workstations']),
+                        'terminals': len(categorized['terminals']),
+                        'servers': len(categorized['servers']),
+                        'other': len(categorized['other']),
+                        'network': len(network_devices),
+                        'printers': len(printers),
+                        'monitors': len(monitors),
+                        'racks': len(racks)
+                    }
+                }
+
+                # Get last refresh time
+                if assets:
+                    max_last_seen = max(asset['last_refresh'] for asset in assets)
+                    response_data['last_refresh'] = datetime.fromtimestamp(max_last_seen)
+
+                return response_data
+
+        except Exception as e:
+            print(f"Error getting devices from database: {e}")
+            return self.get_empty_response()
+
+    def get_last_refresh_time(self):
+        """Get the last time data was refreshed from GLPI"""
+        try:
+            with get_db_cursor() as cursor:
+                cursor.execute("""
+                    SELECT MAX(last_seen) as last_refresh
+                    FROM assets
+                """)
+                result = cursor.fetchone()
+                return result['last_refresh'] if result and result['last_refresh'] else None
+        except Exception as e:
+            print(f"Error getting last refresh time: {e}")
+            return None
+
+    def refresh_from_api(self):
+        """Refresh data from GLPI API"""
+        try:
+            devices = self.get_devices()  # Używamy istniejącej metody do pobrania danych z API
+            if 'computers' in devices:
+                # Update last_refresh time in database
+                with get_db_cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO system_logs (source, severity, host_name, message)
+                        VALUES ('glpi', 'info', 'system', 'GLPI data refresh completed')
+                    """)
+            return devices
+        except Exception as e:
+            print(f"Error refreshing GLPI data: {e}")
+            return self.get_empty_response()
+
+def get_glpi_data(refresh=False):
+    """Get GLPI data - from database or API if refresh requested"""
     try:
         client = GLPIClient()
-        return client.get_devices()
+        if refresh:
+            return client.refresh_from_api()
+        return client.get_devices_from_db()
     except Exception as e:
         print(f"Error in get_glpi_data: {e}")
         return GLPIClient().get_empty_response()

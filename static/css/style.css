@@ -2236,7 +2236,7 @@ body * {
 }
 
 .form-group input {
-    padding: 0.8rem 1rem;
+    padding: 0.8rem 0.6rem;
     border-radius: 10px;
     border: 1px solid var(--border-color);
     background: var(--bg-color);
@@ -2596,4 +2596,60 @@ body * {
 
 [data-theme="dark"] .profile-avatar i {
     color: var(--text-color);
+}
+
+/* New styles for user menu */
+.user-menu {
+    margin-left: auto;
+    padding: 0 20px;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f0f0;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.user-avatar-small img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-avatar-small i {
+    font-size: 20px;
+    color: #666;
+}
+
+.username {
+    color: #333;
+    font-weight: 500;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.logout-btn {
+    color: #666;
+    text-decoration: none;
+    padding: 5px;
+}
+
+.logout-btn:hover {
+    color: #ff4444;
 }

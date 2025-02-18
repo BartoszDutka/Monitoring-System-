@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import threading
 import time
 from config import GRAYLOG_URL, GRAYLOG_USERNAME, GRAYLOG_PASSWORD
+from modules.database import log_system_event
 
 def extract_nested_json(message_str: str) -> dict:
     """
@@ -77,6 +78,8 @@ class GraylogBuffer:
         self.buffer = {}
         self.lock = threading.Lock()
         self.MAX_BUFFER_AGE = 24 * 60 * 60  # 24 godziny w sekundach
+        self.last_refresh_time = None
+        self.latest_data = None
         
         # Uruchom wątek czyszczący stare dane
         self.cleanup_thread = threading.Thread(target=self._cleanup_old_data, daemon=True)
@@ -89,6 +92,8 @@ class GraylogBuffer:
                 'timestamp': datetime.now(),
                 'expires': datetime.now() + timedelta(hours=24)
             }
+            self.last_refresh_time = time.time()
+            self.latest_data = logs_data
     
     def get_logs(self, time_range):
         with self.lock:
@@ -99,6 +104,16 @@ class GraylogBuffer:
                 else:
                     del self.buffer[time_range]
             return None
+    
+    def get_last_refresh(self):
+        """Return the timestamp of the last data refresh"""
+        with self.lock:
+            return self.last_refresh_time
+    
+    def get_latest_data(self):
+        """Return the most recently fetched data"""
+        with self.lock:
+            return self.latest_data
     
     def _cleanup_old_data(self):
         while True:
@@ -115,14 +130,25 @@ class GraylogBuffer:
 # Utworzenie globalnego bufora
 graylog_buffer = GraylogBuffer()
 
-def get_logs(time_range_minutes: int = 5) -> dict:
+def get_logs(time_range_minutes: int = 5, force_refresh: bool = False) -> dict:
     """
-    Fetch and process logs from Graylog with buffering and pagination.
+    Fetch and process logs from Graylog with smart caching
     """
-    # Sprawdź bufor najpierw
-    buffered_data = graylog_buffer.get_logs(time_range_minutes)
-    if buffered_data:
-        return buffered_data
+    # Sprawdź bufor tylko jeśli nie wymuszono odświeżenia
+    if not force_refresh:
+        buffered_data = graylog_buffer.get_logs(time_range_minutes)
+        if buffered_data:
+            return buffered_data
+
+    # Określ minimalny interwał odświeżania (np. 5 minut)
+    MIN_REFRESH_INTERVAL = 300  # 5 minut w sekundach
+    
+    current_time = time.time()
+    last_refresh = graylog_buffer.get_last_refresh()
+    
+    # Jeśli nie minął minimalny interwał, zwróć dane z bufora
+    if not force_refresh and last_refresh and (current_time - last_refresh) < MIN_REFRESH_INTERVAL:
+        return graylog_buffer.get_latest_data()
 
     credentials = f"{GRAYLOG_USERNAME}:{GRAYLOG_PASSWORD}"
     headers = {
@@ -135,8 +161,8 @@ def get_logs(time_range_minutes: int = 5) -> dict:
         all_messages = []
         page = 0
         page_size = 150
-        total_desired = 1000  # Maksymalna liczba logów do pobrania
-
+        total_desired = 2000  # Zwiększamy limit z 500 na 2000
+        
         while len(all_messages) < total_desired:
             # Dodaj parametry paginacji do zapytania
             response = requests.get(
@@ -163,6 +189,20 @@ def get_logs(time_range_minutes: int = 5) -> dict:
                 # Parse message content
                 parsed_data = parse_log_message(msg.get("message", {}))
                 
+                # Log to database
+                severity_mapping = {
+                    "high": "critical",
+                    "medium": "warning",
+                    "low": "info"
+                }
+                
+                log_system_event(
+                    source='graylog',
+                    severity=severity_mapping.get(parsed_data.get('severity', 'low'), 'info'),
+                    host_name=parsed_data.get('formsdbsessionid', 'unknown'),
+                    message=parsed_data.get('message', '')
+                )
+
                 # Format timestamp
                 timestamp = msg.get("timestamp")
                 formatted_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
@@ -221,9 +261,14 @@ def get_logs(time_range_minutes: int = 5) -> dict:
             "stats": stats
         }
         
+        # Store messages in database
+        from modules.database import store_graylog_messages
+        store_graylog_messages(all_messages)
+        
         graylog_buffer.add_logs(time_range_minutes, result)
         return result
 
     except requests.exceptions.RequestException as e:
         print(f"Request error: {e}")
+        log_system_event('graylog', 'error', 'system', f"Error fetching logs: {str(e)}")
         return {"error": str(e)}

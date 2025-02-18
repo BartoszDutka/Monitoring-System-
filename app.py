@@ -2,16 +2,26 @@ from flask import Flask, render_template, request, jsonify, session, flash
 from modules.zabbix import get_hosts, get_unknown_hosts
 from modules.graylog import get_logs
 from modules.glpi import get_glpi_data
-from modules.ldap_auth import authenticate_user, get_user_info
+from modules.ldap_auth import authenticate_user
 from config import *  # Importujemy wszystkie zmienne konfiguracyjne
 import urllib3
 import subprocess
 import os
+import json  # Add this import
 from functools import wraps
 from flask import redirect, url_for
 from werkzeug.utils import secure_filename
 import time  # Dodaj na początku pliku z innymi importami
-from modules.user_data import update_user_avatar, get_user_avatar
+from modules.user_data import update_user_avatar, get_user_avatar, verify_user, get_user_info
+from modules.database import (
+    get_db_cursor, 
+    get_historical_metrics, 
+    get_host_status_history,
+    get_messages_timeline,
+    get_detailed_messages  # Dodaj ten import
+)
+from datetime import datetime, timedelta
+from modules.user_data import update_user_profile
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 app = Flask(__name__)
@@ -60,21 +70,33 @@ def login():
         if not username or not password:
             flash('Please provide both username and password')
             return render_template('login.html', error='Please provide both username and password')
-            
+        
+        # Najpierw próbujemy logowania LDAP
         if authenticate_user(username, password):
+            user_info = get_user_info(username)  # Pobierz dane z lokalnej bazy
+            if user_info:
+                session['logged_in'] = True
+                session['username'] = username
+                session['user_info'] = user_info
+                
+                # Update last login timestamp
+                with get_db_cursor() as cursor:
+                    cursor.execute("""
+                        UPDATE users 
+                        SET last_login = CURRENT_TIMESTAMP 
+                        WHERE username = %s
+                    """, (username,))
+                    
+                return redirect(url_for('index'))
+        
+        # Jeśli LDAP nie zadziała, próbujemy lokalnej bazy
+        elif verify_user(username, password):
             user_info = get_user_info(username)
             if user_info:
-                # Dodaj zapisany avatar do informacji o użytkowniku
-                saved_avatar = get_user_avatar(username)
-                if saved_avatar and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], saved_avatar)):
-                    user_info['avatar'] = saved_avatar
-                
                 session['logged_in'] = True
                 session['username'] = username
                 session['user_info'] = user_info
                 return redirect(url_for('index'))
-            else:
-                return render_template('login.html', error='Could not retrieve user information')
         
         return render_template('login.html', error='Invalid username or password')
     
@@ -94,8 +116,11 @@ def refresh_glpi():
     """Endpoint do odświeżania danych GLPI"""
     try:
         global glpi_cache
-        glpi_cache = get_glpi_data()  # Jednorazowe pobranie danych
-        return jsonify({"status": "success"})
+        glpi_cache = get_glpi_data(refresh=True)  # Wymuszamy odświeżenie z API
+        return jsonify({
+            "status": "success",
+            "last_refresh": glpi_cache.get('last_refresh')
+        })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -139,7 +164,7 @@ def refresh_glpi_category(category):
 def index():
     global glpi_cache
     if (glpi_cache is None):
-        glpi_cache = get_glpi_data()
+        glpi_cache = get_glpi_data()  # Domyślnie pobiera z bazy
     
     zabbix_data = get_hosts()
     graylog_data = get_logs()
@@ -309,86 +334,251 @@ def graylog_logs():
 @app.route('/graylog/messages-over-time')
 @login_required
 def graylog_messages_over_time():
-    # Pobierz początkowe dane
-    logs_data = get_logs(time_range_minutes=60)  # domyślnie 1 godzina
-    return render_template('graylog/messages_over_time.html', graylog=logs_data)
+    # Get initial Graylog data with increased limit
+    graylog_data = get_logs(time_range_minutes=60, force_refresh=True)
+    
+    end_time = datetime.now()
+    start_time = end_time - timedelta(hours=1)
+    timeline_data = get_messages_timeline(start_time, end_time, '1 hours')  # Changed from '1 hour' to '1 hours'
+    
+    return render_template('graylog/messages_over_time.html', 
+                         graylog=graylog_data,
+                         timeline_data=timeline_data,
+                         start_time=start_time.strftime('%Y-%m-%d %H:%M'),
+                         end_time=end_time.strftime('%Y-%m-%d %H:%M'))
 
 @app.route('/api/graylog/messages')
 @login_required
 def get_graylog_messages():
     try:
-        time_range = request.args.get('timeRange', '60')  # domyślnie 60 minut
-        logs_data = get_logs(time_range_minutes=int(time_range))
-        # Dodaj nagłówek CORS jeśli potrzebny
-        response = jsonify(logs_data)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        time_range = int(request.args.get('timeRange', '60'))
+        end_time = datetime.now()
+        start_time = end_time - timedelta(minutes=time_range)
+        
+        # Dodaj wydruk dla debugowania
+        print(f"Fetching messages from {start_time} to {end_time} with range {time_range}")
+        
+        messages_data = get_detailed_messages(start_time, end_time, limit=2000)
+        
+        # Dodaj wydruk dla debugowania
+        print(f"Retrieved {messages_data['total_results']} messages")
+        
+        response = {
+            'logs': [
+                {
+                    'timestamp': msg['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
+                    'level': msg['level'],
+                    'severity': msg['severity'],
+                    'category': msg['category'],
+                    'message': msg['message'],
+                    'details': json.loads(msg['details']) if msg['details'] else {}
+                }
+                for msg in messages_data['messages']
+            ],
+            'total_results': messages_data['total_results'],
+            'time_range': f"Last {time_range} minutes",
+            'query_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'stats': {
+                'error_count': messages_data['stats']['error_count'] or 0,
+                'warn_count': messages_data['stats']['warn_count'] or 0,
+                'info_count': messages_data['stats']['info_count'] or 0
+            }
+        }
+        
+        return jsonify(response)
     except Exception as e:
-        print(f"Error in get_graylog_messages: {e}")  # Dodaj logging błędów
+        print(f"Error in get_graylog_messages: {e}")
+        import traceback
+        traceback.print_exc()  # Dodaj pełny stack trace dla lepszego debugowania
         return jsonify({"error": str(e)}), 500
 
-@app.route('/profile')
+@app.route('/api/graylog/timeline')
+@login_required
+def get_graylog_timeline():
+    try:
+        range_value = int(request.args.get('range', '30'))
+        range_type = request.args.get('range_type', 'minutes')
+        interval = request.args.get('interval', '5 minutes')
+        
+        # Ustaw koniec na aktualną datę
+        end_time = datetime.now()
+
+        # Oblicz start_time w zależności od typu zakresu
+        if range_type == 'minutes':
+            start_time = end_time - timedelta(minutes=range_value)
+            if not interval.endswith('minutes'):
+                interval = '5 minutes'
+        elif range_type == 'hours':
+            start_time = end_time - timedelta(hours=range_value)
+            if not interval.endswith('minutes'):
+                interval = '30 minutes'
+        else:  # days
+            # Dla dni, ustaw end_time na koniec aktualnego dnia
+            end_time = end_time.replace(hour=23, minute=59, second=59, microsecond=999999)
+            # Ustaw start_time na początek dnia sprzed range_value dni
+            start_time = (end_time - timedelta(days=range_value-1)).replace(hour=0, minute=0, second=0, microsecond=0)
+            interval = '1 day'
+
+        print(f"Fetching timeline from {start_time} to {end_time} with interval {interval}")
+        
+        # Pobierz dane z bazy
+        timeline_data = get_messages_timeline(start_time, end_time, interval)
+        
+        # Format danych dla wykresu
+        formatted_data = {
+            'labels': [],
+            'datasets': [
+                {
+                    'label': 'High Priority',
+                    'data': [],
+                    'backgroundColor': 'rgba(220,53,69,0.5)',
+                    'borderColor': '#dc3545',
+                    'borderWidth': 1
+                },
+                {
+                    'label': 'Medium Priority',
+                    'data': [],
+                    'backgroundColor': 'rgba(255,193,7,0.5)',
+                    'borderColor': '#ffc107',
+                    'borderWidth': 1
+                },
+                {
+                    'label': 'Low Priority',
+                    'data': [],
+                    'backgroundColor': 'rgba(13,202,240,0.5)',
+                    'borderColor': '#0dcaf0',
+                    'borderWidth': 1
+                }
+            ]
+        }
+        
+        # Wypełnij dane wykresu
+        for row in timeline_data:
+            formatted_data['labels'].append(row['time_interval'])
+            formatted_data['datasets'][0]['data'].append(row['high_count'])
+            formatted_data['datasets'][1]['data'].append(row['medium_count'])
+            formatted_data['datasets'][2]['data'].append(row['low_count'])
+        
+        return jsonify(formatted_data)
+    except Exception as e:
+        print(f"Error in timeline: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    if 'user_info' not in session:
-        session['user_info'] = {}
+    if 'username' not in session:
+        return redirect(url_for('login'))
+        
+    user_info = get_user_info(session['username'])
+    if not user_info:
+        return redirect(url_for('login'))
+        
+    session['user_info'] = user_info
     return render_template('profile.html',
-                         username=session.get('username'),
-                         user_info=session.get('user_info'))
+                         username=session['username'],
+                         user_info=user_info)
+
+@app.route('/update_profile', methods=['POST'])
+@login_required
+def update_profile():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+        
+    email = request.form.get('email')
+    department = request.form.get('department')
+    role = request.form.get('role')  # Changed from title to role
+    
+    try:
+        update_user_profile(
+            username=session['username'],
+            email=email,
+            department=department,
+            role=role  # Changed from title to role
+        )
+        flash('Profile updated successfully')
+        
+        # Update session info
+        user_info = get_user_info(session['username'])
+        if user_info:
+            session['user_info'] = user_info
+            
+    except Exception as e:
+        print(f"Error updating profile: {e}")
+        flash('Error updating profile')
+        
+    return redirect(url_for('profile'))
 
 @app.route('/upload_avatar', methods=['POST'])
 @login_required
 def upload_avatar():
     try:
         if 'avatar' not in request.files:
-            flash('Nie wybrano pliku')
+            flash('No file selected')
             return redirect(url_for('profile'))
-        
+            
         file = request.files['avatar']
         if file.filename == '':
-            flash('Nie wybrano pliku')
+            flash('No file selected')
             return redirect(url_for('profile'))
-
+            
         if file and allowed_file(file.filename):
-            # Usuń stare zdjęcie jeśli istnieje
-            if session.get('user_info', {}).get('avatar'):
-                old_avatar = os.path.join(app.config['UPLOAD_FOLDER'], session['user_info']['avatar'])
-                try:
-                    if os.path.exists(old_avatar):
-                        os.remove(old_avatar)
-                except Exception as e:
-                    print(f"Błąd podczas usuwania starego avatara: {e}")
-
-            # Zapisz nowy plik
-            ext = file.filename.rsplit('.', 1)[1].lower()
-            filename = secure_filename(f"{session['username']}_{int(time.time())}.{ext}")
+            # Delete old avatar if exists
+            old_avatar = session.get('user_info', {}).get('avatar_path')
+            if old_avatar:
+                old_path = os.path.join(app.config['UPLOAD_FOLDER'], old_avatar)
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+                    
+            # Save new avatar
+            filename = secure_filename(f"{session['username']}_{int(time.time())}.{file.filename.rsplit('.', 1)[1].lower()}")
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            
             file.save(filepath)
-            try:
-                os.chmod(filepath, 0o644)
-            except Exception as e:
-                print(f"Błąd podczas ustawiania uprawnień: {e}")
-
-            # Zaktualizuj sesję
-            if 'user_info' not in session:
-                session['user_info'] = {}
             
-            session['user_info'] = dict(session['user_info'])
-            session['user_info']['avatar'] = filename
-            session.modified = True
-
-            # Zapisz informację o avatarze na stałe
+            # Update database and session
             update_user_avatar(session['username'], filename)
-
-            flash('Zdjęcie profilowe zostało zaktualizowane')
-            return redirect(url_for('profile'))
-
+            
+            # Refresh user info in session
+            user_info = get_user_info(session['username'])
+            if user_info:
+                session['user_info'] = user_info
+                
+            flash('Avatar updated successfully')
+            
     except Exception as e:
-        print(f"Błąd podczas przetwarzania avatara: {e}")
-        flash('Wystąpił błąd podczas zapisywania zdjęcia')
-    
+        print(f"Error uploading avatar: {e}")
+        flash('Error uploading avatar')
+        
     return redirect(url_for('profile'))
+
+@app.route('/api/history/metrics/<host_id>')
+@login_required
+def get_host_metrics_history(host_id):
+    """Get historical metrics for a host"""
+    try:
+        days = int(request.args.get('days', 7))
+        metric_type = request.args.get('type', 'cpu')
+        
+        end_time = datetime.now()
+        start_time = end_time - timedelta(days=days)
+        
+        metrics = get_historical_metrics(host_id, metric_type, start_time, end_time)
+        return jsonify({'metrics': metrics})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/history/status/<host_id>')
+@login_required
+def get_host_history(host_id):
+    """Get historical status for a host"""
+    try:
+        limit = int(request.args.get('limit', 100))
+        history = get_host_status_history(host_id, limit)
+        return jsonify({'history': history})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__': 
     app.run(debug=True, host='0.0.0.0', port=5000)
