@@ -46,6 +46,17 @@
                     <i class="fas fa-clock"></i>
                     <span class="time-range">{{ graylog.time_range }}</span>
                 </div>
+                <div class="logs-limit-controls">
+                    <span class="limit-label">Show entries:</span>
+                    <div class="limit-buttons">
+                        {% set current_limit = request.args.get('limit', '300')|int %}
+                        <button class="limit-btn {% if current_limit == 100 %}active{% endif %}" data-limit="100">100</button>
+                        <button class="limit-btn {% if current_limit == 200 %}active{% endif %}" data-limit="200">200</button>
+                        <button class="limit-btn {% if current_limit == 300 %}active{% endif %}" data-limit="300">300</button>
+                        <button class="limit-btn {% if current_limit == 500 %}active{% endif %}" data-limit="500">500</button>
+                        <button class="limit-btn {% if current_limit == 1000 %}active{% endif %}" data-limit="1000">1000</button>
+                    </div>
+                </div>
             </div>
             
             <div class="logs-categories">
@@ -194,38 +205,228 @@ function toggleCategory(header) {
     }
 }
 
+function updateLogStats(stats) {
+    document.querySelector('.log-stat.error .stat-count').textContent = stats.error_count;
+    document.querySelector('.log-stat.warning .stat-count').textContent = stats.warn_count;
+    document.querySelector('.log-stat.info .stat-count').textContent = stats.info_count;
+}
+
+function updateLogContent(logs) {
+    const categories = {
+        'System Error': {'icon': 'fas fa-exclamation-circle', 'class': 'error'},
+        'Security Alert': {'icon': 'fas fa-shield-alt', 'class': 'security'},
+        'Performance Issue': {'icon': 'fas fa-tachometer-alt', 'class': 'performance'},
+        'Service Status': {'icon': 'fas fa-server', 'class': 'service'},
+        'General Warning': {'icon': 'fas fa-exclamation-triangle', 'class': 'warning'}
+    };
+
+    const logsCategories = document.querySelector('.logs-categories');
+    logsCategories.innerHTML = '';
+
+    // Grupuj logi według kategorii
+    const logsByCategory = {};
+    logs.forEach(log => {
+        if (!logsByCategory[log.category]) {
+            logsByCategory[log.category] = [];
+        }
+        logsByCategory[log.category].push(log);
+    });
+
+    // Generuj HTML dla każdej kategorii
+    Object.entries(categories).forEach(([categoryName, meta]) => {
+        const categoryLogs = logsByCategory[categoryName] || [];
+        if (categoryLogs.length) {
+            const categoryHTML = `
+                <div class="log-category ${meta.class}">
+                    <div class="category-header" onclick="toggleCategory(this)">
+                        <i class="${meta.icon}"></i>
+                        <span>${categoryName}</span>
+                        <span class="count">${categoryLogs.length}</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="category-content">
+                        ${categoryLogs.map(log => `
+                            <div class="log-entry ${log.severity}">
+                                <div class="log-entry-header">
+                                    <div class="header-left">
+                                        <span class="timestamp">
+                                            <i class="fas fa-clock"></i>
+                                            ${log.timestamp}
+                                        </span>
+                                        <span class="source">
+                                            <i class="fas fa-user"></i>
+                                            ${log.details.formsusername || 'Unknown'}
+                                        </span>
+                                    </div>
+                                    <span class="severity-badge ${log.severity}">
+                                        ${log.level}
+                                    </span>
+                                </div>
+                                <div class="log-details">
+                                    ${log.details.formssessionname || log.details.formsdbsessionid ? `
+                                        <div class="detail-section">
+                                            <div class="section-header">
+                                                <i class="fas fa-id-card"></i>
+                                                Session Details
+                                            </div>
+                                            <div class="section-content">
+                                                ${log.details.formssessionname ? `
+                                                    <div class="detail-field">
+                                                        <span class="field-label">Session Name</span>
+                                                        <span class="field-value code">${log.details.formssessionname}</span>
+                                                    </div>
+                                                ` : ''}
+                                                ${log.details.formsdbsessionid ? `
+                                                    <div class="detail-field">
+                                                        <span class="field-label">DB Session ID</span>
+                                                        <span class="field-value code">${log.details.formsdbsessionid}</span>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                    ${log.message ? `
+                                        <div class="detail-section message-section">
+                                            <div class="message-box ${log.severity}">
+                                                <div class="message-header">
+                                                    <i class="fas fa-comment-alt"></i>
+                                                    <span class="message-type">Error Message</span>
+                                                    <span class="message-time">
+                                                        <i class="fas fa-clock"></i>
+                                                        ${log.timestamp}
+                                                    </span>
+                                                </div>
+                                                <div class="message-body">
+                                                    ${log.message}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            logsCategories.insertAdjacentHTML('beforeend', categoryHTML);
+        }
+    });
+}
+
+// Funkcja do ustawiania aktywnego przycisku limitu
+function setActiveLimit(limit) {
+    document.querySelectorAll('.limit-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-limit') === String(limit));
+    });
+}
+
+// Zmodyfikowana funkcja refreshLogs
 function refreshLogs() {
     const button = document.querySelector('.refresh-button');
     const icon = button.querySelector('i');
     button.disabled = true;
     icon.classList.add('fa-spin');
     
-    fetch('/graylog/logs')
-        .then(response => response.text())
-        .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-
-            // Odśwież sekcję logów
-            const newContent = doc.querySelector('.logs-categories');
-            document.querySelector('.logs-categories').innerHTML = newContent.innerHTML;
-
-            // Odśwież statystyki
-            const newStats = doc.querySelector('.logs-summary');
-            document.querySelector('.logs-summary').innerHTML = newStats.innerHTML;
-
-            // Odśwież timestamp
-            const timeRange = doc.querySelector('.time-range');
-            document.querySelector('.time-range').textContent = timeRange.textContent;
-        })
-        .catch(error => console.error('Error:', error))
-        .finally(() => {
-            button.disabled = false;
-            icon.classList.remove('fa-spin');
-        });
+    // Pobierz aktualny limit
+    const currentLimit = sessionStorage.getItem('graylog_limit') || 
+                        new URLSearchParams(window.location.search).get('limit') || 
+                        '300';
+    
+    fetch(`/api/graylog/refresh?limit=${currentLimit}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            updateLogStats(data.stats);
+            document.querySelector('.time-range').textContent = data.time_range;
+            
+            return fetch(`/api/graylog/messages?limit=${currentLimit}`);
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        updateLogContent(data.logs);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        button.disabled = false;
+        icon.classList.remove('fa-spin');
+    });
 }
 
-// Auto-refresh every 5 minutes
-setInterval(refreshLogs, 300000);
+// Przy załadowaniu strony
+document.addEventListener('DOMContentLoaded', function() {
+    // Pobierz limit z URL lub z sesji
+    const urlParams = new URLSearchParams(window.location.search);
+    const limit = urlParams.get('limit') || sessionStorage.getItem('graylog_limit') || '300';
+    
+    // Zapisz limit w sessionStorage
+    sessionStorage.setItem('graylog_limit', limit);
+    
+    // Ustaw aktywny przycisk
+    setActiveLimit(limit);
+    
+    // Od razu pobierz dane z właściwym limitem
+    fetch(`/api/graylog/messages?limit=${limit}`)
+        .then(response => response.json())
+        .then(data => {
+            updateLogStats(data.stats);
+            updateLogContent(data.logs);
+            document.querySelector('.time-range').textContent = 
+                `Last 5 minutes • Showing ${limit} of ${data.total_results} entries`;
+        });
+});
+
+// Zmodyfikowane nasłuchiwanie kliknięć przycisków limitu
+document.querySelectorAll('.limit-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const limit = this.getAttribute('data-limit');
+        
+        // Zapisz nowy limit w sessionStorage
+        sessionStorage.setItem('graylog_limit', limit);
+        
+        // Aktualizuj aktywny przycisk
+        setActiveLimit(limit);
+        
+        // Pobierz dane dla nowego limitu
+        fetch(`/api/graylog/messages?limit=${limit}`)
+            .then(response => response.json())
+            .then(data => {
+                updateLogStats(data.stats);
+                updateLogContent(data.logs);
+                document.querySelector('.time-range').textContent = 
+                    `Last 5 minutes • Showing ${limit} of ${data.total_results} entries`;
+                
+                // Zaktualizuj URL bez przeładowania strony
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('limit', limit);
+                window.history.pushState({}, '', newUrl);
+            });
+    });
+});
+
+// Odświeżaj co 30 sekund
+setInterval(refreshLogs, 30000);
+
+function changeLogsLimit(limit) {
+    const button = document.querySelector('.refresh-button');
+    const icon = button.querySelector('i');
+    button.disabled = true;
+    icon.classList.add('fa-spin');
+    
+    // Przekieruj na tę samą stronę z nowym parametrem limit
+    window.location.href = `/graylog/logs?limit=${limit}`;
+}
+
+// Ustaw domyślną wartość selecta na podstawie parametru URL
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const limit = urlParams.get('limit') || '300';
+    document.getElementById('logsLimit').value = limit;
+});
+
 </script>
 {% endblock %}

@@ -161,7 +161,7 @@ def get_logs(time_range_minutes: int = 5, force_refresh: bool = False) -> dict:
         all_messages = []
         page = 0
         page_size = 150
-        total_desired = 2000  # Zwiększamy limit z 500 na 2000
+        total_desired = 300  # Zmniejszamy limit z 2000 na 300
         
         while len(all_messages) < total_desired:
             # Dodaj parametry paginacji do zapytania

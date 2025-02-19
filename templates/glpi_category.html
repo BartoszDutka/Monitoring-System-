@@ -29,20 +29,20 @@
         <div class="card-content">
             <h3>{{ device.name }}</h3>
             <div class="device-details">
-                {% if device.serial %}
-                <p><strong>Serial:</strong> {{ device.serial }}</p>
+                {% if device.serial_number %}
+                <p><strong>Serial:</strong> {{ device.serial_number }}</p>
                 {% endif %}
-                {% if device.otherserial %}
-                <p><strong>Inventory Number:</strong> {{ device.otherserial }}</p>
+                {% if device.model %}
+                <p><strong>Model:</strong> {{ device.model }}</p>
                 {% endif %}
-                {% if device.computermodels_id %}
-                <p><strong>Model:</strong> {{ device.computermodels_id }}</p>
+                {% if device.location %}
+                <p><strong>Location:</strong> {{ device.location }}</p>
                 {% endif %}
-                {% if device.location_name %}
-                <p><strong>Location:</strong> {{ device.location_name }}</p>
+                {% if device.type %}
+                <p><strong>Type:</strong> {{ device.type }}</p>
                 {% endif %}
-                {% if device.ip_address %}
-                <p><strong>IP Address:</strong> {{ device.ip_address }}</p>
+                {% if device.status %}
+                <p><strong>Status:</strong> {{ device.status }}</p>
                 {% endif %}
             </div>
         </div>

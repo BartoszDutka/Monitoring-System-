@@ -119,6 +119,7 @@ def refresh_glpi():
         glpi_cache = get_glpi_data(refresh=True)  # Wymuszamy odświeżenie z API
         return jsonify({
             "status": "success",
+            "message": "Data refreshed successfully",
             "last_refresh": glpi_cache.get('last_refresh')
         })
     except Exception as e:
@@ -164,10 +165,16 @@ def refresh_glpi_category(category):
 def index():
     global glpi_cache
     if (glpi_cache is None):
-        glpi_cache = get_glpi_data()  # Domyślnie pobiera z bazy
+        glpi_cache = get_glpi_data(refresh=False)
+        if not glpi_cache.get('computers'):
+            glpi_cache = get_glpi_data(refresh=True)
     
     zabbix_data = get_hosts()
-    graylog_data = get_logs()
+    
+    # Pobierz dane Graylog z właściwym limitem
+    limit = session.get('graylog_limit', 300)
+    graylog_data = get_logs(time_range_minutes=5, force_refresh=False)
+    
     return render_template('index.html', 
                          zabbix=zabbix_data, 
                          graylog=graylog_data, 
@@ -326,9 +333,43 @@ def connect_vnc():
 @app.route('/graylog/logs')
 @login_required
 def graylog_logs():
-    logs_data = get_logs()
+    end_time = datetime.now()
+    start_time = end_time - timedelta(minutes=5)
+    
+    # Pobierz limit z URL lub session storage
+    limit = request.args.get('limit', type=int)
+    if limit is None:
+        limit = session.get('graylog_limit', 300)
+    
+    # Zapisz limit do sesji
+    session['graylog_limit'] = limit
+    
+    force_refresh = request.args.get('refresh', '0') == '1'
+    
+    if force_refresh:
+        get_logs(force_refresh=True)
+    
+    logs_data = get_detailed_messages(start_time, end_time, limit=limit)
+    
+    formatted_data = {
+        'logs': [
+            {
+                'timestamp': msg['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
+                'level': msg['level'],
+                'severity': msg['severity'],
+                'category': msg['category'],
+                'message': msg['message'],
+                'details': json.loads(msg['details']) if msg['details'] else {}
+            }
+            for msg in logs_data['messages']
+        ],
+        'total_results': logs_data['total_results'],
+        'time_range': f"Last 5 minutes • Showing {limit} of {logs_data['total_in_db']} entries",
+        'stats': logs_data['stats']
+    }
+    
     return render_template('graylog/logs.html', 
-                         graylog=logs_data,
+                         graylog=formatted_data,
                          request=request)
 
 @app.route('/graylog/messages-over-time')
@@ -351,17 +392,12 @@ def graylog_messages_over_time():
 @login_required
 def get_graylog_messages():
     try:
-        time_range = int(request.args.get('timeRange', '60'))
         end_time = datetime.now()
-        start_time = end_time - timedelta(minutes=time_range)
+        start_time = end_time - timedelta(minutes=5)
+        limit = request.args.get('limit', session.get('graylog_limit', 300), type=int)
+        session['graylog_limit'] = limit
         
-        # Dodaj wydruk dla debugowania
-        print(f"Fetching messages from {start_time} to {end_time} with range {time_range}")
-        
-        messages_data = get_detailed_messages(start_time, end_time, limit=2000)
-        
-        # Dodaj wydruk dla debugowania
-        print(f"Retrieved {messages_data['total_results']} messages")
+        messages_data = get_detailed_messages(start_time, end_time, limit=limit)
         
         response = {
             'logs': [
@@ -375,21 +411,14 @@ def get_graylog_messages():
                 }
                 for msg in messages_data['messages']
             ],
-            'total_results': messages_data['total_results'],
-            'time_range': f"Last {time_range} minutes",
-            'query_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'stats': {
-                'error_count': messages_data['stats']['error_count'] or 0,
-                'warn_count': messages_data['stats']['warn_count'] or 0,
-                'info_count': messages_data['stats']['info_count'] or 0
-            }
+            'total_results': messages_data['total_in_db'],
+            'time_range': f"Last 5 minutes • Showing {limit} of {messages_data['total_in_db']} entries",
+            'stats': messages_data['stats']
         }
         
         return jsonify(response)
     except Exception as e:
         print(f"Error in get_graylog_messages: {e}")
-        import traceback
-        traceback.print_exc()  # Dodaj pełny stack trace dla lepszego debugowania
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/graylog/timeline')
@@ -579,6 +608,31 @@ def get_host_history(host_id):
         return jsonify({'history': history})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/graylog/refresh', methods=['POST'])
+@login_required
+def refresh_graylog_logs():
+    try:
+        # Pobierz limit z parametrów URL
+        limit = request.args.get('limit', session.get('graylog_limit', 300), type=int)
+        session['graylog_limit'] = limit
+        
+        # Force refresh from Graylog API and store in database
+        logs_data = get_logs(force_refresh=True)
+        
+        # Return new statistics from database
+        end_time = datetime.now()
+        start_time = end_time - timedelta(minutes=5)
+        
+        db_data = get_detailed_messages(start_time, end_time, limit=limit)
+        
+        return jsonify({
+            'status': 'success',
+            'stats': db_data['stats'],
+            'time_range': f"Last 5 minutes • Showing {limit} of {db_data['total_in_db']} entries"
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 if __name__ == '__main__': 
     app.run(debug=True, host='0.0.0.0', port=5000)

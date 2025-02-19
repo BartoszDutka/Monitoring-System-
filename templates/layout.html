@@ -94,8 +94,9 @@
 
         <div class="nav-section">
             <h3>Graylog</h3>
-            <a href="/graylog/logs" class="nav-link {% if request.path == '/graylog/logs' %}active{% endif %}">
-                <i class="fas fa-history"></i> Recent Logs
+            <a href="/graylog/logs?refresh=1" class="nav-link">
+                <i class="fas fa-history"></i>
+                <span>Recent Logs</span>
             </a>
         </div>
     </nav>

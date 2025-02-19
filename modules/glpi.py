@@ -265,33 +265,72 @@ class GLPIClient:
                 'App-Token': self.app_token
             }
 
-            # Pobieramy wszystkie urządzenia z timeoutem
+            # Pobieramy wszystkie urządzenia
             computers = self.get_all_items('Computer', headers)
             network_devices = self.get_all_items('NetworkEquipment', headers)
             printers = self.get_all_items('Printer', headers)
             monitors = self.get_all_items('Monitor', headers)
             racks = self.get_all_items('Rack', headers)
-            # Można dodać więcej typów urządzeń jeśli są potrzebne
 
             # Kategoryzujemy komputery
             categorized_computers = self.categorize_computers(computers)
 
             # Archiwizuj dane o urządzeniach
             for computer in computers:
+                # Mapowanie pól do struktury bazy danych
                 asset_data = {
                     'name': computer.get('name'),
-                    'type': 'workstation',
-                    'serial': computer.get('serial'),
-                    'model': computer.get('computermodels_id'),
+                    'type': 'workstation' if computer.get('name', '').upper().startswith('KS') else
+                           'terminal' if computer.get('name', '').upper().startswith('KT') else
+                           'server' if computer.get('name', '').upper().startswith('SRV') else
+                           'other',
+                    'serial_number': computer.get('serial'),
+                    'model': computer.get('computermodels_id'),  # To już jest nazwa modelu dzięki get_model_name
                     'manufacturer': computer.get('manufacturers_id'),
-                    'location': computer.get('location_name'),
-                    'ip': self.get_device_ip(computer['id'], headers),
-                    'mac': computer.get('mac'),
-                    'os_info': {
+                    'location': computer.get('location_name'),  # To już jest nazwa lokacji dzięki get_location_name
+                    'ip_address': self.get_device_ip(computer['id'], headers),
+                    'mac_address': computer.get('mac'),
+                    'os_info': json.dumps({
                         'os': computer.get('operatingsystems_id'),
                         'version': computer.get('operatingsystemversions_id')
-                    },
-                    'specs': computer
+                    }),
+                    'status': 'active',  # Domyślny status
+                    'specifications': json.dumps(computer)  # Pełne dane jako JSON w specifications
+                }
+                print(f"Sending computer data to archive: {asset_data['name']}")
+                archive_asset(asset_data)
+
+            # Podobnie dla urządzeń sieciowych
+            for device in network_devices:
+                asset_data = {
+                    'name': device.get('name'),
+                    'type': 'network',
+                    'serial_number': device.get('serial'),
+                    'model': device.get('networkequipmentmodels_id'),
+                    'manufacturer': device.get('manufacturers_id'),
+                    'location': device.get('location_name'),
+                    'ip_address': device.get('ip'),
+                    'mac_address': device.get('mac'),
+                    'os_info': json.dumps({}),
+                    'status': 'active',
+                    'specifications': json.dumps(device)
+                }
+                archive_asset(asset_data)
+
+            # I dla drukarek
+            for printer in printers:
+                asset_data = {
+                    'name': printer.get('name'),
+                    'type': 'printer',
+                    'serial_number': printer.get('serial'),
+                    'model': printer.get('printermodels_id'),
+                    'manufacturer': printer.get('manufacturers_id'),
+                    'location': printer.get('location_name'),
+                    'ip_address': printer.get('ip'),
+                    'mac_address': printer.get('mac'),
+                    'os_info': json.dumps({}),
+                    'status': 'active',
+                    'specifications': json.dumps(printer)
                 }
                 archive_asset(asset_data)
 
@@ -350,15 +389,27 @@ class GLPIClient:
         """Get devices from local database"""
         try:
             with get_db_cursor() as cursor:
-                # Get all assets from database
+                # Pobierz wszystkie aktywa z bazy danych
                 cursor.execute("""
-                    SELECT *, UNIX_TIMESTAMP(last_seen) as last_refresh 
+                    SELECT 
+                        name,
+                        type,
+                        serial_number,
+                        model,
+                        location,
+                        status,
+                        specifications
                     FROM assets 
                     WHERE last_seen >= NOW() - INTERVAL 24 HOUR
+                    OR last_seen IS NULL
                 """)
                 assets = cursor.fetchall()
 
-                # Categorize assets
+                if not assets:
+                    print("No assets found in database")
+                    return self.get_empty_response()
+
+                # Kategoryzuj aktywa
                 categorized = {
                     'workstations': [],
                     'terminals': [],
@@ -371,33 +422,45 @@ class GLPIClient:
                 racks = []
 
                 for asset in assets:
-                    # Convert JSON strings back to dictionaries
-                    asset['os_info'] = json.loads(asset['os_info']) if asset['os_info'] else {}
-                    asset['specifications'] = json.loads(asset['specifications']) if asset['specifications'] else {}
-                    
-                    asset_with_specs = {**asset, **asset['specifications']}
-                    name = asset['name'].upper() if asset['name'] else ''
-                    
-                    device_type = asset['type'].lower()
-                    if device_type == 'workstation':
-                        if name.startswith('KS'):
-                            categorized['workstations'].append(asset_with_specs)
-                        elif name.startswith('KT'):
-                            categorized['terminals'].append(asset_with_specs)
-                        elif name.startswith('SRV'):
-                            categorized['servers'].append(asset_with_specs)
-                        else:
-                            categorized['other'].append(asset_with_specs)
-                    elif device_type == 'network':
-                        network_devices.append(asset_with_specs)
-                    elif device_type == 'printer':
-                        printers.append(asset_with_specs)
-                    elif device_type == 'monitor':
-                        monitors.append(asset_with_specs)
-                    elif device_type == 'rack':
-                        racks.append(asset_with_specs)
+                    # Konwertuj specifications z JSON na słownik jeśli istnieje
+                    if asset['specifications']:
+                        try:
+                            asset['specifications'] = json.loads(asset['specifications'])
+                        except:
+                            asset['specifications'] = {}
 
-                response_data = {
+                    name = asset['name'].upper() if asset['name'] else ''
+                    asset_type = asset['type'].lower() if asset['type'] else ''
+                    
+                    # Mapuj urządzenia do odpowiednich kategorii
+                    device_data = {
+                        'name': asset['name'],
+                        'serial_number': asset['serial_number'],
+                        'model': asset['model'],
+                        'location': asset['location'],
+                        'type': asset['type'],
+                        'status': asset['status'],
+                        'specifications': asset['specifications']
+                    }
+
+                    if name.startswith('KS'):
+                        categorized['workstations'].append(device_data)
+                    elif name.startswith('KT'):
+                        categorized['terminals'].append(device_data)
+                    elif name.startswith('SRV'):
+                        categorized['servers'].append(device_data)
+                    elif asset_type == 'network':
+                        network_devices.append(device_data)
+                    elif asset_type == 'printer':
+                        printers.append(device_data)
+                    elif asset_type == 'monitor':
+                        monitors.append(device_data)
+                    elif asset_type == 'rack':
+                        racks.append(device_data)
+                    else:
+                        categorized['other'].append(device_data)
+
+                response = {
                     'computers': [*categorized['workstations'], *categorized['terminals'], 
                                 *categorized['servers'], *categorized['other']],
                     'categorized': categorized,
@@ -418,12 +481,7 @@ class GLPIClient:
                     }
                 }
 
-                # Get last refresh time
-                if assets:
-                    max_last_seen = max(asset['last_refresh'] for asset in assets)
-                    response_data['last_refresh'] = datetime.fromtimestamp(max_last_seen)
-
-                return response_data
+                return response
 
         except Exception as e:
             print(f"Error getting devices from database: {e}")
@@ -446,17 +504,121 @@ class GLPIClient:
     def refresh_from_api(self):
         """Refresh data from GLPI API"""
         try:
-            devices = self.get_devices()  # Używamy istniejącej metody do pobrania danych z API
-            if 'computers' in devices:
-                # Update last_refresh time in database
-                with get_db_cursor() as cursor:
-                    cursor.execute("""
-                        INSERT INTO system_logs (source, severity, host_name, message)
-                        VALUES ('glpi', 'info', 'system', 'GLPI data refresh completed')
-                    """)
-            return devices
+            if not self.session_token:
+                if not self.init_session():
+                    return self.get_empty_response()
+
+            headers = {
+                'Session-Token': self.session_token,
+                'App-Token': self.app_token
+            }
+
+            # Pobierz świeże dane z API
+            computers = self.get_all_items('Computer', headers)
+            network_devices = self.get_all_items('NetworkEquipment', headers)
+            printers = self.get_all_items('Printer', headers)
+            monitors = self.get_all_items('Monitor', headers)
+            racks = self.get_all_items('Rack', headers)
+
+            # Kategoryzuj komputery
+            categorized_computers = self.categorize_computers(computers)
+
+            # Archiwizuj dane o urządzeniach
+            print("Rozpoczynam archiwizację urządzeń...")
+
+            # Archiwizuj komputery
+            for computer in computers:
+                asset_data = {
+                    'name': computer.get('name'),
+                    'type': 'computer',
+                    'serial_number': computer.get('serial'),
+                    'model': computer.get('computermodels_id'),
+                    'manufacturer': computer.get('manufacturers_id'),
+                    'location': computer.get('location_name'),
+                    'ip_address': self.get_device_ip(computer['id'], headers),
+                    'mac_address': computer.get('mac'),
+                    'os_info': json.dumps({
+                        'os': computer.get('operatingsystems_id'),
+                        'version': computer.get('operatingsystemversions_id')
+                    }),
+                    'status': 'active',
+                    'specifications': json.dumps(computer)
+                }
+                print(f"Archiwizuję komputer: {asset_data['name']}")
+                archive_asset(asset_data)
+
+            # Archiwizuj urządzenia sieciowe
+            for device in network_devices:
+                asset_data = {
+                    'name': device.get('name'),
+                    'type': 'network',
+                    'serial_number': device.get('serial'),
+                    'model': device.get('networkequipmentmodels_id'),
+                    'manufacturer': device.get('manufacturers_id'),
+                    'location': device.get('location_name'),
+                    'ip_address': device.get('ip'),
+                    'mac_address': device.get('mac'),
+                    'os_info': json.dumps({}),
+                    'status': 'active',
+                    'specifications': json.dumps(device)
+                }
+                print(f"Archiwizuję urządzenie sieciowe: {asset_data['name']}")
+                archive_asset(asset_data)
+
+            # Archiwizuj drukarki
+            for printer in printers:
+                asset_data = {
+                    'name': printer.get('name'),
+                    'type': 'printer',
+                    'serial_number': printer.get('serial'),
+                    'model': printer.get('printermodels_id'),
+                    'manufacturer': printer.get('manufacturers_id'),
+                    'location': printer.get('location_name'),
+                    'ip_address': printer.get('ip'),
+                    'mac_address': printer.get('mac'),
+                    'os_info': json.dumps({}),
+                    'status': 'active',
+                    'specifications': json.dumps(printer)
+                }
+                print(f"Archiwizuję drukarkę: {asset_data['name']}")
+                archive_asset(asset_data)
+
+            print("Zakończono archiwizację urządzeń")
+
+            # Log success
+            with get_db_cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO system_logs (source, severity, host_name, message)
+                    VALUES ('glpi', 'info', 'system', 'GLPI data refresh completed successfully')
+                """)
+
+            return {
+                'computers': computers,
+                'categorized': categorized_computers,
+                'network_devices': network_devices,
+                'printers': printers,
+                'monitors': monitors,
+                'racks': racks,
+                'total_count': len(computers) + len(network_devices) + len(printers) + len(monitors) + len(racks),
+                'category_counts': {
+                    'workstations': len(categorized_computers['workstations']),
+                    'terminals': len(categorized_computers['terminals']),
+                    'servers': len(categorized_computers['servers']),
+                    'other': len(categorized_computers['other']),
+                    'network': len(network_devices),
+                    'printers': len(printers),
+                    'monitors': len(monitors),
+                    'racks': len(racks)
+                }
+            }
         except Exception as e:
             print(f"Error refreshing GLPI data: {e}")
+            # Log error
+            with get_db_cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO system_logs (source, severity, host_name, message)
+                    VALUES ('glpi', 'error', 'system', %s)
+                """, (str(e),))
             return self.get_empty_response()
 
 def get_glpi_data(refresh=False):

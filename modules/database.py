@@ -41,7 +41,7 @@ def log_system_event(source, severity, host_name, message):
             allowed_severities = ['emergency', 'alert', 'critical', 'error', 
                                 'warning', 'notice', 'info', 'debug']
             normalized_severity = severity.lower()
-            if normalized_severity not in allowed_severities:
+            if (normalized_severity not in allowed_severities):
                 normalized_severity = 'info'
 
             cursor.execute("""
@@ -103,30 +103,88 @@ def archive_host_status(host_data: dict):
         ))
 
 def archive_asset(asset_data: dict):
-    """Archive asset information"""
-    with get_db_cursor() as cursor:
-        cursor.execute("""
-            INSERT INTO assets 
-            (name, type, serial_number, model, manufacturer, location, 
-            ip_address, mac_address, os_info, status, specifications)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE
-            last_seen = CURRENT_TIMESTAMP,
-            status = VALUES(status),
-            specifications = VALUES(specifications)
-        """, (
-            asset_data.get('name'),
-            asset_data.get('type'),
-            asset_data.get('serial'),
-            asset_data.get('model'),
-            asset_data.get('manufacturer'),
-            asset_data.get('location'),
-            asset_data.get('ip'),
-            asset_data.get('mac'),
-            json.dumps(asset_data.get('os_info', {})),
-            asset_data.get('status', 'active'),
-            json.dumps(asset_data.get('specs', {}))
-        ))
+    """Archive asset information with proper update logic"""
+    try:
+        with get_db_cursor() as cursor:
+            # Najpierw sprawdź czy urządzenie już istnieje
+            cursor.execute("""
+                SELECT asset_id FROM assets 
+                WHERE name = %s
+            """, (asset_data.get('name'),))
+            
+            existing_asset = cursor.fetchone()
+            
+            if existing_asset:
+                # Update istniejącego rekordu
+                cursor.execute("""
+                    UPDATE assets 
+                    SET 
+                        type = %s,
+                        serial_number = %s,
+                        model = %s,
+                        manufacturer = %s,
+                        location = %s,
+                        ip_address = %s,
+                        mac_address = %s,
+                        os_info = %s,
+                        status = %s,
+                        specifications = %s,
+                        last_seen = CURRENT_TIMESTAMP
+                    WHERE asset_id = %s
+                """, (
+                    asset_data.get('type'),
+                    asset_data.get('serial_number'),
+                    asset_data.get('model'),
+                    asset_data.get('manufacturer'),
+                    asset_data.get('location'),
+                    asset_data.get('ip_address'),
+                    asset_data.get('mac_address'),
+                    asset_data.get('os_info'),
+                    asset_data.get('status', 'active'),
+                    asset_data.get('specifications'),
+                    existing_asset['asset_id']
+                ))
+                print(f"Updated asset: {asset_data.get('name')}")
+            else:
+                # Wstaw nowy rekord
+                cursor.execute("""
+                    INSERT INTO assets (
+                        name, 
+                        type, 
+                        serial_number, 
+                        model, 
+                        manufacturer,
+                        location,
+                        ip_address,
+                        mac_address,
+                        os_info,
+                        status,
+                        specifications,
+                        last_seen
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                """, (
+                    asset_data.get('name'),
+                    asset_data.get('type'),
+                    asset_data.get('serial_number'),
+                    asset_data.get('model'),
+                    asset_data.get('manufacturer'),
+                    asset_data.get('location'),
+                    asset_data.get('ip_address'),
+                    asset_data.get('mac_address'),
+                    asset_data.get('os_info'),
+                    asset_data.get('status', 'active'),
+                    asset_data.get('specifications')
+                 ))
+                print(f"Inserted new asset: {asset_data.get('name')}")
+            
+            # Debug log
+            print(f"Asset data: {json.dumps(asset_data, indent=2)}")
+            
+    except Exception as e:
+        print(f"Error archiving asset {asset_data.get('name')}: {e}")
+        # Print the full error traceback
+        import traceback
+        traceback.print_exc()
 
 def get_historical_metrics(host_id: str, metric_type: str, start_time: datetime, end_time: datetime) -> list:
     """Get historical metrics for a host"""
@@ -194,7 +252,7 @@ def get_messages_timeline(start_time: datetime, end_time: datetime, interval: st
     interval_value = interval_settings['interval']
     
     with get_db_cursor() as cursor:
-        if interval == '1 day':
+        if (interval == '1 day'):
             # Dla dni używamy DATE() do grupowania
             query = """
                 WITH RECURSIVE time_series AS (
@@ -243,40 +301,55 @@ def get_messages_timeline(start_time: datetime, end_time: datetime, interval: st
         cursor.execute(query, (start_time, end_time, format_pattern))
         return cursor.fetchall()
 
-def get_detailed_messages(start_time: datetime, end_time: datetime, limit: int = 2000) -> dict:
-    """Get detailed message data from graylog_messages table"""
-    with get_db_cursor() as cursor:
-        cursor.execute("""
-            SELECT 
-                timestamp,
-                level,
-                severity,
-                category,
-                message,
-                details
-            FROM graylog_messages
-            WHERE timestamp BETWEEN %s AND %s
-            ORDER BY timestamp DESC
-            LIMIT %s
-        """, (start_time, end_time, limit))
-        
-        messages = cursor.fetchall()
-        
-        # Calculate statistics for all messages in the time range, not just limited ones
-        cursor.execute("""
-            SELECT 
-                COUNT(CASE WHEN severity = 'high' THEN 1 END) as error_count,
-                COUNT(CASE WHEN severity = 'medium' THEN 1 END) as warn_count,
-                COUNT(CASE WHEN severity = 'low' THEN 1 END) as info_count,
-                COUNT(*) as total_count
-            FROM graylog_messages
-            WHERE timestamp BETWEEN %s AND %s
-        """, (start_time, end_time))
-        
-        stats = cursor.fetchone()
-        
+def get_detailed_messages(start_time: datetime, end_time: datetime, limit: int = 300) -> dict:
+    """Get detailed message data from graylog_messages table with optimization"""
+    try:
+        with get_db_cursor() as cursor:
+            # Najpierw pobierz ograniczoną liczbę wiadomości
+            cursor.execute("""
+                SELECT 
+                    timestamp,
+                    level,
+                    severity,
+                    category,
+                    message,
+                    details
+                FROM graylog_messages
+                WHERE timestamp BETWEEN %s AND %s
+                ORDER BY timestamp DESC, severity ASC
+                LIMIT %s
+            """, (start_time, end_time, limit))
+            
+            messages = cursor.fetchall()
+            
+            # Policz statystyki tylko dla pobranych wiadomości
+            stats = {
+                'error_count': sum(1 for msg in messages if msg['severity'] == 'high'),
+                'warn_count': sum(1 for msg in messages if msg['severity'] == 'medium'),
+                'info_count': sum(1 for msg in messages if msg['severity'] == 'low'),
+                'total_count': len(messages)
+            }
+            
+            # Pobierz całkowitą liczbę wiadomości w bazie dla tego okresu
+            cursor.execute("""
+                SELECT COUNT(*) as total
+                FROM graylog_messages
+                WHERE timestamp BETWEEN %s AND %s
+            """, (start_time, end_time))
+            
+            total_in_db = cursor.fetchone()['total']
+            
+            return {
+                'messages': messages,
+                'stats': stats,
+                'total_in_db': total_in_db,
+                'total_results': len(messages)
+            }
+    except Exception as e:
+        print(f"Error getting detailed messages: {e}")
         return {
-            'messages': messages,
-            'stats': stats,
-            'total_results': stats['total_count'] if stats else len(messages)  # Use total count from stats
+            'messages': [],
+            'stats': {'error_count': 0, 'warn_count': 0, 'info_count': 0, 'total_count': 0},
+            'total_in_db': 0,
+            'total_results': 0
         }
