@@ -30,19 +30,19 @@
             <h3>{{ device.name }}</h3>
             <div class="device-details">
                 {% if device.serial_number %}
-                <p><strong>Serial:</strong> {{ device.serial_number }}</p>
+                <p><strong>Serial</strong> <span>{{ device.serial_number }}</span></p>
                 {% endif %}
                 {% if device.model %}
-                <p><strong>Model:</strong> {{ device.model }}</p>
+                <p><strong>Model</strong> <span>{{ device.model }}</span></p>
                 {% endif %}
                 {% if device.location %}
-                <p><strong>Location:</strong> {{ device.location }}</p>
+                <p><strong>Location</strong> <span>{{ device.location }}</span></p>
                 {% endif %}
                 {% if device.type %}
-                <p><strong>Type:</strong> {{ device.type }}</p>
+                <p><strong>Type</strong> <span>{{ device.type }}</span></p>
                 {% endif %}
                 {% if device.status %}
-                <p><strong>Status:</strong> {{ device.status }}</p>
+                <p><strong>Status</strong> <span>{{ device.status }}</span></p>
                 {% endif %}
             </div>
         </div>

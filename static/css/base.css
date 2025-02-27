@@ -1,0 +1,65 @@
+:root {
+  --primary-color: #1a73e8;
+  --secondary-color: #f8f9fa;
+  --text-color: #2c3e50;
+  --text-muted: #888;
+  --border-color: #e1e4e8;
+  --bg-color: #fff;
+  --card-bg: #fff;
+  --hover-bg: #e8f0fe;
+  --shadow-color: rgba(0,0,0,.1);
+  --gradient-start: #1a73e8;
+  --gradient-end: #1557b0;
+  --sidebar-width: 250px;
+  --topnav-height: 60px;
+  --footer-height: 200px;
+  --success: #2ecc71;
+  --danger: #e74c3c;
+  --warning: #f39c12;
+  --info: #0dcaf0;
+  --neutral: #95a5a6
+}
+
+body {
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: 0;
+  background-color: #f4f4f4;
+  transition: background-color .3s,color .3s,border-color .3s,box-shadow .3s;
+  background-color: var(--bg-color);
+  margin: 0;
+  font-family: Arial,sans-serif
+}
+
+h1 {
+  color: #333;
+  padding: 20px;
+  text-align: center;
+  margin: 0
+}
+
+h2 {
+  color: #fff;
+  margin-left: 20px
+}
+
+li:nth-child(2n) {
+  background-color: #f9f9f9
+}
+
+input,
+select {
+  transition: background-color .3s,color .3s,border-color .3s,box-shadow .3s
+}
+
+body *,
+input,
+select {
+  transition: background-color .3s,color .3s,border-color .3s,box-shadow .3s
+}
+
+[data-theme=light] .card-header,
+[data-theme=light] .dashboard-header {
+  background: linear-gradient(135deg,var(--gradient-start),var(--gradient-end))!important
+}
