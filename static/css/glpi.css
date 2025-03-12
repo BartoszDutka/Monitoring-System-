@@ -1,4 +1,4 @@
-/* Modern redesigned GLPI Category styles */
+/* Simple, clean, modern GLPI Category styles */
 
 :root {
   --glpi-primary: #4a6cf7;
@@ -8,23 +8,20 @@
   --glpi-dark: #212529;
   --glpi-success: #28a745;
   --glpi-border: #e9ecef;
-  --glpi-card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  --glpi-hover-shadow: 0 15px 35px rgba(74, 108, 247, 0.12);
-  --glpi-gradient: linear-gradient(135deg, #4a6cf7 0%, #5978f3 100%);
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
 
-/* Dashboard header with gradient background */
+/* Simplified dashboard header */
 .dashboard-header {
-  background: var(--glpi-gradient);
+  background: var(--glpi-primary);
   border-radius: 12px;
-  padding: 1.8rem 2rem;
-  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 5px 15px rgba(74, 108, 247, 0.2);
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(74, 108, 247, 0.2);
 }
 
 .dashboard-header::before {
@@ -153,307 +150,219 @@
   font-size: 0.9rem;
 }
 
-/* GLPI device cards - modern design */
+/* Clean, modern card grid */
 .hosts-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); /* Increased from 320px */
+  gap: 1.2rem;
+  margin-top: 1.5rem;
 }
 
+/* Simplified card design */
 .host-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
   overflow: hidden;
-  box-shadow: var(--glpi-card-shadow);
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid var(--glpi-border);
   position: relative;
-}
-
-.host-card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 6px;
-  height: 100%;
-  background: var(--glpi-gradient);
-  opacity: 0;
-  transition: opacity 0.4s ease;
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .host-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--glpi-hover-shadow);
+  transform: translateY(-3px);
+  box-shadow: var(--card-hover-shadow);
 }
 
-.host-card:hover::after {
-  opacity: 1;
-}
-
-/* Make card content more spacious */
+/* Clean card content */
 .card-content {
-  padding: 1.5rem 1.5rem 2rem; /* Reduced padding */
+  padding: 1.25rem;
   flex-grow: 1;
-  position: relative;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.8) 0%, rgba(255,255,255,1) 100%);
-  border-radius: 16px 16px 0 0;
-  transition: all 0.3s ease;
-  overflow: visible;
   display: flex;
   flex-direction: column;
 }
 
-/* Make the header more compact */
+/* Clean header with status dot */
 .host-card h3 {
-  font-size: 1.2rem; /* Smaller font */
-  margin-top: 0;
-  margin-bottom: 1rem; /* Reduced margin */
-  color: var(--glpi-dark);
+  font-size: 1.15rem;
   font-weight: 600;
-  position: relative;
-  padding-bottom: 0.6rem; /* Less padding */
-  letter-spacing: -0.01em;
-}
-
-.host-card h3::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 40px;
-  height: 3px;  /* Slightly thicker underline */
-  background: var(--glpi-gradient);
-  border-radius: 2px;  /* Rounded edges on the underline */
-}
-
-/* More compact device details container */
-.device-details {
-  font-size: 0.85rem; /* Smaller font size */
-  overflow: visible;
-  word-break: break-word;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
-  gap: 0.5rem; /* Reduced gap */
-  padding-top: 0.5rem; /* Less padding */
-  margin-bottom: 0.5rem;
-  position: relative;
-  flex: 1; /* Take available space */
-}
-
-/* More compact detail items */
-.device-details p {
-  margin: 0;
-  padding: 0.5rem 0.8rem; /* Reduced padding */
-  background: rgba(249, 250, 255, 0.7);
-  border-radius: 6px; /* Smaller radius */
-  transition: all 0.25s ease;
+  color: var(--glpi-dark);
+  margin: 0 0 1.2rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem; /* Less gap */
-  border: 1px solid transparent;
-  position: relative;
-  overflow: hidden;
-  min-height: unset; /* Remove any minimum height */
 }
 
-/* Remove transform on hover to prevent overlapping */
-.device-details p:hover {
-  background: rgba(249, 250, 255, 0.9);
-  border-color: rgba(74, 108, 247, 0.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-  /* Removed transform that was causing overlap */
+/* Simple status dot */
+.device-status {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
 }
 
-/* Smaller side indicator */
-.device-details p::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 3px; /* Thinner indicator */
-  background: var(--glpi-gradient);
-  opacity: 0.2;
-  transition: all 0.25s ease;
-  border-radius: 0 1px 1px 0;
+.status-active {
+  background-color: var(--glpi-success);
 }
 
-.device-details p:hover::before {
-  opacity: 1;
+.status-inactive {
+  background-color: var(--glpi-accent);
 }
 
-/* Smaller label */
-.device-details p strong {
-  color: var(--glpi-dark);
-  font-weight: 600;
-  min-width: 60px; /* Smaller width */
-  max-width: 70px;
-  flex: 0 0 auto;
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-
-.device-details p strong::after {
-  content: ':';
-  margin-left: 2px;
+/* Simple category tag */
+.device-category {
+  display: inline-block;
+  margin-left: auto;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: var(--glpi-light);
   color: var(--glpi-secondary);
-  opacity: 0.6;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* Smaller value */
-.device-details p span {
-  color: var(--glpi-secondary);
-  flex: 1 1 auto;
-  text-align: right;
-  font-weight: 400;
-  background: rgba(255, 255, 255, 0.5);
-  padding: 0.2rem 0.4rem; /* Smaller padding */
+/* Clean device details container */
+.device-details {
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5rem;
+  flex: 1;
+  overflow-y: auto;
+  max-height: 420px; /* Increased from 320px to reduce scrolling */
+  padding-right: 6px;
+}
+
+/* Minimal scrollbar */
+.device-details::-webkit-scrollbar {
+  width: 4px;
+}
+
+.device-details::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.device-details::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
   border-radius: 4px;
-  transition: all 0.2s ease;
-  position: relative;
-  word-break: break-word; /* Allow breaking of long words */
-  max-width: 75%; /* Allow more width */
 }
 
-.device-details p:hover span {
-  background: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+/* Clean detail items with improved alignment */
+.device-details p {
+  margin: 0;
+  padding: 6px 0; /* Reduced from 8px to fit more content */
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+  align-items: flex-start; /* Align to top for multi-line content */
+  width: 100%; /* Ensure full width */
 }
 
-/* Different colors for different types of details */
-.device-details p:nth-child(1)::before {
-  background: linear-gradient(to bottom, #4a6cf7, #3454d1);
-}
-
-.device-details p:nth-child(2)::before {
-  background: linear-gradient(to bottom, #36b9cc, #258a9c);
-}
-
-.device-details p:nth-child(3)::before {
-  background: linear-gradient(to bottom, #4e73df, #3756c5);
-}
-
-.device-details p:nth-child(4)::before {
-  background: linear-gradient(to bottom, #6f42c1, #5a36a0);
-}
-
-.device-details p:nth-child(5)::before {
-  background: linear-gradient(to bottom, #e74a3b, #c93325);
-}
-
-/* Empty state styling */
-.device-details:empty::after {
-  content: 'No device details available';
-  display: block;
-  text-align: center;
-  padding: 1.5rem;
+/* Consistent styling for ALL label elements */
+.device-details p strong {
+  flex: 0 0 110px; /* Fixed width, no shrinking, no growing */
+  width: 110px;
+  min-width: 110px; /* Ensure minimum width */
+  font-weight: 600;
   color: var(--glpi-secondary);
-  font-style: italic;
-  background: rgba(249, 250, 255, 0.7);
-  border-radius: 8px;
-  border: 1px dashed rgba(0, 0, 0, 0.1);
+  font-size: 0.85rem;
+  padding-right: 10px; /* Add some spacing between label and value */
+  text-align: left; /* Left-align the text */
+  display: block; /* For better alignment */
+  vertical-align: top; /* Align to top */
+  flex-basis: 110px;
+  flex-shrink: 0;
+  flex-grow: 0;
+  box-sizing: border-box;
 }
 
-/* Smaller action area */
+/* Consistent styling for ALL value elements */
+.device-details p span {
+  color: var(--glpi-dark);
+  flex: 1;
+  word-break: break-word;
+  line-height: 1.4; /* Added line-height for better readability */
+  text-align: left; /* Left-align the text */
+  padding-left: 5px; /* Add a bit of padding between label and value */
+  display: block; /* For better alignment */
+  vertical-align: top; /* Align to top */
+}
+
+.device-details p:last-child {
+  border-bottom: none;
+}
+
+/* Simplified key fields highlight with better alignment */
+.field-id, .field-serial, .field-otherserial, .field-owner {
+  background-color: rgba(0,0,0,0.01);
+  border-radius: 6px;
+  padding: 8px 12px !important;
+  margin-bottom: 4px;
+  display: flex !important; /* Ensure flex layout */
+}
+
+.field-id strong, .field-serial strong, .field-otherserial strong, .field-owner strong {
+  color: var(--glpi-dark);
+}
+
+/* Clean action area */
 .device-actions {
-  padding: 1.2rem; /* Less padding */
-  background: #f8f9fb;
-  border-top: 1px solid var(--glpi-border);
-  text-align: center;
-  position: relative;
-  z-index: 5;
+  padding: 1rem 1.25rem;
+  background: var(--glpi-light);
+  border-top: 1px solid rgba(0,0,0,0.05);
 }
 
-/* Add a visual separator between details and action area */
-.device-actions::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -2px; /* Position slightly above the border */
-  height: 4px;
-  background: linear-gradient(to right, 
-    rgba(255,255,255,0) 0%, 
-    rgba(232,236,244,1) 50%, 
-    rgba(255,255,255,0) 100%);
-  z-index: 1;
-}
-
-/* Smaller button */
+/* Clean button */
 .vnc-button {
   width: 100%;
-  padding: 0.7rem 1rem; /* Less padding */
+  padding: 0.8rem;
   border: none;
-  border-radius: 8px; /* Smaller radius */
-  background: var(--glpi-gradient);
+  border-radius: 8px;
+  background: var(--glpi-primary);
   color: white;
-  font-weight: 600;
-  font-size: 0.9rem; /* Smaller font */
+  font-weight: 500;
+  font-size: 0.95rem;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(74, 108, 247, 0.2);
+  transition: all 0.2s ease;
 }
 
 .vnc-button:hover {
-  box-shadow: 0 8px 20px rgba(74, 108, 247, 0.3);
-  filter: brightness(1.05);
+  background: #3a5ce5;
+  box-shadow: 0 3px 6px rgba(58, 92, 229, 0.2);
 }
 
 .vnc-button:active {
-  transform: scale(0.98);
-  filter: brightness(0.95);
+  transform: translateY(1px);
 }
 
-.vnc-button i {
-  font-size: 1.1rem;
-}
-
-/* No results message with better design */
+/* Clean no results message */
 .no-results {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 3.5rem 2rem;
+  padding: 2rem;
   color: var(--glpi-secondary);
   background: white;
-  border-radius: 16px;
-  box-shadow: var(--glpi-card-shadow);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  border: 2px dashed var(--glpi-border);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
 }
 
-.no-results i {
-  font-size: 3rem;
-  color: var(--glpi-accent);
-  margin-bottom: 0.5rem;
-}
-
-/* Responsive adjustments for different screen sizes */
-@media (max-width: 992px) {
-  .hosts-container {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
-}
-
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .dashboard-header {
     flex-direction: column;
     align-items: stretch;
-    padding: 1.5rem;
-    gap: 1.5rem;
+    gap: 1rem;
   }
   
   .header-actions {
@@ -461,49 +370,23 @@
     flex-direction: column;
   }
   
-  .search-container {
-    width: 100%;
-  }
-  
-  .refresh-controls {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .refresh-button {
-    flex: 1;
-    justify-content: center;
-    padding: 0.8rem 1rem;
-  }
-  
   .hosts-container {
     grid-template-columns: 1fr;
   }
+}
 
-  .card-content {
-    padding: 1.5rem 1.5rem 2rem; /* Adjust padding for mobile */
+/* Media query adjustments */
+@media (min-width: 1600px) {
+  .hosts-container {
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); /* Even larger on big screens */
   }
   
   .device-details {
-    margin-bottom: 0.8rem; /* Increase bottom margin on mobile */
+    max-height: 480px; /* More space on large screens */
   }
 }
 
-/* Status indicators for different states */
-.status-indicator {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 8px;
-}
-
-.status-active {
-  background-color: var(--glpi-success);
-  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
-}
-
-.status-inactive {
-  background-color: var(--glpi-accent);
-  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+/* Hide debug info */
+.debug-info {
+  display: none !important;
 }

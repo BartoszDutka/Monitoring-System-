@@ -43,6 +43,13 @@ MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB w bajtach
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
 
+# Custom filter for checking if a character is a digit
+@app.template_filter('isdigit')
+def isdigit_filter(s):
+    if not s:
+        return False
+    return s[0].isdigit() if s else False
+
 # Upewnij się, że folder istnieje
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 

@@ -27,26 +27,121 @@
     {% for device in devices %} 
     <div class="host-card">
         <div class="card-content">
-            <h3>{{ device.name }}</h3>
+            <h3>
+                <div class="device-status {% if device.status == 'active' %}status-active{% else %}status-inactive{% endif %}" 
+                     title="Device {% if device.status == 'active' %}Active{% else %}Inactive{% endif %}"></div>
+                {{ device.name }}
+                <span class="device-category">{{ device.type|default('unknown') }}</span>
+            </h3>
             <div class="device-details">
-                {% if device.serial_number %}
-                <p><strong>Serial</strong> <span>{{ device.serial_number }}</span></p>
+                
+                {# ID field with more flexible detection #}
+                {% if device.id or device.ID or device.device_id or device.asset_id or (device.specifications and device.specifications.id) %}
+                <p class="field-id"><strong>ID</strong> <span>
+                    {{ device.id or device.ID or device.device_id or device.asset_id or device.specifications.id if device.specifications else "" }}
+                </span></p>
                 {% endif %}
-                {% if device.model %}
-                <p><strong>Model</strong> <span>{{ device.model }}</span></p>
+                
+                {# Serial Number with more detection #}
+                {% if device.serial_number or device.serial or (device.specifications and device.specifications.serial) %}
+                <p class="field-serial"><strong>Serial</strong> <span>
+                    {{ device.serial_number or device.serial or (device.specifications.serial if device.specifications else "") }}
+                </span></p>
                 {% endif %}
-                {% if device.location %}
-                <p><strong>Location</strong> <span>{{ device.location }}</span></p>
+                
+                {# Other Serial Number with enhanced detection #}
+                {% if device.otherserial or device.other_serial or device.alt_serial or device.inventory_number or (device.specifications and device.specifications.otherserial) %}
+                <p class="field-otherserial"><strong>Other S/N</strong> <span>
+                    {{ device.otherserial or device.other_serial or device.alt_serial or device.inventory_number or (device.specifications.otherserial if device.specifications else "") }}
+                </span></p>
                 {% endif %}
-                {% if device.type %}
-                <p><strong>Type</strong> <span>{{ device.type }}</span></p>
+                
+                {# Owner/User with enhanced detection #}
+                {% if device.owner_name or device.tech_owner_name or device.contact or device.owner or device.user or device.contact_num or (device.users_id and device.users_id is not number) or (device.users_id_tech and device.users_id_tech is not number) or (device.specifications and device.specifications.contact) %}
+                <p class="field-owner"><strong>Owner</strong> <span>
+                    {{ device.owner_name or device.tech_owner_name or device.contact or device.owner or device.user or device.contact_num or (device.users_id if device.users_id is not number else "") or (device.users_id_tech if device.users_id_tech is not number else "") or (device.specifications.contact if device.specifications else "") }}
+                </span></p>
                 {% endif %}
+                
+                {# Model information #}
+                {% if device.model_name %}
+                <p class="field-owner"><strong>Model</strong> <span>{{ device.model_name }}</span></p>
+                {% elif device.computermodels_id and device.computermodels_id is not number %}
+                <p class="field-owner" ><strong>Model</strong> <span>{{ device.computermodels_id }}</span></p>
+                {% endif %}
+                
+                {# Manufacturer information #}
+                {% if device.manufacturer_name %}
+                <p><strong>Manufacturer</strong> <span>{{ device.manufacturer_name }}</span></p>
+                {% elif device.manufacturers_id and device.manufacturers_id is not number %}
+                <p><strong>Manufacturer</strong> <span>{{ device.manufacturers_id }}</span></p>
+                {% endif %}
+                
+                {# IP address #}
+                {% if device.ip_address %}
+                <p><strong>IP Address</strong> <span>{{ device.ip_address }}</span></p>
+                {% elif device.ip %}
+                <p><strong>IP Address</strong> <span>{{ device.ip }}</span></p>
+                {% endif %}
+                
+                {# MAC Address #}
+                {% if device.mac_address %}
+                <p><strong>MAC</strong> <span>{{ device.mac_address }}</span></p>
+                {% elif device.mac %}
+                <p><strong>MAC</strong> <span>{{ device.mac }}</span></p>
+                {% endif %}
+                
+                {# Operating System #}
+                {% if device.os_name %}
+                <p><strong>OS</strong> <span>{{ device.os_name }}</span></p>
+                {% elif device.operatingsystems_id and device.operatingsystems_id is not number %}
+                <p><strong>OS</strong> <span>{{ device.operatingsystems_id }}</span></p>
+                {% endif %}
+                
+                {# Removed OS Version - not displayed on page #}
+                
+                {# Last update #}
+                {% if device.date_mod %}
+                <p><strong>Last Modified</strong> <span>{{ device.date_mod }}</span></p>
+                {% endif %}
+                
+                {# Check for location name in various potential fields #}
+                {% if device.location_name %}
+                <p class="field-owner"><strong>Location</strong> <span>{{ device.location_name }}</span></p>
+                {% elif device.location and device.location|string|lower != "none" and not (device.location|string)[0:]|isdigit %}
+                <p class="field-owner"><strong>Location</strong> <span>{{ device.location }}</span></p>
+                {% elif device.location_name_full %}
+                <p class="field-owner"><strong>Location</strong> <span>{{ device.location_name_full }}</span></p>
+                {% elif device.location_full_name %}
+                <p class="field-owner"><strong>Location</strong> <span>{{ device.location_full_name }}</span></p>
+                {% elif device.locations_name %}
+                <p class="field-owner"><strong>Location</strong> <span>{{ device.locations_name }}</span></p>
+                {% elif device.glpi_location %}
+                <p class="field-owner"><strong>Location</strong> <span>{{ device.glpi_location }}</span></p>
+                {% endif %}
+                
+                {# Status information - showing only the main device status #}
                 {% if device.status %}
-                <p><strong>Status</strong> <span>{{ device.status }}</span></p>
+                <p class="field-owner"><strong>Status</strong> <span>{{ device.status }}</span></p>
+                {% endif %}
+                
+                {# Comments #}
+                {% if device.comment %}
+                <p><strong>Comments</strong> <span>{{ device.comment }}</span></p>
+                {% endif %}
+                
+                {% if not device.id and not device.ID and 
+                    not device.serial_number and not device.serial and 
+                    not device.otherserial and 
+                    not device.contact and not device.owner and not device.user and 
+                    not device.location_name and not device.location and 
+                    not device.location_name_full and not device.location_full_name and
+                    not device.locations_name and not device.glpi_location %}
+                <p><strong>Notice</strong> <span>This device has no detailed information available</span></p>
                 {% endif %}
             </div>
         </div>
-        <!-- Dodaj przycisk VNC tylko dla Workstations i Terminals -->
+        
         {% if category_title in ['Workstations (KS)', 'Terminals (KT)'] %}
         <div class="device-actions">
             <button class="vnc-button" onclick="connectToVNC('{{ device.name }}')"
@@ -152,5 +247,48 @@ function connectToVNC(hostname) {
         alert('Failed to connect to VNC');
     });
 }
+
+// Check if device details containers need scroll indicators
+document.addEventListener('DOMContentLoaded', function() {
+    const detailsContainers = document.querySelectorAll('.device-details');
+    
+    function checkScrollable(container) {
+        if (container.scrollHeight > container.clientHeight) {
+            container.classList.add('scrollable');
+        } else {
+            container.classList.remove('scrollable');
+        }
+    }
+    
+    // Initial check
+    detailsContainers.forEach(container => {
+        checkScrollable(container);
+        
+        // Update the scrollable class when scrolling
+        container.addEventListener('scroll', function() {
+            if (this.scrollTop + this.clientHeight >= this.scrollHeight - 10) {
+                this.classList.remove('scrollable');
+            } else {
+                this.classList.add('scrollable');
+            }
+        });
+    });
+    
+    // Re-check on window resize
+    window.addEventListener('resize', function() {
+        detailsContainers.forEach(checkScrollable);
+    });
+
+    // Simplified debugging - only show essential info
+    detailsContainers.forEach(container => {
+        // Check if any text is visible - only critical debug code kept
+        if (container.textContent.trim() === '') {
+            console.warn('No visible text in device details container');
+            container.innerHTML = '<p><strong>Debug</strong> <span>No content visible - check CSS</span></p>';
+        }
+    });
+    
+    // Removed all the unused debug logging functions
+});
 </script>
 {% endblock %}
