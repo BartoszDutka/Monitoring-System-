@@ -1,0 +1,411 @@
+{% extends "layout.html" %}
+
+{% block title %}Inventory Management{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/inventory.css') }}">
+<script>
+    // Create people options variable that will be used in the JavaScript file
+    const peopleOptions = `
+        {% for person in people %}
+        <option value="{{ person.id }}">{{ person.name }} ({{ person.department }})</option>
+        {% endfor %}
+    `;
+</script>
+<script src="{{ url_for('static', filename='js/inventory.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="fas fa-boxes"></i> Inventory Management</h1>
+</div>
+
+<div class="inventory-container">
+    <div class="input-method-selector">
+        <div class="method-options">
+            <button class="method-btn" data-method="manual">
+                <i class="fas fa-pen"></i> 
+                <span>Manual Input</span>
+            </button>
+            <button class="method-btn" data-method="invoice">
+                <i class="fas fa-file-invoice"></i>
+                <span>Invoice Import</span>
+            </button>
+            <button class="method-btn" data-method="equipment">
+                <i class="fas fa-laptop"></i>
+                <span>User Equipment</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Invoice Input Section -->
+    <div class="input-section invoice-section" style="display: none;">
+        <div class="form-container" id="invoiceFormContainer">
+            <h2><i class="fas fa-file-invoice"></i> Import from PDF Invoice</h2>
+            <p class="section-description">
+                Upload an invoice PDF to automatically extract item details.
+            </p>
+            <form id="invoiceForm">
+                <div class="form-group">
+                    <label for="invoicePdf">Upload Invoice PDF</label>
+                    <div class="file-upload">
+                        <input type="file" id="invoicePdf" name="invoice_pdf" accept=".pdf">
+                        <label for="invoicePdf" class="file-upload-btn">
+                            <i class="fas fa-file-upload"></i> Select Invoice PDF
+                        </label>
+                        <div class="selected-files" id="selectedInvoiceFile">No file selected</div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn primary"><i class="fas fa-file-import"></i> Process Invoice</button>
+                </div>
+            </form>
+            
+            <!-- Processing indicator -->
+            <div id="processingIndicator" class="pdf-processing" style="display: none;">
+                <i class="fas fa-spinner"></i>
+                <p>Processing invoice...</p>
+            </div>
+
+            <!-- Invoice Preview -->
+            <div id="invoicePreview" class="invoice-preview" style="display: none;">
+                <h3>Invoice Data</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Invoice Number</label>
+                        <div id="invoiceNumber" class="form-control"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <div id="invoiceDate" class="form-control"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Vendor</label>
+                    <div id="invoiceVendor" class="form-control"></div>
+                </div>
+                
+                <h4>Detected Items</h4>
+                <div class="product-categories">
+                    <div class="category-toggle">
+                        <label><input type="checkbox" id="toggleHardware" checked> Hardware</label>
+                        <label><input type="checkbox" id="toggleSoftware" checked> Software</label>
+                        <label><input type="checkbox" id="toggleFurniture" checked> Furniture</label>
+                        <label><input type="checkbox" id="toggleAccessories" checked> Accessories</label>
+                        <label><input type="checkbox" id="toggleOther" checked> Other</label>
+                    </div>
+                </div>
+                <table class="invoice-data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Total Price</th>
+                            <th>Assign To</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <!-- Products will be listed here -->
+                    </tbody>
+                </table>
+                
+                <div class="form-actions">
+                    <button type="button" id="importAllProducts" class="btn primary">
+                        <i class="fas fa-file-import"></i> Import Selected Items
+                    </button>
+                    <button type="button" id="addMissingProduct" class="btn secondary">
+                        <i class="fas fa-plus"></i> Add Missing Item
+                    </button>
+                    <button type="button" id="tryAlternativeMethod" class="btn secondary">
+                        <i class="fas fa-sync"></i> Try Alternative Method
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Input Section -->
+    <div class="input-section manual-section" style="display: none;">
+        <div class="form-container" id="manualFormContainer">
+            <h2><i class="fas fa-pen"></i> Add Item Manually</h2>
+            <p class="section-description">
+                Fill in the details below to add a new item to your inventory.
+            </p>
+            <form id="itemForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemName">Item Name *</label>
+                        <input type="text" id="itemName" name="itemName" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemCategory">Category *</label>
+                        <select id="itemCategory" name="itemCategory" class="form-control" required>
+                            <option value="">Select Category</option>
+                            <option value="hardware">Hardware</option>
+                            <option value="software">Software</option>
+                            <option value="furniture">Office Furniture</option>
+                            <option value="accessories">Accessories</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemStatus">Status *</label>
+                        <select id="itemStatus" name="itemStatus" class="form-control" required>
+                            <option value="available">Available</option>
+                            <option value="in-use">In Use</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="disposed">Disposed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemLocation">Location *</label>
+                        <input type="text" id="itemLocation" name="itemLocation" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="acquisitionDate">Acquisition Date</label>
+                        <input type="date" id="acquisitionDate" name="acquisitionDate" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemValue">Value (PLN)</label>
+                        <input type="number" id="itemValue" name="itemValue" class="form-control" step="0.01">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="itemDescription">Description</label>
+                    <textarea id="itemDescription" name="itemDescription" class="form-control" rows="3"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemManufacturer">Manufacturer</label>
+                        <input type="text" id="itemManufacturer" name="itemManufacturer" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemModel">Model</label>
+                        <input type="text" id="itemModel" name="itemModel" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="itemSerial">Serial Number</label>
+                    <input type="text" id="itemSerial" name="itemSerial" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="itemNotes">Notes</label>
+                    <textarea id="itemNotes" name="itemNotes" class="form-control" rows="2"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Attachments</label>
+                    <div class="file-upload">
+                        <input type="file" id="itemAttachments" name="itemAttachments" multiple>
+                        <label for="itemAttachments" class="file-upload-btn">
+                            <i class="fas fa-cloud-upload-alt"></i> Choose Files
+                        </label>
+                        <div class="selected-files" id="selectedFiles">No files selected</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemQuantity">Quantity *</label>
+                        <input type="number" id="itemQuantity" name="itemQuantity" class="form-control" required min="1" value="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="assignTo">Assign To</label>
+                        <select id="assignTo" name="assignTo" class="form-control">
+                            <option value="">Unassigned</option>
+                            {% for person in people %}
+                            <option value="{{ person.id }}" {% if person.id == current_user_id %}selected{% endif %}>{{ person.name }} ({{ person.department }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn primary" id="saveItemBtn">Save Item</button>
+                    <button type="reset" class="btn secondary">Reset Form</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Equipment Section -->
+    <div class="input-section equipment-section" style="display: none;">
+        <div class="form-container" id="equipmentContainer">
+            <h2><i class="fas fa-laptop"></i> User Equipment</h2>
+            <p class="section-description">
+                View and manage equipment assigned to users.
+            </p>
+            <div class="user-select">
+                <label for="userSelect">Select User:</label>
+                <select id="userSelect" class="form-control">
+                    <option value="">Choose a user...</option>
+                    {% for person in people %}
+                    <option value="{{ person.id }}" {% if person.id == current_user_id %}selected{% endif %}>
+                        {{ person.name }} ({{ person.department }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div id="userEquipmentList" class="equipment-list" style="display: none;">
+                <h3>Assigned Equipment</h3>
+                <table class="equipment-table">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Type</th>
+                            <th>Serial Number</th>
+                            <th>Quantity</th>
+                            <th>Assigned Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="equipmentTableBody">
+                        <!-- Equipment items will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Add these styles */
+.product-categories {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: var(--primary-light);
+    border-radius: var(--radius);
+}
+
+.category-toggle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem; /* Reduced from 1rem */
+}
+
+.category-toggle label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem; /* Reduced from 0.5rem */
+    cursor: pointer;
+    font-size: 0.9rem; /* Smaller font size */
+}
+
+tr.imported {
+    opacity: 0.6;
+    background-color: var(--primary-light);
+}
+
+tr[data-category="hardware"] td:nth-child(2) {
+    color: var(--primary-color);
+}
+
+tr[data-category="software"] td:nth-child(2) {
+    color: var(--success-color);
+}
+
+tr[data-category="furniture"] td:nth-child(2) {
+    color: var(--warning-color);
+}
+
+tr[data-category="accessories"] td:nth-child(2) {
+    color: #9333ea; /* Purple for accessories */
+}
+
+.product-category-select {
+    padding: 0.25rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    width: 100%;
+    max-width: 100px; /* Reduced from 120px */
+    font-size: 0.85rem;
+}
+
+.quantity-input {
+    width: 50px !important; /* Reduced from 60px */
+    padding: 0.25rem 0.1rem !important;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+#processingIndicator {
+    margin: 2rem auto;
+}
+
+#processingIndicator p {
+    margin-top: 1rem;
+    font-weight: 500;
+}
+
+.btn-icon {
+    margin-right: 0.15rem; /* Reduced from 0.25rem */
+    width: 2rem;
+    height: 2rem;
+}
+
+.btn-icon.edit-product {
+    background-color: var(--warning-color);
+    color: white;
+}
+
+.btn-icon.delete-product {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.assign-to-select {
+    font-size: 0.82rem !important;
+    padding: 0.25rem 0.1rem !important;
+    min-width: 130px;
+    width: 100%;
+}
+
+@media (max-width: 992px) {
+    .invoice-data-table {
+        display: block;
+        overflow-x: auto;
+        width: 100%;
+    }
+    
+    .category-toggle {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .assign-to-select,
+    .product-category-select {
+        max-width: none;
+    }
+}
+
+/* Add compact mode for better display */
+@media (min-width: 993px) {
+    .invoice-data-table.compact-mode th,
+    .invoice-data-table.compact-mode td {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+{% endblock %}
