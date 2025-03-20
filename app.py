@@ -9,7 +9,7 @@ import subprocess
 import os
 import json  # Add this import
 from functools import wraps
-from flask import redirect, url_for
+from flask import redirect, url_for, abort
 from werkzeug.utils import secure_filename
 import time  # Dodaj na początku pliku z innymi importami
 from modules.user_data import update_user_avatar, get_user_avatar, verify_user, get_user_info
@@ -23,6 +23,7 @@ from modules.database import (
 from datetime import datetime, timedelta
 from modules.user_data import update_user_profile
 from inventory import inventory  # Import the inventory blueprint
+from werkzeug.exceptions import Forbidden  # Add this import
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 app = Flask(__name__)
@@ -67,6 +68,22 @@ def login_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
+
+def role_required(required_roles):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not session.get('logged_in'):
+                return redirect(url_for('login'))
+            user_role = session.get('user_info', {}).get('role', 'viewer')
+            if user_role not in required_roles:
+                return render_template('403.html'), 403
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+def admin_required(f):
+    return role_required(['admin'])(f)
 
 @app.context_processor
 def utility_processor():
@@ -507,7 +524,7 @@ def get_graylog_timeline():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/profile', methods=['GET', 'POST'])
-@login_required
+@role_required(['admin', 'user'])  # Viewers can't access profile
 def profile():
     if 'username' not in session:
         return redirect(url_for('login'))
@@ -515,14 +532,24 @@ def profile():
     user_info = get_user_info(session['username'])
     if not user_info:
         return redirect(url_for('login'))
+    
+    # Get departments list
+    with get_db_cursor() as cursor:
+        cursor.execute('''
+            SELECT name, description
+            FROM departments
+            ORDER BY name
+        ''')
+        departments = cursor.fetchall()
         
     session['user_info'] = user_info
     return render_template('profile.html',
                          username=session['username'],
-                         user_info=user_info)
+                         user_info=user_info,
+                         departments=departments)
 
 @app.route('/update_profile', methods=['POST'])
-@login_required
+@role_required(['admin', 'user'])
 def update_profile():
     if 'username' not in session:
         return redirect(url_for('login'))
@@ -552,7 +579,7 @@ def update_profile():
     return redirect(url_for('profile'))
 
 @app.route('/upload_avatar', methods=['POST'])
-@login_required
+@role_required(['admin', 'user'])  # Viewers can't upload avatars
 def upload_avatar():
     try:
         if 'avatar' not in request.files:
@@ -645,5 +672,91 @@ def refresh_graylog_logs():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-if __name__ == '__main__': 
+@app.route('/manage_users')
+@admin_required
+def manage_users():
+    with get_db_cursor() as cursor:
+        cursor.execute("SELECT * FROM users ORDER BY created_at DESC")
+        users = cursor.fetchall()
+    return render_template('manage_users.html', users=users)
+
+@app.route('/update_user_role', methods=['POST'])
+@admin_required
+def update_user_role():
+    user_id = request.form.get('user_id')
+    new_role = request.form.get('role')
+    
+    if new_role not in ['admin', 'user', 'viewer']:
+        flash('Invalid role specified')
+        return redirect(url_for('manage_users'))
+        
+    with get_db_cursor() as cursor:
+        cursor.execute("""
+            UPDATE users 
+            SET role = %s 
+            WHERE user_id = %s
+        """, (new_role, user_id))
+        
+    flash('User role updated successfully')
+    return redirect(url_for('manage_users'))
+
+# Add error handler for 403 errors
+@app.errorhandler(403)
+def forbidden_error(error):
+    return render_template('403.html'), 403
+
+@app.route('/api/delete_user', methods=['POST'])
+@admin_required
+def delete_user():
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        
+        with get_db_cursor() as cursor:
+            # Check if user exists and is not the current user
+            cursor.execute("SELECT username FROM users WHERE user_id = %s", (user_id,))
+            user = cursor.fetchone()
+            
+            if not user or user['username'] == session['username']:
+                return jsonify({'success': False, 'message': 'Cannot delete this user'}), 400
+                
+            # Delete the user
+            cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
+            
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error deleting user: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/update_user', methods=['POST'])
+@admin_required
+def update_user_info():
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        email = data.get('email')
+        department = data.get('department')
+        
+        with get_db_cursor() as cursor:
+            cursor.execute("""
+                UPDATE users 
+                SET email = %s, 
+                    department = %s 
+                WHERE user_id = %s
+            """, (email, department, user_id))
+            
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error updating user: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+if __name__ == '__main__':
+    # Import required modules
+    from modules.database import setup_departments_table, ensure_default_departments
+    
+    # Initialize database tables
+    setup_departments_table()
+    ensure_default_departments()
+    
+    # Run the application
     app.run(debug=True, host='0.0.0.0', port=5000)

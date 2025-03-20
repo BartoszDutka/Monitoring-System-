@@ -109,7 +109,38 @@
                         </tr>
                     </thead>
                     <tbody id="productTableBody">
-                        <!-- Products will be listed here -->
+                        <!-- Template for product row -->
+                        <template id="productRowTemplate">
+                            <tr>
+                                <td>%NAME%</td>
+                                <td>
+                                    <select class="product-category-select">
+                                        <option value="hardware">Hardware</option>
+                                        <option value="software">Software</option>
+                                        <option value="furniture">Furniture</option>
+                                        <option value="accessories">Accessories</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </td>
+                                <td><input type="number" class="quantity-input" value="%QUANTITY%"></td>
+                                <td>%UNIT_PRICE%</td>
+                                <td>%TOTAL_PRICE%</td>
+                                <td>
+                                    <select class="assign-to-select form-control">
+                                        <option value="">Select Department</option>
+                                        {% for dept in departments %}
+                                        <option value="{{ dept.name }}" {% if dept.name == current_department %}selected{% endif %}>
+                                            {{ dept.name }} ({{ dept.equipment_count }} items)
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    <button class="btn-icon edit-product" title="Edit"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-icon delete-product" title="Delete"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </template>
                     </tbody>
                 </table>
                 
@@ -228,11 +259,13 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="assignTo">Assign To</label>
+                        <label for="assignTo">Assign To Department</label>
                         <select id="assignTo" name="assignTo" class="form-control">
                             <option value="">Unassigned</option>
-                            {% for person in people %}
-                            <option value="{{ person.id }}" {% if person.id == current_user_id %}selected{% endif %}>{{ person.name }} ({{ person.department }})</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.name }}" {% if dept.name == current_department %}selected{% endif %}>
+                                {{ dept.name }} ({{ dept.equipment_count }} items)
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -249,24 +282,24 @@
     <!-- User Equipment Section -->
     <div class="input-section equipment-section" style="display: none;">
         <div class="form-container" id="equipmentContainer">
-            <h2><i class="fas fa-laptop"></i> User Equipment</h2>
+            <h2><i class="fas fa-laptop"></i> Department Equipment</h2>
             <p class="section-description">
-                View and manage equipment assigned to users.
+                View and manage equipment assigned to departments.
             </p>
-            <div class="user-select">
-                <label for="userSelect">Select User:</label>
-                <select id="userSelect" class="form-control">
-                    <option value="">Choose a user...</option>
-                    {% for person in people %}
-                    <option value="{{ person.id }}" {% if person.id == current_user_id %}selected{% endif %}>
-                        {{ person.name }} ({{ person.department }})
+            <div class="department-select">
+                <label for="departmentSelect">Select Department:</label>
+                <select id="departmentSelect" class="form-control">
+                    <option value="">Choose a department...</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.name }}" {% if dept.name == current_department %}selected{% endif %}>
+                        {{ dept.name }} ({{ dept.equipment_count or 0 }} items)
                     </option>
                     {% endfor %}
                 </select>
             </div>
             
-            <div id="userEquipmentList" class="equipment-list" style="display: none;">
-                <h3>Assigned Equipment</h3>
+            <div id="departmentEquipmentList" class="equipment-list" style="display: none;">
+                <h3>Department Equipment</h3>
                 <table class="equipment-table">
                     <thead>
                         <tr>
@@ -276,6 +309,7 @@
                             <th>Quantity</th>
                             <th>Assigned Date</th>
                             <th>Status</th>
+                            <th>Users</th>
                             <th>Actions</th>
                         </tr>
                     </thead>

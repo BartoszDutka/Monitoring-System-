@@ -144,6 +144,50 @@
   border-color: #e0e0e0;
 }
 
+/* Style dla selecta departamentu */
+.profile-form select {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #f9f9f9;
+    color: var(--text-color);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6'%3E%3Cpath d='M0 0h12L6 6z' fill='%23555'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 12px;
+}
+
+.profile-form select:focus {
+    border-color: #2196f3;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+    outline: none;
+}
+
+.profile-form select:hover {
+    background-color: #f5f5f5;
+}
+
+.profile-form select option {
+    padding: 0.5rem;
+    font-size: 1rem;
+    background-color: white;
+}
+
+.profile-form select:disabled {
+    background-color: #f5f5f5;
+    color: #9e9e9e;
+    cursor: not-allowed;
+    border-color: #e0e0e0;
+}
+
 /* Save button */
 .btn-save {
   background: linear-gradient(45deg, #4caf50, #7cb342);
@@ -226,6 +270,210 @@
   font-size: 1.3rem;
 }
 
+/* Error page styling */
+.error-container {
+    max-width: 600px;
+    margin: 4rem auto;
+    padding: 0 1rem;
+}
+
+.error-card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 3rem;
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 4rem;
+    color: #dc3545;
+    margin-bottom: 1.5rem;
+}
+
+.error-card h1 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    font-size: 2rem;
+}
+
+.error-details {
+    color: #6c757d;
+    margin: 1.5rem 0;
+}
+
+.error-card .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+}
+
+/* Admin Controls Styling */
+.admin-controls {
+  margin-top: 2rem;
+  text-align: right;
+}
+
+.btn-manage-users {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background: #f8f9fa;
+  color: #2196f3;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-manage-users:hover {
+  background: #e3f2fd;
+  border-color: #2196f3;
+  color: #1976d2;
+}
+
+.btn-manage-users i {
+  font-size: 0.9rem;
+}
+
+/* User Management Page Styling */
+.users-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  background: var(--card-bg);
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0;
+}
+
+.table thead th {
+  background-color: rgba(0, 0, 0, 0.03);
+  color: var(--text-color);
+  font-weight: 600;
+  text-align: left;
+  padding: 1.2rem 1rem;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+.table tbody td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  color: var(--text-color);
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(33, 150, 243, 0.05);
+}
+
+/* Role selector styling */
+.role-form select {
+  padding: 0.5rem 2rem 0.5rem 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background-color: white;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6'%3E%3Cpath d='M0 0h12L6 6z' fill='%23555'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: all 0.3s;
+}
+
+.role-form select:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+}
+
+.role-form select:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Role indicator colors */
+.role-form select option[value="admin"] {
+  background-color: rgba(255, 152, 0, 0.1);
+}
+
+.role-form select option[value="user"] {
+  background-color: rgba(33, 150, 243, 0.1);
+}
+
+.role-form select option[value="viewer"] {
+  background-color: rgba(139, 195, 74, 0.1);
+}
+
+/* Action buttons */
+.btn-danger {
+  background: linear-gradient(45deg, #f44336, #e57373);
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(45deg, #e53935, #ef5350);
+  box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+}
+
+.btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+/* Add these new styles for edit functionality */
+.edit-input {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.edit-input:focus {
+    outline: none;
+    border-color: #2196f3;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.d-none {
+    display: none !important;
+}
+
+.me-2 {
+    margin-right: 0.5rem !important;
+}
+
 /* Responsive layout */
 @media (max-width: 768px) {
   .profile-header {
@@ -244,5 +492,41 @@
   
   .btn-save {
     width: 100%;
+  }
+}
+
+/* Responsive adjustments for the users table */
+@media (max-width: 992px) {
+  .table thead th, .table tbody td {
+    padding: 0.8rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .btn-sm {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    text-align: center;
+    padding: 1.5rem 1rem;
+  }
+  
+  .users-container {
+    padding: 0;
+  }
+}
+
+/* Add this to your existing responsive section */
+@media (max-width: 768px) {
+  .admin-controls {
+    text-align: center;
+  }
+  
+  .btn-manage-users {
+    width: 100%;
+    justify-content: center;
   }
 }

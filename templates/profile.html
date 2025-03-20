@@ -45,13 +45,29 @@
                     
                     <div class="form-group">
                         <label>Department:</label>
-                        <input type="text" name="department" value="{{ user_info.department or '' }}">
+                        <select name="department" class="form-control">
+                            <option value="">Select Department</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.name }}" {% if dept.name == user_info.department %}selected{% endif %}>
+                                {{ dept.name }} ({{ dept.description }})
+                            </option>
+                            {% endfor %}
+                        </select>
                     </div>
                     
                     <div class="form-group">
                         <label>Role:</label>
-                        <input type="text" name="role" value="{{ user_info.role or 'user' }}" {% if user_info.role != 'admin' %}disabled{% endif %}>
+                        <input type="text" value="{{ user_info.role }}" disabled>
                     </div>
+
+                    {% if user_info.role == 'admin' %}
+                        <div class="admin-controls">
+                            <a href="{{ url_for('manage_users') }}" class="btn-manage-users">
+                                <i class="fas fa-users-cog"></i>
+                                Manage Users
+                            </a>
+                        </div>
+                    {% endif %}
                     
                     <button type="submit" class="btn-save">Save Changes</button>
                 </form>
@@ -132,11 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Handle flash messages
-    const messages = {{ get_flashed_messages() | tojson }};
-    if (messages.length > 0) {
-        alert(messages[0]);
-    }
+
 });
 </script>
 {% endblock %}

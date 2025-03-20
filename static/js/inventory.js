@@ -118,8 +118,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td>${product.total_price ? product.total_price.toFixed(2) : '0.00'} PLN</td>
                         <td>
                             <select class="assign-to-select form-control">
-                                <option value="">Unassigned</option>
-                                ${peopleOptions}
+                                <option value="">Select Department</option>
+                                ${Array.from(document.querySelectorAll('#departmentSelect option'))
+                                    .filter(opt => opt.value)
+                                    .map(opt => `
+                                        <option value="${opt.value}" ${opt.selected ? 'selected' : ''}>
+                                            ${opt.text}
+                                        </option>
+                                    `).join('')}
                             </select>
                         </td>
                         <td>
@@ -378,6 +384,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // First click the manual button to show that section
         document.querySelector('.method-btn[data-method="manual"]').click();
     });
+
+    const departmentSelect = document.getElementById('departmentSelect');
+    if (departmentSelect) {
+        departmentSelect.addEventListener('change', function() {
+            const department = this.value;
+            if (department) {
+                loadDepartmentEquipment(department);
+            } else {
+                document.getElementById('departmentEquipmentList').style.display = 'none';
+            }
+        });
+
+        // Load equipment for initial selection if any
+        if (departmentSelect.value) {
+            loadDepartmentEquipment(departmentSelect.value);
+        }
+    }
 });
 
 function guessProductCategory(name) {
@@ -426,37 +449,32 @@ function guessProductCategory(name) {
 }
 
 function importProductToInventory(product, showAlert = true) {
-    // Create form data to add this product to inventory
     const formData = new FormData();
     formData.append('itemName', product.name);
-    formData.append('itemCategory', product.category || 'hardware'); // Use category from UI
+    formData.append('itemCategory', product.category || 'hardware');
     formData.append('itemStatus', 'available');
     formData.append('itemQuantity', product.quantity);
     formData.append('itemValue', product.unit_price || product.price || 0);
-    
-    // Add user assignment if specified
-    if (product.assignTo) {
-        formData.append('assignTo', product.assignTo);
-    }
-    
-    // Get vendor from invoice if available
-    const vendor = document.getElementById('invoiceVendor').textContent;
+    formData.append('assignTo', product.assignTo || ''); // Make sure department is included
+
+    // Add other necessary fields
+    const invoiceNumber = document.getElementById('invoiceNumber')?.textContent;
+    const invoiceDate = document.getElementById('invoiceDate')?.textContent;
+    const vendor = document.getElementById('invoiceVendor')?.textContent;
+
     if (vendor && vendor !== 'Not detected') {
         formData.append('itemManufacturer', vendor);
     }
-    
-    // Get invoice details for notes
-    const invoiceNumber = document.getElementById('invoiceNumber').textContent;
-    const invoiceDate = document.getElementById('invoiceDate').textContent;
+
     formData.append('itemNotes', `Imported from invoice ${invoiceNumber} dated ${invoiceDate}`);
     
-    // Try to parse invoice date, otherwise use current date
     if (invoiceDate && invoiceDate !== 'Not detected') {
         formData.append('acquisitionDate', invoiceDate);
     } else {
         formData.append('acquisitionDate', new Date().toISOString().split('T')[0]);
     }
-    
+
+    // Send request
     fetch('/api/equipment/add', {
         method: 'POST',
         body: formData
@@ -466,6 +484,11 @@ function importProductToInventory(product, showAlert = true) {
         if (data.success) {
             if (showAlert) {
                 alert(`Product "${product.name}" added successfully!`);
+            }
+            // Refresh equipment list if we're viewing the department it was assigned to
+            const departmentSelect = document.getElementById('departmentSelect');
+            if (departmentSelect && departmentSelect.value === product.assignTo) {
+                loadDepartmentEquipment(product.assignTo);
             }
         } else {
             if (showAlert) {
@@ -527,3 +550,58 @@ function unassignEquipment(equipmentId) {
         .catch(error => console.error('Error:', error));
     }
 }
+
+function loadDepartmentEquipment(departmentName) {
+    const equipmentList = document.getElementById('departmentEquipmentList');
+    equipmentList.style.display = 'block';
+    
+    const loadingSpinner = document.createElement('div');
+    loadingSpinner.className = 'loading-spinner';
+    loadingSpinner.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    equipmentList.appendChild(loadingSpinner);
+
+    fetch(`/api/department_equipment/${encodeURIComponent(departmentName)}`)
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('equipmentTableBody');
+            
+            if (data.equipment && data.equipment.length > 0) {
+                tbody.innerHTML = data.equipment.map(item => `
+                    <tr>
+                        <td>${item.name || 'N/A'}</td>
+                        <td>${item.type || 'N/A'}</td>
+                        <td>${item.serial_number || 'N/A'}</td>
+                        <td>${item.quantity || 1}</td>
+                        <td>${item.assigned_date || 'N/A'}</td>
+                        <td><span class="status-badge ${item.status}">${item.status || 'N/A'}</span></td>
+                        <td>
+                            <button class="btn-icon" onclick="unassignFromDepartment(${item.id})">
+                                <i class="fas fa-unlink"></i>
+                            </button>
+                            <button class="btn-icon" onclick="editEquipment(${item.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="7">No equipment assigned to this department</td></tr>';
+            }
+            
+            loadingSpinner.remove();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            equipmentList.innerHTML = '<div class="error-message">Failed to load equipment data</div>';
+        });
+}
+
+// Add this function to handle department selection
+document.getElementById('departmentSelect')?.addEventListener('change', function() {
+    const department = this.value;
+    if (department) {
+        loadDepartmentEquipment(department);
+    } else {
+        document.getElementById('departmentEquipmentList').style.display = 'none';
+    }
+});

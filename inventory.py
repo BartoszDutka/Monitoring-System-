@@ -15,36 +15,139 @@ def view_inventory():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
         
-    # Get all users with their equipment count
+    # Get all departments with their equipment count
     with get_db_cursor() as cursor:
         cursor.execute('''
-            SELECT u.user_id as id, u.display_name as name, u.Department as department, 
-                COUNT(e.id) as equipment_count
-            FROM users u
-            LEFT JOIN equipment e ON e.assigned_to = u.user_id
-            GROUP BY u.user_id
-            ORDER BY u.display_name
+            SELECT 
+                d.name,
+                d.description,
+                COUNT(DISTINCT e.id) as equipment_count
+            FROM departments d
+            LEFT JOIN equipment e ON e.assigned_to_department = d.name
+            GROUP BY d.name, d.description
+            ORDER BY d.name
         ''')
-        users = cursor.fetchall()
+        departments = cursor.fetchall()
     
-    # Get current user info if available
-    current_user_id = None
+    # Get current user's department
+    current_department = None
     if 'username' in session:
         username = session.get('username')
         with get_db_cursor() as cursor:
-            cursor.execute('''
-                SELECT user_id as id
-                FROM users 
-                WHERE username = %s
-            ''', (username,))
+            cursor.execute('SELECT Department FROM users WHERE username = %s', (username,))
             user = cursor.fetchone()
             if user:
-                current_user_id = user['id']
+                current_department = user['Department']
     
-    # For debugging CSS issue
-    print("Rendering inventory.html template")
-    
-    return render_template('inventory.html', people=users, current_user_id=current_user_id)
+    return render_template('inventory.html', 
+                         departments=departments, 
+                         current_department=current_department)
+
+@inventory.route('/api/department_equipment/<department>')
+def get_department_equipment(department):
+    if not session.get('logged_in'):
+        return jsonify({'error': 'Not authenticated'}), 401
+        
+    with get_db_cursor() as cursor:
+        # Get department info
+        cursor.execute('''
+            SELECT name, description, location
+            FROM departments
+            WHERE name = %s
+        ''', (department,))
+        dept_info = cursor.fetchone()
+        
+        # Get equipment for department
+        cursor.execute('''
+            SELECT 
+                e.id,
+                e.name,
+                e.type,
+                e.serial_number,
+                e.status,
+                e.quantity,
+                e.assigned_date,
+                e.notes
+            FROM equipment e
+            WHERE e.assigned_to_department = %s
+            ORDER BY e.type, e.name
+        ''', (department,))
+        equipment = cursor.fetchall()
+        
+    return jsonify({
+        'department': dept_info,
+        'equipment': [dict(item) for item in equipment]  # Convert row objects to dictionaries
+    })
+
+# Update the assign equipment function
+@inventory.route('/api/equipment/assign', methods=['POST'])
+def assign_equipment():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+        
+    data = request.json
+    try:
+        with get_db_cursor() as cursor:
+            cursor.execute('''
+                UPDATE equipment 
+                SET assigned_to_department = %s, 
+                    assigned_date = %s,
+                    status = 'assigned',
+                    quantity = %s
+                WHERE id = %s
+            ''', (
+                data['department'],
+                datetime.now().strftime('%Y-%m-%d'),
+                data.get('quantity', 1),
+                data['equipment_id']
+            ))
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+# Update the add equipment function
+@inventory.route('/api/equipment/add', methods=['POST'])
+def add_equipment():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+        
+    data = request.form
+    try:
+        with get_db_cursor() as cursor:
+            # First check if department exists
+            if data.get('assignTo'):
+                cursor.execute('''
+                    SELECT name FROM departments 
+                    WHERE name = %s
+                ''', (data.get('assignTo'),))
+                if not cursor.fetchone():
+                    return jsonify({'error': 'Invalid department selected'}), 400
+
+            cursor.execute('''
+                INSERT INTO equipment (
+                    name, type, serial_number, status, 
+                    acquisition_date, value, description,
+                    manufacturer, model, notes, quantity,
+                    assigned_to_department
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ''', (
+                    data.get('itemName'),
+                    data.get('itemCategory'),
+                    data.get('itemSerial'),
+                    data.get('itemStatus', 'available'),
+                    data.get('acquisitionDate'),
+                    data.get('itemValue'),
+                    data.get('itemDescription'),
+                    data.get('itemManufacturer'),
+                    data.get('itemModel'),
+                    data.get('itemNotes'),
+                    data.get('itemQuantity', 1),
+                    data.get('assignTo')  # This is the department name
+                ))
+            
+        return jsonify({'success': True, 'item_id': cursor.lastrowid})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
 @inventory.route('/api/person_equipment/<int:person_id>')
 def get_person_equipment(person_id):
@@ -73,31 +176,6 @@ def get_person_equipment(person_id):
         'equipment': equipment
     })
 
-@inventory.route('/api/equipment/assign', methods=['POST'])
-def assign_equipment():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-        
-    data = request.json
-    try:
-        with get_db_cursor() as cursor:
-            cursor.execute('''
-                UPDATE equipment 
-                SET assigned_to = %s, 
-                    assigned_date = %s,
-                    status = 'assigned',
-                    quantity = %s
-                WHERE id = %s
-            ''', (
-                data['person_id'],
-                datetime.now().strftime('%Y-%m-%d'),
-                data.get('quantity', 1),
-                data['equipment_id']
-            ))
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
 @inventory.route('/api/equipment/unassign', methods=['POST'])
 def unassign_equipment():
     if not session.get('logged_in'):
@@ -114,56 +192,6 @@ def unassign_equipment():
                 WHERE id = %s
             ''', (data['equipment_id'],))
         return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-@inventory.route('/api/equipment/add', methods=['POST'])
-def add_equipment():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-        
-    data = request.form
-    try:
-        with get_db_cursor() as cursor:
-            # Insert the new equipment item
-            cursor.execute('''
-                INSERT INTO equipment (
-                    name, type, serial_number, status, 
-                    acquisition_date, value, description,
-                    manufacturer, model, notes, quantity
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ''', (
-                data.get('itemName'),
-                data.get('itemCategory'),
-                data.get('itemSerial'),
-                data.get('itemStatus', 'available'),
-                data.get('acquisitionDate'),
-                data.get('itemValue'),
-                data.get('itemDescription'),
-                data.get('itemManufacturer'),
-                data.get('itemModel'),
-                data.get('itemNotes'),
-                data.get('itemQuantity', 1)
-            ))
-            
-            # Get the ID of the last inserted item
-            item_id = cursor.lastrowid
-            
-            # If assigned to someone, update the assignment
-            if data.get('assignTo'):
-                cursor.execute('''
-                    UPDATE equipment 
-                    SET assigned_to = %s, 
-                        assigned_date = %s,
-                        status = 'assigned'
-                    WHERE id = %s
-                ''', (
-                    data.get('assignTo'),
-                    datetime.now().strftime('%Y-%m-%d'),
-                    item_id
-                ))
-                
-        return jsonify({'success': True, 'item_id': item_id})
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
@@ -256,7 +284,7 @@ def extract_invoice_data(pdf_path):
             table_info = analyze_tables_for_info(all_tables)
             for key, value in table_info.items():
                 # Only update if value is not None and current value is None
-                if value is not None and invoice_data.get(key) is None:
+                if value is not None and invoice_data.get(key) is not None:
                     invoice_data[key] = value
             
             # 4. Extract products from tables
