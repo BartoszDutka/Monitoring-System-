@@ -453,7 +453,7 @@ select.form-control {
   border-radius: 9999px;
   border: none;
   background-color: var(--primary-light);
-  color: var(--primary-color);
+  color: white;
   cursor: pointer;
   transition: var(--transition);
 }

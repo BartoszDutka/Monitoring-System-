@@ -1,16 +1,16 @@
 /* Import all CSS files */
-@import 'base.css';
-@import 'layout.css';
-@import 'navigation.css';
-@import 'components.css';
-@import 'status.css';
-@import 'dashboard.css';
-@import 'hosts.css';
-@import 'logs.css';
-@import 'alerts.css';
-@import 'forms.css';
-@import 'login.css';
-@import 'profile.css';
-@import 'details.css';
-@import 'charts.css';
-@import 'messages.css';
+@import 'base.css'; /* Style podstawowe i zmienne */
+@import 'layout.css'; /* Układ i struktura strony */
+@import 'navigation.css'; /* Komponenty nawigacyjne */
+@import 'components.css'; /* Komponenty wielokrotnego użytku */
+@import 'status.css'; /* Wskaźniki statusu */
+@import 'dashboard.css'; /* Style dla dashboardu */
+@import 'hosts.css'; /* Wyświetlanie hostów */
+@import 'logs.css'; /* Wpisy logów */
+@import 'alerts.css'; /* Alerty i powiadomienia */
+@import 'forms.css'; /* Formularze i pola wprowadzania */
+@import 'login.css'; /* Strona logowania */
+@import 'profile.css'; /* Profile użytkowników */
+@import 'details.css'; /* Widoki szczegółowe */
+@import 'charts.css'; /* Wykresy i wizualizacje */
+@import 'messages.css'; /* Wyświetlanie wiadomości */

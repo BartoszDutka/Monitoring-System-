@@ -116,7 +116,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-color), var(--gradient-end, #1557b0));
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -165,14 +165,41 @@
   transition: .3s;
   background: 0 0;
   border: none;
-  color: var(--text-color);
+  color: var(--primary-color);
   cursor: pointer;
   padding: 8px;
   border-radius: 50%
 }
 
+.theme-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
 .theme-toggle:hover {
-  background-color: var(--hover-bg)
+    background: var(--hover-bg);
+    transform: rotate(15deg);
+}
+
+.theme-toggle i {
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .theme-toggle {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+    background: rgba(46, 204, 113, 0.1);
 }
 
 .logout-button {

@@ -13,7 +13,7 @@
 }
 
 /* Simplified dashboard header */
-.dashboard-header {
+.glpi-dashboard-header {
   background: var(--glpi-primary);
   border-radius: 12px;
   padding: 1.5rem;
@@ -24,7 +24,7 @@
   box-shadow: 0 4px 12px rgba(74, 108, 247, 0.2);
 }
 
-.dashboard-header::before {
+.glpi-dashboard-header::before {
   content: '';
   position: absolute;
   width: 250px;
@@ -35,7 +35,7 @@
   right: -50px;
 }
 
-.dashboard-header::after {
+.glpi-dashboard-header::after {
   content: '';
   position: absolute;
   width: 180px;
@@ -46,7 +46,7 @@
   left: -30px;
 }
 
-.dashboard-header h1 {
+.glpi-dashboard-header h1 {
   font-size: 2rem;
   font-weight: 700;
   color: white;
@@ -56,7 +56,7 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.header-actions {
+.glpi-header-actions {
   display: flex;
   gap: 1.2rem;
   align-items: center;
@@ -151,7 +151,7 @@
 }
 
 /* Clean, modern card grid */
-.hosts-container {
+.glpi-hosts-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); /* Increased from 320px */
   gap: 1.2rem;
@@ -159,34 +159,36 @@
 }
 
 /* Simplified card design */
-.host-card {
+.glpi-host-card {
   background: white;
   border-radius: 12px;
   box-shadow: var(--card-shadow);
-  overflow: hidden;
+  overflow: hidden; /* Ensure content stays within the card */
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
-  height: 100%;
   position: relative;
   border: 1px solid rgba(0, 0, 0, 0.04);
+  height: auto;
+  margin-bottom: 20px; /* Prevent overlapping */
 }
 
-.host-card:hover {
+.glpi-host-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--card-hover-shadow);
+  z-index: 2; /* Ensure hover cards are above others */
 }
 
 /* Clean card content */
 .card-content {
   padding: 1.25rem;
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
+  flex: 1 0 auto;
 }
 
 /* Clean header with status dot */
-.host-card h3 {
+.glpi-host-card h3 {
   font-size: 1.15rem;
   font-weight: 600;
   color: var(--glpi-dark);
@@ -314,19 +316,35 @@
 
 /* Clean action area */
 .device-actions {
-  padding: 1rem 1.25rem;
   background: var(--glpi-light);
   border-top: 1px solid rgba(0,0,0,0.05);
+  padding: 1rem 1.25rem;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex; /* Ensure flex layout */
+  justify-content: center; /* Center the button */
+  align-items: center; /* Center the button */
+  position: relative;
+  z-index: 1;
+  margin-top: auto; /* Push to the bottom of the card */
 }
 
-/* Clean button */
+/* Debug outline for troubleshooting */
+.device-actions::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--glpi-primary);
+  opacity: 0.3;
+}
+
+/* Clean button with improved visibility */
 .vnc-button {
   width: 100%;
   padding: 0.8rem;
-  border: none;
-  border-radius: 8px;
-  background: var(--glpi-primary);
-  color: white;
   font-weight: 500;
   font-size: 0.95rem;
   cursor: pointer;
@@ -335,15 +353,11 @@
   align-items: center;
   gap: 0.5rem;
   transition: all 0.2s ease;
-}
-
-.vnc-button:hover {
-  background: #3a5ce5;
-  box-shadow: 0 3px 6px rgba(58, 92, 229, 0.2);
-}
-
-.vnc-button:active {
-  transform: translateY(1px);
+  border: none;
+  border-radius: 8px;
+  background: var(--glpi-primary);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added shadow for better visibility */
 }
 
 /* Clean no results message */
@@ -359,25 +373,25 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .dashboard-header {
+  .glpi-dashboard-header {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
   }
   
-  .header-actions {
+  .glpi-header-actions {
     width: 100%;
     flex-direction: column;
   }
   
-  .hosts-container {
+  .glpi-hosts-container {
     grid-template-columns: 1fr;
   }
 }
 
 /* Media query adjustments */
 @media (min-width: 1600px) {
-  .hosts-container {
+  .glpi-hosts-container {
     grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); /* Even larger on big screens */
   }
   

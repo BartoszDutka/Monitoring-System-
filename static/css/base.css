@@ -1,35 +1,81 @@
 :root {
-  --primary-color: #1a73e8;
-  --secondary-color: #f8f9fa;
-  --text-color: #2c3e50;
-  --text-muted: #888;
-  --border-color: #e1e4e8;
-  --bg-color: #fff;
-  --card-bg: #fff;
-  --hover-bg: #e8f0fe;
-  --shadow-color: rgba(0,0,0,.1);
-  --gradient-start: #1a73e8;
-  --gradient-end: #1557b0;
-  --sidebar-width: 250px;
-  --topnav-height: 60px;
-  --footer-height: 200px;
-  --success: #2ecc71;
-  --danger: #e74c3c;
-  --warning: #f39c12;
-  --info: #0dcaf0;
-  --neutral: #95a5a6
+    /* Primary colors */
+    --primary-color: #2ecc71;
+    --primary-dark: #27ae60;
+    --primary-light: #47d588;
+    --secondary-color: #f8f9fa;
+    
+    /* Text colors */
+    --text-color: #2c3e50;
+    --text-muted: #888;
+    
+    /* Background colors */
+    --bg-color: #fff;
+    --card-bg: #fff;
+    --hover-bg: #e8f0fe;
+    
+    /* Border and shadow */
+    --border-color: #e1e4e8;
+    --shadow-color: rgba(0,0,0,.1);
+    
+    /* Gradient */
+    --gradient-start: #2ecc71;
+    --gradient-end: #27ae60;
+    
+    /* Layout */
+    --sidebar-width: 250px;
+    --topnav-height: 60px;
+    --footer-height: 200px;
+    
+    /* Status colors */
+    --success: #2ecc71;
+    --danger: #e74c3c;
+    --warning: #f39c12;
+    --info: #3498db;
+    --neutral: #95a5a6;
 }
 
+/* Base theme transition */
+:root,
+[data-theme="light"],
+[data-theme="dark"] {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Force all themed elements to inherit transition */
+*,
+*::before,
+*::after {
+    transition: background-color 0.3s ease-in-out,
+                color 0.3s ease-in-out,
+                border-color 0.3s ease-in-out,
+                box-shadow 0.3s ease-in-out;
+}
+
+/* Ensure body follows HTML theme */
 body {
-  color: var(--text-color);
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  padding: 0;
-  background-color: #f4f4f4;
-  transition: background-color .3s,color .3s,border-color .3s,box-shadow .3s;
-  background-color: var(--bg-color);
-  margin: 0;
-  font-family: Arial,sans-serif
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 0;
+    background-color: #f4f4f4;
+    transition: background-color .3s,color .3s,border-color .3s,box-shadow .3s;
+    background-color: var(--bg-color);
+    margin: 0;
+    font-family: Arial,sans-serif
+}
+
+/* Ensure immediate theme application */
+html[data-theme="light"] body,
+html[data-theme="dark"] body {
+    color: var(--text-color) !important;
+    background-color: var(--bg-color) !important;
+}
+
+/* Reset any conflicting transitions */
+.no-transition,
+.no-transition * {
+    transition: none !important;
 }
 
 h1 {
