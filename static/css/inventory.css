@@ -175,7 +175,7 @@ body {
   margin-top: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--dark-color);
+  color: linear-gradient(135deg,var(--gradient-start),var(--gradient-end));
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border-color);
   margin-bottom: 1.5rem;
@@ -452,7 +452,7 @@ select.form-control {
   height: 2.25rem;
   border-radius: 9999px;
   border: none;
-  background-color: var(--primary-light);
+  background-color: green;
   color: white;
   cursor: pointer;
   transition: var(--transition);
