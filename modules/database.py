@@ -353,3 +353,68 @@ def get_detailed_messages(start_time: datetime, end_time: datetime, limit: int =
             'total_in_db': 0,
             'total_results': 0
         }
+
+def setup_departments_table():
+    """Create departments table if not exists"""
+    with get_db_cursor() as cursor:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS departments (
+                name VARCHAR(255) PRIMARY KEY,
+                description TEXT,
+                location VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        """)
+
+def ensure_default_departments():
+    """Ensure that default departments exist in the database"""
+    default_departments = [
+        ('IT', 'Information Technology Department', 'Floor 1'),
+        ('HR', 'Human Resources', 'Floor 2'),
+        ('Administration', 'Administration Department', 'Floor 1'),
+        ('Research', 'Research and Development', 'Floor 3'),
+        ('Operations', 'Operations Department', 'Floor 2'),
+        ('Finance', 'Finance Department', 'Floor 2'),
+        ('Marketing', 'Marketing Department', 'Floor 3'),
+        ('Sales', 'Sales Department', 'Floor 3'),
+        ('Support', 'Technical Support', 'Floor 1'),
+        ('Development', 'Software Development', 'Floor 3')
+    ]
+    
+    with get_db_cursor() as cursor:
+        for dept in default_departments:
+            cursor.execute("""
+                INSERT IGNORE INTO departments (name, description, location)
+                VALUES (%s, %s, %s)
+            """, dept)
+
+def get_departments():
+    """Get all departments with their equipment count"""
+    with get_db_cursor() as cursor:
+        cursor.execute('''
+            SELECT 
+                d.name,
+                d.description,
+                d.location,
+                COUNT(e.id) as equipment_count
+            FROM departments d
+            LEFT JOIN equipment e ON e.assigned_to_department = d.name
+            GROUP BY d.name, d.description, d.location
+            ORDER BY d.name
+        ''')
+        return cursor.fetchall()
+
+def get_department_info(department_name):
+    """Get specific department information"""
+    with get_db_cursor() as cursor:
+        cursor.execute('''
+            SELECT 
+                d.*,
+                COUNT(e.id) as equipment_count
+            FROM departments d
+            LEFT JOIN equipment e ON e.assigned_to_department = d.name
+            WHERE d.name = %s
+            GROUP BY d.name, d.description, d.location
+        ''', (department_name,))
+        return cursor.fetchone()

@@ -5,11 +5,12 @@ from modules.glpi import get_glpi_data
 from modules.ldap_auth import authenticate_user
 from config import *  # Importujemy wszystkie zmienne konfiguracyjne
 import urllib3
+import urllib.parse  # Add this import
 import subprocess
 import os
 import json  # Add this import
 from functools import wraps
-from flask import redirect, url_for
+from flask import redirect, url_for, abort
 from werkzeug.utils import secure_filename
 import time  # Dodaj na początku pliku z innymi importami
 from modules.user_data import update_user_avatar, get_user_avatar, verify_user, get_user_info
@@ -22,11 +23,18 @@ from modules.database import (
 )
 from datetime import datetime, timedelta
 from modules.user_data import update_user_profile
+from inventory import inventory  # Import the inventory blueprint
+from werkzeug.exceptions import Forbidden  # Add this import
+from flask_caching import Cache
+import logging
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 app = Flask(__name__)
 app.secret_key = 'twoj_tajny_klucz_do_sesji'  # Poprawiony błąd składni
 app.config['SESSION_TYPE'] = 'filesystem'
+
+# Register blueprints
+app.register_blueprint(inventory)
 
 # Dodaj globalną zmienną dla cache
 glpi_cache = None
@@ -43,6 +51,24 @@ MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB w bajtach
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Configure caching
+cache = Cache(config={
+    'CACHE_TYPE': 'SimpleCache',
+    'CACHE_DEFAULT_TIMEOUT': 300
+})
+cache.init_app(app)
+
+# Custom filter for checking if a character is a digit
+@app.template_filter('isdigit')
+def isdigit_filter(s):
+    if not s:
+        return False
+    return s[0].isdigit() if s else False
+
 # Upewnij się, że folder istnieje
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -56,6 +82,22 @@ def login_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
+
+def role_required(required_roles):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not session.get('logged_in'):
+                return redirect(url_for('login'))
+            user_role = session.get('user_info', {}).get('role', 'viewer')
+            if user_role not in required_roles:
+                return render_template('403.html'), 403
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+def admin_required(f):
+    return role_required(['admin'])(f)
 
 @app.context_processor
 def utility_processor():
@@ -131,7 +173,7 @@ def refresh_glpi_category(category):
     """Endpoint do odświeżania konkretnej kategorii GLPI"""
     try:
         global glpi_cache
-        if glpi_cache is None:
+        if (glpi_cache is None):
             glpi_cache = get_glpi_data()
         else:
             # Odśwież tylko wybraną kategorię
@@ -160,26 +202,89 @@ def refresh_glpi_category(category):
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# Modify index route to use cached data
 @app.route('/')
 @login_required
 def index():
-    global glpi_cache
-    if (glpi_cache is None):
-        glpi_cache = get_glpi_data(refresh=False)
-        if not glpi_cache.get('computers'):
-            glpi_cache = get_glpi_data(refresh=True)
+    start_time = datetime.now()
     
-    zabbix_data = get_hosts()
+    zabbix_data = get_cached_zabbix_data()
+    graylog_data = get_cached_graylog_data()
+    glpi_data = get_cached_glpi_data()
     
-    # Pobierz dane Graylog z właściwym limitem
-    limit = session.get('graylog_limit', 300)
-    graylog_data = get_logs(time_range_minutes=5, force_refresh=False)
+    response_time = (datetime.now() - start_time).total_seconds()
+    logger.info(f"Dashboard loaded in {response_time:.2f} seconds")
     
-    return render_template('index.html', 
-                         zabbix=zabbix_data, 
-                         graylog=graylog_data, 
-                         glpi=glpi_cache, 
+    return render_template('index.html',
+                         zabbix=zabbix_data,
+                         graylog=graylog_data,
+                         glpi=glpi_data,
                          request=request)
+
+# Add new API endpoints for cached data
+@app.route('/api/zabbix/refresh')
+@login_required
+def get_cached_zabbix_data():
+    start_time = datetime.now()
+    
+    @cache.cached(timeout=60, key_prefix='zabbix_data')
+    def get_data():
+        return get_hosts()
+    
+    data = get_data()
+    response_time = (datetime.now() - start_time).total_seconds()
+    logger.info(f"Zabbix data retrieved in {response_time:.2f} seconds")
+    
+    return jsonify(data) if request.path.startswith('/api/') else data
+
+@app.route('/api/glpi/refresh')
+@login_required
+def get_cached_glpi_data():
+    start_time = datetime.now()
+    
+    @cache.cached(timeout=300, key_prefix='glpi_data')
+    def get_data():
+        return get_glpi_data(refresh=False)
+    
+    data = get_data()
+    response_time = (datetime.now() - start_time).total_seconds()
+    logger.info(f"GLPI data retrieved in {response_time:.2f} seconds")
+    
+    return jsonify(data) if request.path.startswith('/api/') else data
+
+@app.route('/api/graylog/refresh')
+@login_required
+def get_cached_graylog_data():
+    start_time = datetime.now()
+    
+    @cache.cached(timeout=30, key_prefix='graylog_data')
+    def get_data():
+        return get_logs(time_range_minutes=5)
+    
+    data = get_data()
+    response_time = (datetime.now() - start_time).total_seconds()
+    logger.info(f"Graylog data retrieved in {response_time:.2f} seconds")
+    
+    return jsonify(data) if request.path.startswith('/api/') else data
+
+# Force cache refresh endpoints
+@app.route('/api/zabbix/force_refresh')
+@login_required
+def force_refresh_zabbix():
+    cache.delete('zabbix_data')
+    return jsonify(get_cached_zabbix_data())
+
+@app.route('/api/glpi/force_refresh')
+@login_required
+def force_refresh_glpi():
+    cache.delete('glpi_data')
+    return jsonify(get_cached_glpi_data())
+
+@app.route('/api/graylog/force_refresh')
+@login_required
+def force_refresh_graylog():
+    cache.delete('graylog_data')
+    return jsonify(get_cached_graylog_data())
 
 @app.route('/available-hosts')
 @login_required
@@ -330,9 +435,27 @@ def connect_vnc():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/graylog/loading')
+@login_required
+def graylog_loading():
+    target_page = request.args.get('target', '/graylog/logs')
+    query_string = request.args.get('query_string', '')
+    
+    if (query_string):
+        target_page = f"{target_page}?{query_string}"
+    
+    return render_template('loading.html', target_page=target_page)  # zmiana ścieżki szablonu
+
 @app.route('/graylog/logs')
 @login_required
 def graylog_logs():
+    # Check if we're coming from the loading page
+    if not request.referrer or 'loading' not in request.referrer:
+        query_string = request.query_string.decode() if request.query_string else ''
+        return redirect(url_for('graylog_loading', 
+                              target='/graylog/logs',
+                              query_string=query_string))
+    
     end_time = datetime.now()
     start_time = end_time - timedelta(minutes=5)
     
@@ -375,6 +498,10 @@ def graylog_logs():
 @app.route('/graylog/messages-over-time')
 @login_required
 def graylog_messages_over_time():
+    # Check if we're coming from the loading page
+    if not request.referrer or 'loading' not in request.referrer:
+        return redirect(url_for('graylog_loading', target='/graylog/messages-over-time'))
+    
     # Get initial Graylog data with increased limit
     graylog_data = get_logs(time_range_minutes=60, force_refresh=True)
     
@@ -496,7 +623,7 @@ def get_graylog_timeline():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/profile', methods=['GET', 'POST'])
-@login_required
+@role_required(['admin', 'user'])  # Viewers can't access profile
 def profile():
     if 'username' not in session:
         return redirect(url_for('login'))
@@ -504,14 +631,24 @@ def profile():
     user_info = get_user_info(session['username'])
     if not user_info:
         return redirect(url_for('login'))
+    
+    # Get departments list
+    with get_db_cursor() as cursor:
+        cursor.execute('''
+            SELECT name, description
+            FROM departments
+            ORDER BY name
+        ''')
+        departments = cursor.fetchall()
         
     session['user_info'] = user_info
     return render_template('profile.html',
                          username=session['username'],
-                         user_info=user_info)
+                         user_info=user_info,
+                         departments=departments)
 
 @app.route('/update_profile', methods=['POST'])
-@login_required
+@role_required(['admin', 'user'])
 def update_profile():
     if 'username' not in session:
         return redirect(url_for('login'))
@@ -541,7 +678,7 @@ def update_profile():
     return redirect(url_for('profile'))
 
 @app.route('/upload_avatar', methods=['POST'])
-@login_required
+@role_required(['admin', 'user'])  # Viewers can't upload avatars
 def upload_avatar():
     try:
         if 'avatar' not in request.files:
@@ -634,5 +771,101 @@ def refresh_graylog_logs():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-if __name__ == '__main__': 
+@app.route('/manage_users')
+@admin_required
+def manage_users():
+    with get_db_cursor() as cursor:
+        cursor.execute("SELECT * FROM users ORDER BY created_at DESC")
+        users = cursor.fetchall()
+    return render_template('manage_users.html', users=users)
+
+@app.route('/update_user_role', methods=['POST'])
+@admin_required
+def update_user_role():
+    user_id = request.form.get('user_id')
+    new_role = request.form.get('role')
+    
+    if new_role not in ['admin', 'user', 'viewer']:
+        flash('Invalid role specified')
+        return redirect(url_for('manage_users'))
+        
+    with get_db_cursor() as cursor:
+        cursor.execute("""
+            UPDATE users 
+            SET role = %s 
+            WHERE user_id = %s
+        """, (new_role, user_id))
+        
+    flash('User role updated successfully')
+    return redirect(url_for('manage_users'))
+
+# Add error handler for 403 errors
+@app.errorhandler(403)
+def forbidden_error(error):
+    return render_template('403.html'), 403
+
+@app.route('/api/delete_user', methods=['POST'])
+@admin_required
+def delete_user():
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        
+        with get_db_cursor() as cursor:
+            # Check if user exists and is not the current user
+            cursor.execute("SELECT username FROM users WHERE user_id = %s", (user_id,))
+            user = cursor.fetchone()
+            
+            if not user or user['username'] == session['username']:
+                return jsonify({'success': False, 'message': 'Cannot delete this user'}), 400
+                
+            # Delete the user
+            cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
+            
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error deleting user: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/update_user', methods=['POST'])
+@admin_required
+def update_user_info():
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        email = data.get('email')
+        department = data.get('department')
+        
+        with get_db_cursor() as cursor:
+            cursor.execute("""
+                UPDATE users 
+                SET email = %s, 
+                    department = %s 
+                WHERE user_id = %s
+            """, (email, department, user_id))
+            
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error updating user: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/fetch_logs', methods=['POST'])
+def fetch_logs():
+    try:
+        data = request.get_json()
+        force_refresh = data.get('force_refresh', False)
+        logs = get_logs(time_range_minutes=30, force_refresh=force_refresh)
+        return jsonify(logs)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    # Import required modules
+    from modules.database import setup_departments_table, ensure_default_departments
+    
+    # Initialize database tables
+    setup_departments_table()
+    ensure_default_departments()
+    
+    # Run the application
     app.run(debug=True, host='0.0.0.0', port=5000)

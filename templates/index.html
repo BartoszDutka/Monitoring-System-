@@ -14,12 +14,12 @@
         </div>
         <div class="card-content">
             <div class="dashboard-nav">
-                <a href="/graylog/logs?limit={{ session.get('graylog_limit', 300) }}&refresh=1" class="dashboard-nav-link">
+                <a href="/graylog/loading?target=/graylog/logs&query_string=limit={{ session.get('graylog_limit', 300) }}&refresh=1" class="dashboard-nav-link">
                     <i class="fas fa-history"></i>
                     <span>Recent Logs</span>
                     <span class="count">{{ session.get('graylog_limit', 300) }}</span>
                 </a>
-                <a href="/graylog/messages-over-time" class="dashboard-nav-link">
+                <a href="/graylog/loading?target=/graylog/messages-over-time" class="dashboard-nav-link">
                     <i class="fas fa-chart-line"></i>
                     <span>Messages Over Time</span>
                 </a>
@@ -45,6 +45,26 @@
                 <a href="/unknown-hosts" class="dashboard-nav-link unknown">
                     <i class="fas fa-question-circle"></i>
                     <span>Unknown Hosts</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Functions Card -->
+    <div class="dashboard-card functions-card">
+        <div class="card-header">
+            <i class="fas fa-cogs"></i>
+            <h2>Functions</h2>
+        </div>
+        <div class="card-content">
+            <nav class="dashboard-nav">
+                <a href="/inventory" class="dashboard-nav-link">
+                    <i class="fas fa-boxes"></i>
+                    <span>Item Inventory</span>
+                </a>
+                <a href="/tasks.html" class="dashboard-nav-link">
+                    <i class="fas fa-tasks"></i>
+                    <span>Task Management</span>
                 </a>
             </nav>
         </div>
