@@ -14,12 +14,12 @@
         </div>
         <div class="card-content">
             <div class="dashboard-nav">
-                <a href="/graylog/logs?limit={{ session.get('graylog_limit', 300) }}&refresh=1" class="dashboard-nav-link">
+                <a href="/graylog/loading?target=/graylog/logs&query_string=limit={{ session.get('graylog_limit', 300) }}&refresh=1" class="dashboard-nav-link">
                     <i class="fas fa-history"></i>
                     <span>Recent Logs</span>
                     <span class="count">{{ session.get('graylog_limit', 300) }}</span>
                 </a>
-                <a href="/graylog/messages-over-time" class="dashboard-nav-link">
+                <a href="/graylog/loading?target=/graylog/messages-over-time" class="dashboard-nav-link">
                     <i class="fas fa-chart-line"></i>
                     <span>Messages Over Time</span>
                 </a>

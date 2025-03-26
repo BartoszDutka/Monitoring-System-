@@ -5,6 +5,7 @@ from modules.glpi import get_glpi_data
 from modules.ldap_auth import authenticate_user
 from config import *  # Importujemy wszystkie zmienne konfiguracyjne
 import urllib3
+import urllib.parse  # Add this import
 import subprocess
 import os
 import json  # Add this import
@@ -172,7 +173,7 @@ def refresh_glpi_category(category):
     """Endpoint do odświeżania konkretnej kategorii GLPI"""
     try:
         global glpi_cache
-        if glpi_cache is None:
+        if (glpi_cache is None):
             glpi_cache = get_glpi_data()
         else:
             # Odśwież tylko wybraną kategorię
@@ -434,9 +435,27 @@ def connect_vnc():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/graylog/loading')
+@login_required
+def graylog_loading():
+    target_page = request.args.get('target', '/graylog/logs')
+    query_string = request.args.get('query_string', '')
+    
+    if (query_string):
+        target_page = f"{target_page}?{query_string}"
+    
+    return render_template('loading.html', target_page=target_page)  # zmiana ścieżki szablonu
+
 @app.route('/graylog/logs')
 @login_required
 def graylog_logs():
+    # Check if we're coming from the loading page
+    if not request.referrer or 'loading' not in request.referrer:
+        query_string = request.query_string.decode() if request.query_string else ''
+        return redirect(url_for('graylog_loading', 
+                              target='/graylog/logs',
+                              query_string=query_string))
+    
     end_time = datetime.now()
     start_time = end_time - timedelta(minutes=5)
     
@@ -479,6 +498,10 @@ def graylog_logs():
 @app.route('/graylog/messages-over-time')
 @login_required
 def graylog_messages_over_time():
+    # Check if we're coming from the loading page
+    if not request.referrer or 'loading' not in request.referrer:
+        return redirect(url_for('graylog_loading', target='/graylog/messages-over-time'))
+    
     # Get initial Graylog data with increased limit
     graylog_data = get_logs(time_range_minutes=60, force_refresh=True)
     
@@ -825,6 +848,16 @@ def update_user_info():
     except Exception as e:
         print(f"Error updating user: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/fetch_logs', methods=['POST'])
+def fetch_logs():
+    try:
+        data = request.get_json()
+        force_refresh = data.get('force_refresh', False)
+        logs = get_logs(time_range_minutes=30, force_refresh=force_refresh)
+        return jsonify(logs)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     # Import required modules
