@@ -4,9 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Monitoring Dashboard{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/style.css">
-    <script src="/static/js/charts.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Poprawione ścieżki do stylów -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/loading.css') }}">
+    {% block head %}{% endblock %}
+    <!-- Theme styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-light.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-dark.css') }}">
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
 </head>
 <body class="with-sidebar">
     <!-- Top Navigation -->
@@ -17,6 +24,9 @@
         </div>
         {% if session.logged_in %}
         <div class="nav-items">
+            <button id="theme-toggle" class="theme-toggle" title="Toggle theme">
+                <i class="fas fa-sun"></i>
+            </button>
             <a href="{{ url_for('profile') }}" class="user-info">
                 {% if session.user_info and session.user_info.avatar_path %}
                     <img src="{{ url_for('static', filename='avatars/' + session.user_info.avatar_path) }}?v={{ time.time() }}" alt="Profile" class="nav-avatar">
@@ -27,9 +37,6 @@
                 {% endif %}
                 <span class="nav-username">{{ session.user_info.display_name if session.user_info.display_name else session.username }}</span>
             </a>
-            <button class="theme-toggle" onclick="toggleTheme()">
-                <i class="fas fa-moon"></i>
-            </button>
             <a href="{{ url_for('logout') }}" class="logout-button">
                 <i class="fas fa-sign-out-alt"></i>
                 Wyloguj
@@ -67,6 +74,16 @@
             </a>
             <a href="#" class="nav-link">
                 <i class="fas fa-history"></i> History
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <h3>Functions</h3>
+            <a href="/inventory" class="nav-link {% if request.path == '/inventory' %}active{% endif %}">
+                <i class="fas fa-boxes"></i> Item Inventory
+            </a>
+            <a href="/tasks" class="nav-link {% if request.path == '/tasks' %}active{% endif %}">
+                <i class="fas fa-tasks"></i> Task Management
             </a>
         </div>
 
@@ -129,39 +146,38 @@
     </footer>
     
     <script>
-        // Theme toggle functionality
-        function toggleTheme() {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            
-            const themeIcon = document.querySelector('.theme-toggle i');
-            if (newTheme === 'dark') {
-                themeIcon.style.color = '#2ecc71';
-                themeIcon.className = 'fas fa-sun';
-            } else {
-                themeIcon.style.color = '';
-                themeIcon.className = 'fas fa-moon';
-            }
-        }
-
-        // Set theme on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            
-            const themeIcon = document.querySelector('.theme-toggle i');
-            if (savedTheme === 'dark') {
-                themeIcon.style.color = '#2ecc71';
-                themeIcon.className = 'fas fa-sun';
-            } else {
-                themeIcon.style.color = '';
-                themeIcon.className = 'fas fa-moon';
-            }
-        });
-    </script>
+document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('theme-toggle');
+    const icon = themeToggle.querySelector('i');
+    const html = document.documentElement;
+    
+    // Funkcja do aktualizacji motywu
+    function updateTheme(isDark) {
+        const theme = isDark ? 'dark' : 'light';
+        html.setAttribute('data-theme', theme);
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        
+        // Aktualizuj ikonę
+        icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        icon.style.color = isDark ? '#e0e0e0' : '#2ecc71';
+        
+        // Wymuś przeliczenie stylów
+        document.body.style.display = 'none';
+        document.body.offsetHeight; // Force reflow
+        document.body.style.display = '';
+    }
+    
+    // Inicjalizacja przy załadowaniu
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    updateTheme(savedTheme === 'dark');
+    
+    // Obsługa kliknięcia
+    themeToggle.addEventListener('click', () => {
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        updateTheme(!isDark);
+    });
+});
+</script>
 </body>
 </html>

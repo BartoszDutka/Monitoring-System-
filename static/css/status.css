@@ -1,0 +1,110 @@
+.available {
+  background-color: var(--success)
+}
+
+.unavailable {
+  background-color: var(--danger)
+}
+
+.unknown {
+  background-color: var(--neutral)
+}
+
+.available {
+  background-color: #2ecc71!important;
+  color: #fff!important
+}
+
+.unavailable {
+  background-color: #e74c3c!important;
+  color: #fff!important
+}
+
+.unknown {
+  color: #fff!important;
+  background-color: #95a5a6!important
+}
+
+.nav-link.available {
+  color: #2e7d32
+}
+
+.nav-link.unavailable {
+  color: #c62828
+}
+
+.nav-link.unknown {
+  color: #616161
+}
+
+.dashboard-nav-link.available {
+  background-color: #2ecc71!important;
+  color: #fff!important;
+  transition: transform .3s,box-shadow .3s;
+  box-shadow: 0 2px 4px rgba(46,204,113,.2)
+}
+
+.dashboard-nav-link.unavailable {
+  background-color: #e74c3c!important;
+  color: #fff!important;
+  transition: transform .3s,box-shadow .3s;
+  box-shadow: 0 2px 4px rgba(231,76,60,.2)
+}
+
+.dashboard-nav-link.unknown {
+  color: #fff!important;
+  box-shadow: 0 2px 4px rgba(149,165,166,.2);
+  transition: transform .3s,box-shadow .3s;
+  background-color: #95a5a6!important
+}
+
+.dashboard-nav-link.available:hover {
+  background-color: #27ae60!important;
+  box-shadow: 0 4px 8px rgba(46,204,113,.3)
+}
+
+.dashboard-nav-link.unavailable:hover {
+  background-color: #c0392b!important;
+  box-shadow: 0 4px 8px rgba(231,76,60,.3)
+}
+
+.dashboard-nav-link.unknown:hover {
+  background-color: #7f8c8d!important;
+  box-shadow: 0 4px 8px rgba(149,165,166,.3)
+}
+
+.dashboard-nav-link.available.active {
+  background-color: #e8f5e9;
+  color: #2e7d32
+}
+
+.dashboard-nav-link.unavailable.active {
+  background-color: #fbe9e7;
+  color: #c62828
+}
+
+.dashboard-nav-link.unknown.active {
+  background-color: #f5f5f5;
+  color: #616161
+}
+
+.hosts-details.available summary {
+  color: #fff;
+  background-color: #2e7d32
+}
+
+.hosts-details.unavailable summary {
+  color: #fff;
+  background-color: #c62828
+}
+
+.hosts-details.unknown summary {
+  color: #fff;
+  background-color: #616161
+}
+
+.dashboard-nav-link.available i,
+.dashboard-nav-link.unavailable i,
+.dashboard-nav-link.unknown i {
+  color: #fff!important
+}

@@ -140,8 +140,6 @@ class GLPIClient:
                 'criteria[0][value]': device_id,
                 'criteria[1][field]': 'itemtype',
                 'criteria[1][value]': 'Computer',
-                'criteria[2][field]': 'name',
-                'criteria[2][value]': 'Zarządzanie'  # Szukamy portu o nazwie "Zarządzanie"
             }
             
             response = requests.get(
@@ -155,17 +153,98 @@ class GLPIClient:
             if response.status_code == 200:
                 ports = response.json()
                 if ports and len(ports) > 0:
-                    port = ports[0]  # Bierzemy pierwszy znaleziony port zarządzania
-                    # Adres IP powinien być bezpośrednio w porcie w polu 'NetworkName'
-                    if 'ip' in port:
-                        return port['ip']
-                    if '_ipaddresses' in port:
-                        return port['_ipaddresses'][0] if port['_ipaddresses'] else ''
+                    # First try to find a port named "Zarządzanie"
+                    for port in ports:
+                        if port.get('name') == 'Zarządzanie':
+                            if 'ip' in port:
+                                return port['ip']
+                            if '_ipaddresses' in port:
+                                return port['_ipaddresses'][0] if port['_ipaddresses'] else ''
+                    
+                    # If no management port found, take the first one with an IP
+                    for port in ports:
+                        if 'ip' in port and port['ip']:
+                            return port['ip']
+                        if '_ipaddresses' in port and port['_ipaddresses']:
+                            return port['_ipaddresses'][0]
             return ''
             
         except Exception as e:
             print(f"Error fetching IP for device {device_id}: {e}")
             return ''
+            
+    def get_manufacturer_name(self, manufacturer_id, headers):
+        """Pobiera nazwę producenta na podstawie ID"""
+        if not manufacturer_id:
+            return 'Unknown Manufacturer'
+            
+        try:
+            url = f'{self.base_url}/apirest.php/Manufacturer/{manufacturer_id}'
+            response = requests.get(
+                url,
+                headers=headers,
+                verify=False,
+                timeout=self.timeout
+            )
+            
+            if response.status_code == 200:
+                manufacturer_data = response.json()
+                return manufacturer_data.get('name', 'Unknown Manufacturer')
+            return 'Unknown Manufacturer'
+        except Exception as e:
+            print(f"Error fetching manufacturer name for ID {manufacturer_id}: {e}")
+            return 'Unknown Manufacturer'
+            
+    def get_os_name(self, os_id, headers):
+        """Pobiera nazwę systemu operacyjnego na podstawie ID"""
+        if not os_id:
+            return 'Unknown OS'
+            
+        try:
+            url = f'{self.base_url}/apirest.php/OperatingSystem/{os_id}'
+            response = requests.get(
+                url,
+                headers=headers,
+                verify=False,
+                timeout=self.timeout
+            )
+            
+            if response.status_code == 200:
+                os_data = response.json()
+                return os_data.get('name', 'Unknown OS')
+            return 'Unknown OS'
+        except Exception as e:
+            print(f"Error fetching OS name for ID {os_id}: {e}")
+            return 'Unknown OS'
+
+    def get_user_info(self, user_id, headers):
+        """Pobiera informacje o użytkowniku na podstawie ID"""
+        if not user_id:
+            return 'Unknown User'
+            
+        try:
+            url = f'{self.base_url}/apirest.php/User/{user_id}'
+            response = requests.get(
+                url,
+                headers=headers,
+                verify=False,
+                timeout=self.timeout
+            )
+            
+            if response.status_code == 200:
+                user_data = response.json()
+                user_name = user_data.get('name', 'Unknown User')
+                # Sometimes firstname and realname are available
+                first_name = user_data.get('firstname', '')
+                last_name = user_data.get('realname', '')
+                
+                if first_name and last_name:
+                    return f"{first_name} {last_name}"
+                return user_name
+            return 'Unknown User'
+        except Exception as e:
+            print(f"Error fetching user info for ID {user_id}: {e}")
+            return 'Unknown User'
 
     def get_all_items(self, endpoint, headers):
         """Pobiera wszystkie elementy z danego endpointu"""
@@ -198,16 +277,56 @@ class GLPIClient:
                         
                     if items and isinstance(items, list):
                         for item in items:
+                            # Make sure ID is always present and properly named
+                            if 'id' in item:
+                                item['ID'] = item['id']  # Add uppercase version for compatibility
+                            
+                            # Location information
                             if item.get('locations_id'):
                                 item['location_name'] = self.get_location_name(
                                     item['locations_id'], 
                                     headers
                                 )
+                                
+                            # Model information    
                             if endpoint == 'Computer' and item.get('computermodels_id'):
-                                item['computermodels_id'] = self.get_model_name(
+                                item['model_name'] = self.get_model_name(
                                     item['computermodels_id'],
                                     headers
                                 )
+                                
+                            # Manufacturer information
+                            if item.get('manufacturers_id'):
+                                item['manufacturer_name'] = self.get_manufacturer_name(
+                                    item['manufacturers_id'],
+                                    headers
+                                )
+                                
+                            # OS information
+                            if endpoint == 'Computer' and item.get('operatingsystems_id'):
+                                item['os_name'] = self.get_os_name(
+                                    item['operatingsystems_id'],
+                                    headers
+                                )
+                                
+                            # Owner/User information
+                            if item.get('users_id_tech'):
+                                item['tech_owner_name'] = self.get_user_info(
+                                    item['users_id_tech'],
+                                    headers
+                                )
+                            
+                            if item.get('users_id'):
+                                item['owner_name'] = self.get_user_info(
+                                    item['users_id'],
+                                    headers
+                                )
+                                
+                            # Add IP address
+                            if endpoint == 'Computer':
+                                item['ip_address'] = self.get_device_ip(item['id'], headers)
+                                # Add network port details
+                                self.enrich_device_with_network_info(item, headers)
                     
                     all_items.extend(items)
                     print(f"Fetched {len(items)} items from {endpoint}, total: {len(all_items)}")

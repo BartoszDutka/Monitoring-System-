@@ -24,7 +24,7 @@
             <div class="control-group">
                 <label>Interval:</label>
                 <select id="timeInterval" onchange="updateChart()">
-                    <!-- Opcje będą dodawane dynamicznie -->
+                    <!-- Options will be added dynamically -->
                 </select>
             </div>
             <button class="refresh-button" onclick="refreshChart()">
@@ -62,62 +62,6 @@
         </div>
     </div>
 </div>
-
-<style>
-.time-controls {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.control-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.control-group label {
-    font-weight: 500;
-    color: white;
-    white-space: nowrap;
-}
-
-.select-group {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.time-controls select {
-    padding: 0.5rem;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    background: var(--card-bg);
-    color: var(--text-color);
-    min-width: 100px;
-}
-
-.refresh-button {
-    margin-left: auto;
-}
-
-@media (max-width: 768px) {
-    .time-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .control-group {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .refresh-button {
-        margin-left: 0;
-        width: 100%;
-    }
-}
-</style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment"></script>

@@ -1,0 +1,471 @@
+/* Modern Host Cards Display with Enhanced Spacing */
+
+.hosts-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 2.5rem;
+  padding: 2rem;
+}
+
+/* Fixed-height host card with improved sizing */
+.host-card {
+  border-radius: 16px;
+  padding: 1.8rem;
+  background: var(--card-bg);
+  height: 420px; /* Set fixed height instead of min-height */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Left color indicator with increased width */
+.host-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--primary-color), var(--gradient-end));
+  opacity: 0.8;
+}
+
+/* More prominent card header */
+.host-card h3 {
+  font-size: 1.4rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-color);
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Remove underline and make icon larger */
+.host-card h3::after {
+  content: none;
+}
+
+.host-card h3 i {
+  color: var(--primary-color);
+  font-size: 1.3rem;
+  background: rgba(var(--primary-color-rgb, 26, 115, 232), 0.1);
+  padding: 0.6rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* More prominent status badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 30px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  position: absolute;
+  right: 1.8rem;
+  top: 1.8rem;
+}
+
+.status-badge.online {
+  background: rgba(46, 213, 115, 0.15);
+  color: #2ed573;
+  border: 1px solid rgba(46, 213, 115, 0.3);
+}
+
+.status-badge.offline {
+  background: rgba(255, 71, 87, 0.15);
+  color: #ff4757;
+  border: 1px solid rgba(255, 71, 87, 0.3);
+}
+
+.status-badge.unknown {
+  background: rgba(45, 52, 54, 0.15);
+  color: #2d3436;
+  border: 1px solid rgba(45, 52, 54, 0.3);
+}
+
+/* Modified details section with better scrolling behavior */
+.device-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin: 1.2rem 0;
+  padding: 0.5rem;
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 200px; /* Set max height to ensure consistent card size */
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  border-radius: 8px; /* Rounded corners for the scroll area */
+  scrollbar-width: thin; /* For Firefox */
+  position: relative; /* For positioning scrollbar */
+}
+
+/* More visible scrollbar styling */
+.device-details::-webkit-scrollbar {
+  width: 8px; /* Wider scrollbar */
+}
+
+.device-details::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05); /* More visible track */
+  border-radius: 8px;
+  margin: 4px; /* Add some margin to the track */
+}
+
+.device-details::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15); /* Darker thumb for visibility */
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.5); /* Border to make it stand out */
+}
+
+.device-details::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Alerts container with improved structure */
+.alert-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 0.5rem; /* Add margin to separate from device details */
+  padding-top: 0.5rem; /* Add padding to make it clear this is a separate section */
+  border-top: 1px dashed rgba(0, 0, 0, 0.1); /* Add separator for visual clarity */
+}
+
+/* Specific styling for the alerts list with guaranteed scrolling */
+ul.alerts, 
+.alerts,
+.alert-container {
+  max-height: 180px;
+  overflow-y: auto !important;
+  margin-top: 0.5rem;
+  padding-right: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.05);
+  display: block;
+  width: 100%;
+}
+
+ul.alerts::-webkit-scrollbar,
+.alerts::-webkit-scrollbar,
+.alert-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+ul.alerts::-webkit-scrollbar-track,
+.alerts::-webkit-scrollbar-track,
+.alert-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+}
+
+ul.alerts::-webkit-scrollbar-thumb,
+.alerts::-webkit-scrollbar-thumb,
+.alert-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+}
+
+ul.alerts::-webkit-scrollbar-thumb:hover,
+.alerts::-webkit-scrollbar-thumb:hover,
+.alert-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Force-show scrollbar even when content isn't overflowing yet */
+ul.alerts, 
+.alerts,
+.alert-container {
+  overflow-y: scroll;
+}
+
+/* Apply consistent styling for list items in alerts */
+ul.alerts li,
+.alerts > * {
+  padding: 0.8rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.03);
+  margin-bottom: 0.5rem;
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  border-left: 3px solid;
+  /* Match styling of alert-item */
+}
+
+/* Alert title to make it clear this is the alerts section */
+.alerts-header {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.alerts-header i {
+  color: #ff9800;
+}
+
+/* Individual alert item with improved styling for scrolling */
+.alert-item {
+  padding: 0.8rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.03);
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  border-left: 3px solid;
+  margin-bottom: 0.5rem; /* Add margin between alerts */
+  min-height: 70px; /* Minimum height to make it substantial */
+}
+
+.alert-item.critical {
+  background: rgba(220, 53, 69, 0.05);
+  border-left-color: #dc3545;
+}
+
+.alert-item.warning {
+  background: rgba(255, 193, 7, 0.05);
+  border-left-color: #ffc107;
+}
+
+.alert-item.info {
+  background: rgba(23, 162, 184, 0.05);
+  border-left-color: #17a2b8;
+}
+
+.alert-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+}
+
+.alert-item.critical .alert-icon {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.alert-item.warning .alert-icon {
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+}
+
+.alert-item.info .alert-icon {
+  background: rgba(23, 162, 184, 0.1);
+  color: #17a2b8;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-title {
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  font-size: 0.9rem;
+}
+
+.alert-message {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.alert-time {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+}
+
+/* Enhanced detail items */
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.6rem;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.detail-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.detail-item i {
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.04);
+  padding: 0.7rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.4rem;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-value {
+  font-size: 1rem;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+/* Enhanced action buttons area */
+.device-actions {
+  padding-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  border-top: 1px solid var(--border-color);
+  margin-top: 1.5rem;
+}
+
+/* Secondary action button */
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  padding: 0.8rem 1rem;
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--text-color);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+
+.action-button:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-color);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Primary connect button */
+.vnc-button {
+  gap: 0.7rem;
+  padding: 0.8rem 1.2rem;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  align-items: center;
+  background: linear-gradient(135deg, var(--primary-color), var(--gradient-end));
+  color: #fff;
+  display: inline-flex;
+  font-size: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(26, 115, 232, 0.2);
+  font-weight: 600;
+  flex: 2;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Host Card Variants with stronger colors */
+.host-card.available::after {
+  background: linear-gradient(to bottom, #2ecc71, #27ae60);
+  width: 8px;
+}
+
+.host-card.unavailable::after {
+  background: linear-gradient(to bottom, #e74c3c, #c0392b);
+  width: 8px;
+}
+
+.host-card.unknown::after {
+  background: linear-gradient(to bottom, #95a5a6, #7f8c8d);
+  width: 8px;
+}
+
+/* Add background texture for visual interest */
+.host-card.available {
+  background-image: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), 
+                    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2327ae60' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.host-card.unavailable {
+  background-image: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), 
+                    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e74c3c' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Keep existing responsive code */
+@media (max-width: 768px) {
+  .host-card {
+    height: auto; /* Allow auto height on mobile */
+  }
+  
+  .device-details {
+    max-height: none; /* Remove max height on mobile */
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.01); /* Subtle background to indicate scrollable area */
+  }
+  
+  .device-actions {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  
+  .action-button, .vnc-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Additional responsive adjustments */
+  .hosts-container {
+    gap: 1.5rem;
+    padding: 1.5rem 1rem;
+  }
+  
+  .host-card {
+    padding: 1.5rem;
+  }
+  
+  .status-badge {
+    position: static;
+    margin-bottom: 1rem;
+  }
+  
+  .detail-item i {
+    padding: 0.5rem;
+    min-width: 2rem;
+  }
+}
