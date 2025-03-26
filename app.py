@@ -24,6 +24,8 @@ from datetime import datetime, timedelta
 from modules.user_data import update_user_profile
 from inventory import inventory  # Import the inventory blueprint
 from werkzeug.exceptions import Forbidden  # Add this import
+from flask_caching import Cache
+import logging
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 app = Flask(__name__)
@@ -47,6 +49,17 @@ MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB w bajtach
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Configure caching
+cache = Cache(config={
+    'CACHE_TYPE': 'SimpleCache',
+    'CACHE_DEFAULT_TIMEOUT': 300
+})
+cache.init_app(app)
 
 # Custom filter for checking if a character is a digit
 @app.template_filter('isdigit')
@@ -188,26 +201,89 @@ def refresh_glpi_category(category):
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# Modify index route to use cached data
 @app.route('/')
 @login_required
 def index():
-    global glpi_cache
-    if (glpi_cache is None):
-        glpi_cache = get_glpi_data(refresh=False)
-        if not glpi_cache.get('computers'):
-            glpi_cache = get_glpi_data(refresh=True)
+    start_time = datetime.now()
     
-    zabbix_data = get_hosts()
+    zabbix_data = get_cached_zabbix_data()
+    graylog_data = get_cached_graylog_data()
+    glpi_data = get_cached_glpi_data()
     
-    # Pobierz dane Graylog z właściwym limitem
-    limit = session.get('graylog_limit', 300)
-    graylog_data = get_logs(time_range_minutes=5, force_refresh=False)
+    response_time = (datetime.now() - start_time).total_seconds()
+    logger.info(f"Dashboard loaded in {response_time:.2f} seconds")
     
-    return render_template('index.html', 
-                         zabbix=zabbix_data, 
-                         graylog=graylog_data, 
-                         glpi=glpi_cache, 
+    return render_template('index.html',
+                         zabbix=zabbix_data,
+                         graylog=graylog_data,
+                         glpi=glpi_data,
                          request=request)
+
+# Add new API endpoints for cached data
+@app.route('/api/zabbix/refresh')
+@login_required
+def get_cached_zabbix_data():
+    start_time = datetime.now()
+    
+    @cache.cached(timeout=60, key_prefix='zabbix_data')
+    def get_data():
+        return get_hosts()
+    
+    data = get_data()
+    response_time = (datetime.now() - start_time).total_seconds()
+    logger.info(f"Zabbix data retrieved in {response_time:.2f} seconds")
+    
+    return jsonify(data) if request.path.startswith('/api/') else data
+
+@app.route('/api/glpi/refresh')
+@login_required
+def get_cached_glpi_data():
+    start_time = datetime.now()
+    
+    @cache.cached(timeout=300, key_prefix='glpi_data')
+    def get_data():
+        return get_glpi_data(refresh=False)
+    
+    data = get_data()
+    response_time = (datetime.now() - start_time).total_seconds()
+    logger.info(f"GLPI data retrieved in {response_time:.2f} seconds")
+    
+    return jsonify(data) if request.path.startswith('/api/') else data
+
+@app.route('/api/graylog/refresh')
+@login_required
+def get_cached_graylog_data():
+    start_time = datetime.now()
+    
+    @cache.cached(timeout=30, key_prefix='graylog_data')
+    def get_data():
+        return get_logs(time_range_minutes=5)
+    
+    data = get_data()
+    response_time = (datetime.now() - start_time).total_seconds()
+    logger.info(f"Graylog data retrieved in {response_time:.2f} seconds")
+    
+    return jsonify(data) if request.path.startswith('/api/') else data
+
+# Force cache refresh endpoints
+@app.route('/api/zabbix/force_refresh')
+@login_required
+def force_refresh_zabbix():
+    cache.delete('zabbix_data')
+    return jsonify(get_cached_zabbix_data())
+
+@app.route('/api/glpi/force_refresh')
+@login_required
+def force_refresh_glpi():
+    cache.delete('glpi_data')
+    return jsonify(get_cached_glpi_data())
+
+@app.route('/api/graylog/force_refresh')
+@login_required
+def force_refresh_graylog():
+    cache.delete('graylog_data')
+    return jsonify(get_cached_graylog_data())
 
 @app.route('/available-hosts')
 @login_required
