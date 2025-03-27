@@ -27,6 +27,8 @@ from inventory import inventory  # Import the inventory blueprint
 from werkzeug.exceptions import Forbidden  # Add this import
 from flask_caching import Cache
 import logging
+from modules.tasks import tasks, setup_tasks_tables  # Import from the modules directory
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 app = Flask(__name__)
@@ -35,6 +37,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 
 # Register blueprints
 app.register_blueprint(inventory)
+app.register_blueprint(tasks)  # Add this line to register the tasks blueprint
 
 # Dodaj globalną zmienną dla cache
 glpi_cache = None
@@ -45,11 +48,17 @@ VNC_PASSWORD = "SW!nk@19"
 
 # Dodaj konfigurację dla uploadów
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'avatars')
+TASK_ATTACHMENTS_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'attachments')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB w bajtach
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['TASK_ATTACHMENTS_FOLDER'] = TASK_ATTACHMENTS_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_FILE_SIZE
+
+# Upewnij się, że foldery istnieją
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(TASK_ATTACHMENTS_FOLDER, exist_ok=True)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -155,29 +164,56 @@ def logout():
 @app.route('/api/glpi/refresh')
 @login_required
 def refresh_glpi():
-    """Endpoint do odświeżania danych GLPI"""
+    """Endpoint to refresh GLPI data from API or get from database"""
     try:
         global glpi_cache
-        glpi_cache = get_glpi_data(refresh=True)  # Wymuszamy odświeżenie z API
+        
+        # Check if we should force API refresh
+        force_api = request.args.get('force_api', '0') == '1'
+        
+        if force_api:
+            # Force refresh from API and update database
+            glpi_cache = get_glpi_data(refresh=True)
+            logger.info("Refreshed GLPI data from API and updated database")
+        else:
+            # Get data from database
+            glpi_cache = get_glpi_data(refresh=False)
+            logger.info("Retrieved GLPI data from database")
+            
         return jsonify({
             "status": "success",
-            "message": "Data refreshed successfully",
+            "message": "Data retrieved successfully",
+            "source": "api" if force_api else "database",
             "last_refresh": glpi_cache.get('last_refresh')
         })
     except Exception as e:
+        logger.error(f"Error in refresh_glpi: {str(e)}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/glpi/refresh/<category>')
 @login_required
 def refresh_glpi_category(category):
-    """Endpoint do odświeżania konkretnej kategorii GLPI"""
+    """Endpoint to refresh specific GLPI category from API or get from database"""
     try:
         global glpi_cache
-        if (glpi_cache is None):
-            glpi_cache = get_glpi_data()
+        
+        # Check if we should force API refresh
+        force_api = request.args.get('force_api', '0') == '1'
+        
+        if force_api:
+            # Force refresh specific category from API
+            logger.info(f"Forcing refresh of category '{category}' from API")
+            new_data = get_glpi_data(refresh=True, category=category)
         else:
-            # Odśwież tylko wybraną kategorię
-            new_data = get_glpi_data()
+            # Get data from database
+            logger.info(f"Retrieving category '{category}' from database")
+            new_data = get_glpi_data(refresh=False)
+            
+        # Initialize glpi_cache if needed
+        if glpi_cache is None:
+            glpi_cache = new_data
+        else:
+            # Update only the specific category
             if category == 'workstations':
                 glpi_cache['categorized']['workstations'] = new_data['categorized']['workstations']
             elif category == 'terminals':
@@ -195,12 +231,42 @@ def refresh_glpi_category(category):
             elif category == 'others':
                 glpi_cache['categorized']['other'] = new_data['categorized']['other']
             
-            # Zaktualizuj liczniki
+            # Update counters
             glpi_cache['category_counts'] = new_data['category_counts']
             
-        return jsonify({"status": "success"})
+        return jsonify({
+            "status": "success",
+            "message": f"Category '{category}' refreshed successfully",
+            "source": "api" if force_api else "database"
+        })
     except Exception as e:
+        logger.error(f"Error in refresh_glpi_category: {str(e)}")
         return jsonify({"status": "error", "message": str(e)}), 500
+
+# Update the cached GLPI data function
+@app.route('/api/glpi/data')
+@login_required
+def get_cached_glpi_data():
+    start_time = datetime.now()
+    
+    # Check if force refresh is requested
+    force_api = request.args.get('force_api', '0') == '1'
+    
+    @cache.cached(timeout=300, key_prefix='glpi_data')
+    def get_data():
+        return get_glpi_data(refresh=False)  # Always get from database by default
+    
+    # Either use cached data or force refresh
+    if force_api:
+        cache.delete('glpi_data')
+        data = get_glpi_data(refresh=True)
+    else:
+        data = get_data()
+    
+    response_time = (datetime.now() - start_time).total_seconds()
+    logger.info(f"GLPI data retrieved in {response_time:.2f} seconds (source: {'API' if force_api else 'database'})")
+    
+    return jsonify(data) if request.path.startswith('/api/') else data
 
 # Modify index route to use cached data
 @app.route('/')
@@ -234,21 +300,6 @@ def get_cached_zabbix_data():
     data = get_data()
     response_time = (datetime.now() - start_time).total_seconds()
     logger.info(f"Zabbix data retrieved in {response_time:.2f} seconds")
-    
-    return jsonify(data) if request.path.startswith('/api/') else data
-
-@app.route('/api/glpi/refresh')
-@login_required
-def get_cached_glpi_data():
-    start_time = datetime.now()
-    
-    @cache.cached(timeout=300, key_prefix='glpi_data')
-    def get_data():
-        return get_glpi_data(refresh=False)
-    
-    data = get_data()
-    response_time = (datetime.now() - start_time).total_seconds()
-    logger.info(f"GLPI data retrieved in {response_time:.2f} seconds")
     
     return jsonify(data) if request.path.startswith('/api/') else data
 
@@ -859,6 +910,13 @@ def fetch_logs():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/glpi/devices')
+@login_required
+def get_glpi_devices():
+    """API endpoint to get all GLPI devices for tasks relationship - redirects to tasks/api/devices"""
+    # Redirect to the new endpoint in the tasks module
+    return redirect(url_for('tasks.get_devices'))
+
 if __name__ == '__main__':
     # Import required modules
     from modules.database import setup_departments_table, ensure_default_departments
@@ -866,6 +924,7 @@ if __name__ == '__main__':
     # Initialize database tables
     setup_departments_table()
     ensure_default_departments()
+    setup_tasks_tables()  # Add this line to initialize tasks tables
     
     # Run the application
     app.run(debug=True, host='0.0.0.0', port=5000)

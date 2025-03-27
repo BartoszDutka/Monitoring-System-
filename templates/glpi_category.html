@@ -202,8 +202,8 @@ function refreshData(type) {
 
     const category = '{{ request.path.split("/")[-1] }}';
     const url = type === 'current' 
-        ? `/api/glpi/refresh/${category}`
-        : '/api/glpi/refresh';
+        ? `/api/glpi/refresh/${category}?force_api=1`
+        : '/api/glpi/refresh?force_api=1';
 
     fetch(url)
         .then(response => response.json())
@@ -211,7 +211,7 @@ function refreshData(type) {
             if (data.status === 'success') {
                 window.location.reload();
             } else {
-                throw new Error('Refresh failed');
+                throw new Error(data.message || 'Refresh failed');
             }
         })
         .catch(error => {
@@ -220,6 +220,7 @@ function refreshData(type) {
                 btn.disabled = false;
                 btn.innerHTML = btn.dataset.originalText;
             });
+            alert('Failed to refresh data. Please try again.');
         });
 }
 

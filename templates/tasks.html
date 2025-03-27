@@ -1,0 +1,661 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tasks.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Task Management</h1>
+    <div class="header-actions">
+        {% if is_admin %}
+        <button class="btn primary-btn" id="create-task-btn">
+            <i class="fas fa-plus"></i> New Task
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Task Filters -->
+<div class="filter-container">
+    <div class="filters">
+        <select id="status-filter" class="filter-select">
+            <option value="all">All Statuses</option>
+            <option value="new">New</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+        </select>
+        
+        <select id="priority-filter" class="filter-select">
+            <option value="all">All Priorities</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+        </select>
+        
+        {% if is_admin %}
+        <select id="assignee-filter" class="filter-select">
+            <option value="all">All Assignees</option>
+            {% for user in users %}
+            <option value="{{ user.username }}">{{ user.display_name or user.username }}</option>
+            {% endfor %}
+        </select>
+        {% endif %}
+    </div>
+    
+    <div class="search-container">
+        <input type="text" id="task-search" placeholder="Search tasks...">
+        <i class="fas fa-search"></i>
+    </div>
+</div>
+
+<!-- Task List -->
+<div class="tasks-container">
+    {% if tasks %}
+    <div class="task-list">
+        <div class="task-header">
+            <div class="task-id">#</div>
+            <div class="task-title">Title</div>
+            <div class="task-assignee">Assignee</div>
+            <div class="task-status">Status</div>
+            <div class="task-priority">Priority</div>
+            <div class="task-due-date">Due Date</div>
+            <div class="task-actions">Actions</div>
+        </div>
+        
+        {% for task in tasks %}
+        <div class="task-item" 
+             data-status="{{ task.status }}" 
+             data-priority="{{ task.priority }}" 
+             data-assignee="{{ task.assignee }}">
+            <div class="task-id">{{ task.task_id }}</div>
+            <div class="task-title">{{ task.title }}</div>
+            <div class="task-assignee">{{ task.assignee_name or task.assignee }}</div>
+            <div class="task-status">
+                <span class="status-badge {{ task.status }}">{{ task.status|replace('_', ' ')|title }}</span>
+            </div>
+            <div class="task-priority">
+                <span class="priority-badge {{ task.priority }}">{{ task.priority|title }}</span>
+            </div>
+            <div class="task-due-date">
+                {{ task.due_date|default('Not set', true) }}
+            </div>
+            <div class="task-actions">
+                <button class="btn view-task" data-task-id="{{ task.task_id }}">
+                    <i class="fas fa-eye"></i>
+                </button>
+                {% if is_admin %}
+                <button class="btn delete-task" data-task-id="{{ task.task_id }}">
+                    <i class="fas fa-trash"></i>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-tasks">
+        <i class="fas fa-tasks"></i>
+        <p>No tasks found</p>
+        {% if is_admin %}
+        <button class="btn primary-btn" id="no-tasks-create-btn">Create New Task</button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Task Creation Modal -->
+{% if is_admin %}
+<div id="create-task-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Create New Task</h3>
+            <span class="close">&times;</span>
+        </div>
+        <form action="{{ url_for('tasks.create_task') }}" method="POST" class="modal-form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title">Title*</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="4"></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="assignee">Assignee*</label>
+                    <select id="assignee" name="assignee" required>
+                        <option value="">Select Assignee</option>
+                        {% for user in users %}
+                        <option value="{{ user.username }}">{{ user.display_name or user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group half">
+                    <label for="priority">Priority</label>
+                    <select id="priority" name="priority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="due_date">Due Date</label>
+                    <input type="date" id="due_date" name="due_date">
+                </div>
+                <div class="form-group half">
+                    <label for="related_type">Related To</label>
+                    <select id="related_type" name="related_type">
+                        <option value="">Not Related</option>
+                        <option value="glpi_device">GLPI Device</option>
+                        <option value="zabbix_alert">Zabbix Alert</option>
+                    </select>
+                </div>
+            </div>
+            <div id="related-container" class="form-group" style="display: none;">
+                <div id="glpi-device-selector" style="display: none;">
+                    <label for="glpi_device_search">Search Device</label>
+                    <input type="text" id="glpi_device_search" placeholder="Type to search devices..." class="device-search">
+                    <div class="select-container">
+                        <select id="glpi_device_id" name="related_id" class="related-select" size="10">
+                            <option value="">Loading devices...</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="zabbix-alert-selector" style="display: none;">
+                    <label for="zabbix_alert_search">Search Alert</label>
+                    <input type="text" id="zabbix_alert_search" placeholder="Type to search alerts..." class="device-search">
+                    <div class="select-container">
+                        <select id="zabbix_alert_id" name="related_id" class="related-select" size="10">
+                            <option value="">Loading alerts...</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" id="related_data" name="related_data" value="{}">
+            </div>
+            <div class="form-group">
+                <label for="attachment">Attachment</label>
+                <input type="file" id="attachment" name="attachment" accept="image/*" class="file-input">
+                <div class="file-input-placeholder">
+                    <span>Choose an image file</span>
+                </div>
+                <div class="file-preview-container" style="display: none;">
+                    <img id="file-preview" src="" alt="Preview">
+                    <button type="button" class="btn remove-file" id="remove-file">Remove</button>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn cancel-btn" id="cancel-create">Cancel</button>
+                <button type="submit" class="btn primary-btn">Create Task</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- Task View Modal -->
+<div id="view-task-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="view-task-title">Task Details</h3>
+            <span class="close">&times;</span>
+        </div>
+        <div class="task-details">
+            <div class="task-info-grid">
+                <div class="info-group">
+                    <label>Status</label>
+                    <span id="view-task-status" class="status-badge"></span>
+                </div>
+                <div class="info-group">
+                    <label>Priority</label>
+                    <span id="view-task-priority" class="priority-badge"></span>
+                </div>
+                <div class="info-group">
+                    <label>Assignee</label>
+                    <span id="view-task-assignee"></span>
+                </div>
+                <div class="info-group">
+                    <label>Created By</label>
+                    <span id="view-task-creator"></span>
+                </div>
+                <div class="info-group">
+                    <label>Created At</label>
+                    <span id="view-task-created"></span>
+                </div>
+                <div class="info-group">
+                    <label>Due Date</label>
+                    <span id="view-task-due"></span>
+                </div>
+            </div>
+            <div class="task-description-container">
+                <h4>Description</h4>
+                <div id="view-task-description" class="task-description"></div>
+            </div>
+            <div id="view-task-attachment" class="task-attachment-container" style="display: none;"></div>
+            <div id="related-item-container" style="display:none;">
+                <h4>Related Item</h4>
+                <div id="related-item-details" class="related-details"></div>
+            </div>
+            <div class="update-status-section">
+                <form id="update-status-form" action="" method="POST">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <select id="new-status" name="status">
+                                <option value="new">New</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn primary-btn">Update</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="comments-section">
+                <h4>Comments</h4>
+                <div id="task-comments" class="comments-list"></div>
+                <form id="add-comment-form" action="" method="POST">
+                    <div class="form-group">
+                        <textarea name="comment" placeholder="Add a comment..." required></textarea>
+                    </div>
+                    <div class="form-group text-right">
+                        <button type="submit" class="btn primary-btn">Add Comment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Task creation modal
+    const createTaskModal = document.getElementById('create-task-modal');
+    const createTaskBtn = document.getElementById('create-task-btn');
+    const noTasksCreateBtn = document.getElementById('no-tasks-create-btn');
+    const closeCreateModal = createTaskModal?.querySelector('.close');
+    const cancelCreateBtn = document.getElementById('cancel-create');
+
+    // Task view modal
+    const viewTaskModal = document.getElementById('view-task-modal');
+    const viewTaskBtns = document.querySelectorAll('.view-task');
+    const closeViewModal = viewTaskModal?.querySelector('.close');
+
+    // Task filtering
+    const statusFilter = document.getElementById('status-filter');
+    const priorityFilter = document.getElementById('priority-filter');
+    const assigneeFilter = document.getElementById('assignee-filter');
+    const taskSearch = document.getElementById('task-search');
+
+    // Related item selector
+    const relatedTypeSelect = document.getElementById('related_type');
+    const relatedContainer = document.getElementById('related-container');
+    const glpiDeviceSelector = document.getElementById('glpi-device-selector');
+    const zabbixAlertSelector = document.getElementById('zabbix-alert-selector');
+    const relatedDataInput = document.getElementById('related_data');
+
+    // Show/hide task creation modal
+    if (createTaskBtn) {
+        createTaskBtn.addEventListener('click', function() {
+            createTaskModal.style.display = 'block';
+        });
+    }
+
+    if (noTasksCreateBtn) {
+        noTasksCreateBtn.addEventListener('click', function() {
+            createTaskModal.style.display = 'block';
+        });
+    }
+
+    if (closeCreateModal) {
+        closeCreateModal.addEventListener('click', function() {
+            createTaskModal.style.display = 'none';
+        });
+    }
+
+    if (cancelCreateBtn) {
+        cancelCreateBtn.addEventListener('click', function() {
+            createTaskModal.style.display = 'none';
+        });
+    }
+
+    // Show task details modal
+    viewTaskBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const taskId = this.getAttribute('data-task-id');
+            loadTaskDetails(taskId);
+            viewTaskModal.style.display = 'block';
+        });
+    });
+
+    closeViewModal.addEventListener('click', function() {
+        viewTaskModal.style.display = 'none';
+    });
+
+    // Handle related item selection
+    if (relatedTypeSelect) {
+        relatedTypeSelect.addEventListener('change', function() {
+            const selectedType = this.value;
+            
+            if (selectedType === '') {
+                relatedContainer.style.display = 'none';
+                return;
+            }
+            
+            relatedContainer.style.display = 'block';
+            glpiDeviceSelector.style.display = 'none';
+            zabbixAlertSelector.style.display = 'none';
+            
+            if (selectedType === 'glpi_device') {
+                glpiDeviceSelector.style.display = 'block';
+                loadGlpiDevices();
+            } else if (selectedType === 'zabbix_alert') {
+                zabbixAlertSelector.style.display = 'block';
+                loadZabbixAlerts();
+            }
+        });
+    }
+
+    // Filter tasks function
+    function filterTasks() {
+        const status = statusFilter.value;
+        const priority = priorityFilter.value;
+        const assignee = assigneeFilter ? assigneeFilter.value : 'all';
+        const searchText = taskSearch.value.toLowerCase();
+        
+        const tasks = document.querySelectorAll('.task-item');
+        
+        tasks.forEach(function(task) {
+            const taskStatus = task.getAttribute('data-status');
+            const taskPriority = task.getAttribute('data-priority');
+            const taskAssignee = task.getAttribute('data-assignee');
+            const taskTitle = task.querySelector('.task-title').textContent.toLowerCase();
+            
+            const statusMatch = status === 'all' || taskStatus === status;
+            const priorityMatch = priority === 'all' || taskPriority === priority;
+            const assigneeMatch = assignee === 'all' || taskAssignee === assignee;
+            const searchMatch = taskTitle.includes(searchText);
+            
+            task.style.display = statusMatch && priorityMatch && assigneeMatch && searchMatch ? '' : 'none';
+        });
+    }
+
+    // Add event listeners for filtering
+    statusFilter.addEventListener('change', filterTasks);
+    priorityFilter.addEventListener('change', filterTasks);
+    if (assigneeFilter) {
+        assigneeFilter.addEventListener('change', filterTasks);
+    }
+    taskSearch.addEventListener('input', filterTasks);
+
+    // File upload preview functionality
+    const attachmentInput = document.getElementById('attachment');
+    const filePreview = document.getElementById('file-preview');
+    const filePreviewContainer = document.querySelector('.file-preview-container');
+    const filePlaceholder = document.querySelector('.file-input-placeholder');
+    const removeFileBtn = document.getElementById('remove-file');
+    
+    if (attachmentInput) {
+        attachmentInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    filePreview.src = e.target.result;
+                    filePreviewContainer.style.display = 'flex';
+                    filePlaceholder.style.display = 'none';
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    if (removeFileBtn) {
+        removeFileBtn.addEventListener('click', function() {
+            attachmentInput.value = '';
+            filePreview.src = '';
+            filePreviewContainer.style.display = 'none';
+            filePlaceholder.style.display = 'flex';
+        });
+    }
+
+    // Close modals when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === createTaskModal) {
+            createTaskModal.style.display = 'none';
+        }
+        if (event.target === viewTaskModal) {
+            viewTaskModal.style.display = 'none';
+        }
+    });
+});
+
+// Function to load GLPI devices
+function loadGlpiDevices() {
+    const deviceSelect = document.getElementById('glpi_device_id');
+    const searchInput = document.getElementById('glpi_device_search');
+    
+    // Show loading state
+    deviceSelect.innerHTML = '<option value="">Loading devices...</option>';
+    
+    // Fetch devices from API
+    fetch('/tasks/api/devices')
+        .then(response => response.json())
+        .then(data => {
+            // Clear loading state
+            deviceSelect.innerHTML = '';
+            
+            // Check if we have devices
+            if (data.length === 0) {
+                deviceSelect.innerHTML = '<option value="">No devices found</option>';
+                return;
+            }
+            
+            // Add devices to select
+            data.forEach(device => {
+                const option = document.createElement('option');
+                option.value = device.id;
+                option.textContent = `${device.name} (${device.type}) - ${device.location || 'No location'}`;
+                option.setAttribute('data-name', device.name);
+                option.setAttribute('data-type', device.type);
+                option.setAttribute('data-location', device.location || '');
+                option.setAttribute('data-serial', device.serial_number || '');
+                deviceSelect.appendChild(option);
+            });
+            
+            // Add search functionality
+            searchInput.addEventListener('input', function() {
+                const searchText = this.value.toLowerCase();
+                Array.from(deviceSelect.options).forEach(option => {
+                    const optionText = option.text.toLowerCase();
+                    option.style.display = optionText.includes(searchText) ? '' : 'none';
+                });
+            });
+            
+            // Handle device selection
+            deviceSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                if (selectedOption) {
+                    const relatedData = {
+                        id: this.value,
+                        name: selectedOption.getAttribute('data-name'),
+                        type: selectedOption.getAttribute('data-type'),
+                        location: selectedOption.getAttribute('data-location'),
+                        serial: selectedOption.getAttribute('data-serial')
+                    };
+                    
+                    // Update hidden input with JSON data
+                    document.getElementById('related_data').value = JSON.stringify(relatedData);
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error loading devices:', error);
+            deviceSelect.innerHTML = '<option value="">Error loading devices</option>';
+        });
+}
+
+// Function to load Zabbix alerts (placeholder)
+function loadZabbixAlerts() {
+    const alertSelect = document.getElementById('zabbix_alert_id');
+    const searchInput = document.getElementById('zabbix_alert_search');
+    
+    alertSelect.innerHTML = '<option value="">Loading alerts...</option>';
+    
+    // Implement Zabbix alert loading here
+    // For now, just show a placeholder message
+    setTimeout(() => {
+        alertSelect.innerHTML = '<option value="">No alerts available</option>';
+    }, 500);
+}
+
+// Load task details
+function loadTaskDetails(taskId) {
+    fetch(`/tasks/api/task/${taskId}`)
+        .then(response => response.json())
+        .then(data => {
+            const task = data.task;
+            
+            // Update task details
+            document.getElementById('view-task-title').textContent = task.title;
+            
+            // Update status badge
+            const statusBadge = document.getElementById('view-task-status');
+            statusBadge.textContent = task.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            statusBadge.className = 'status-badge ' + task.status;
+            
+            // Update priority badge
+            const priorityBadge = document.getElementById('view-task-priority');
+            priorityBadge.textContent = task.priority.replace(/\b\w/g, l => l.toUpperCase());
+            priorityBadge.className = 'priority-badge ' + task.priority;
+            
+            // Update other fields
+            document.getElementById('view-task-assignee').textContent = task.assignee_name || task.assignee;
+            document.getElementById('view-task-creator').textContent = task.creator;
+            document.getElementById('view-task-created').textContent = task.created_at;
+            document.getElementById('view-task-due').textContent = task.due_date || 'Not set';
+            document.getElementById('view-task-description').textContent = task.description || 'No description provided';
+
+            // Handle attachment if present
+            const attachmentContainer = document.getElementById('view-task-attachment');
+            if (task.attachment_url) {
+                attachmentContainer.style.display = 'block';
+                attachmentContainer.innerHTML = `
+                    <div class="task-attachment">
+                        <h4>Attachment</h4>
+                        <div class="attachment-wrapper">
+                            <a href="${task.attachment_url}" target="_blank" class="attachment-link">
+                                <img src="${task.attachment_url}" alt="Task attachment" class="task-attachment-img">
+                                <div class="attachment-overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                    <span>View Full Size</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            } else {
+                attachmentContainer.style.display = 'none';
+            }
+
+            // Handle related item if present
+            const relatedItemContainer = document.getElementById('related-item-container');
+            const relatedItemDetails = document.getElementById('related-item-details');
+            
+            if (task.related_type && task.related_id) {
+                // Show loading state
+                relatedItemContainer.style.display = 'block';
+                relatedItemDetails.innerHTML = '<p>Loading related item details...</p>';
+                
+                if (task.related_type === 'glpi_device') {
+                    // Fetch device details
+                    fetch(`/tasks/api/related_device/${task.related_id}`)
+                        .then(response => response.json())
+                        .then(device => {
+                            if (device.error) {
+                                relatedItemDetails.innerHTML = `<p class="text-danger">Error: ${device.error}</p>`;
+                                return;
+                            }
+                            
+                            // Show device details
+                            relatedItemDetails.innerHTML = `
+                                <div class="related-info">
+                                    <h5>${device.name}</h5>
+                                    <p><strong>Type:</strong> ${device.type}</p>
+                                    <p><strong>Location:</strong> ${device.location || 'Not specified'}</p>
+                                    <p><strong>Serial:</strong> ${device.serial_number || 'Not specified'}</p>
+                                    <p><strong>Model:</strong> ${device.model || 'Not specified'}</p>
+                                    <p><strong>IP Address:</strong> ${device.ip_address || 'Not specified'}</p>
+                                    <p><strong>Last Seen:</strong> ${device.last_seen || 'Unknown'}</p>
+                                </div>
+                            `;
+                        })
+                        .catch(error => {
+                            console.error('Error loading device details:', error);
+                            relatedItemDetails.innerHTML = '<p class="text-danger">Failed to load device details</p>';
+                        });
+                } else if (task.related_type === 'zabbix_alert') {
+                    // Handle Zabbix alert
+                    relatedItemDetails.innerHTML = `<p>Zabbix Alert ID: ${task.related_id}</p>`;
+                }
+            } else {
+                relatedItemContainer.style.display = 'none';
+            }
+
+            // Set current status in the update form
+            const statusSelect = document.getElementById('new-status');
+            if (statusSelect) {
+                statusSelect.value = task.status;
+            }
+
+            // Update form action URL
+            const updateStatusForm = document.getElementById('update-status-form');
+            if (updateStatusForm) {
+                updateStatusForm.action = `/tasks/update/${taskId}`;
+            }
+
+            // Update comment form action URL
+            const addCommentForm = document.getElementById('add-comment-form');
+            if (addCommentForm) {
+                addCommentForm.action = `/tasks/add_comment/${taskId}`;
+            }
+
+            // Load comments
+            const commentsContainer = document.getElementById('task-comments');
+            if (commentsContainer) {
+                if (data.comments && data.comments.length > 0) {
+                    const commentElements = data.comments.map(comment => `
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <span class="comment-author">${comment.display_name || comment.username}</span>
+                                <span class="comment-time">${comment.created_at}</span>
+                            </div>
+                            <div class="comment-text">${comment.comment}</div>
+                        </div>
+                    `).join('');
+                    
+                    commentsContainer.innerHTML = commentElements;
+                } else {
+                    commentsContainer.innerHTML = '<div class="no-comments">No comments yet</div>';
+                }
+            }
+
+            // Show the modal
+            viewTaskModal.style.display = 'block';
+        })
+        .catch(error => console.error('Error loading task:', error));
+}
+</script>
+
+{% endblock %}

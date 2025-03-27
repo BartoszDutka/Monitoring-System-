@@ -740,13 +740,167 @@ class GLPIClient:
                 """, (str(e),))
             return self.get_empty_response()
 
-def get_glpi_data(refresh=False):
-    """Get GLPI data - from database or API if refresh requested"""
+    def refresh_category_from_api(self, category):
+        """Refresh data for a specific category from GLPI API"""
+        try:
+            if not self.session_token:
+                if not self.init_session():
+                    return self.get_empty_response()
+
+            headers = {
+                'Session-Token': self.session_token,
+                'App-Token': self.app_token
+            }
+
+            # Base data structure that we'll populate with refreshed data
+            base_data = self.get_devices_from_db()
+            
+            # Category mapping to API endpoint
+            category_map = {
+                'workstations': {'endpoint': 'Computer', 'filter': lambda c: c.get('name', '').upper().startswith('KS')},
+                'terminals': {'endpoint': 'Computer', 'filter': lambda c: c.get('name', '').upper().startswith('KT')},
+                'servers': {'endpoint': 'Computer', 'filter': lambda c: c.get('name', '').upper().startswith('SRV')},
+                'network': {'endpoint': 'NetworkEquipment', 'filter': None},
+                'printers': {'endpoint': 'Printer', 'filter': None},
+                'monitors': {'endpoint': 'Monitor', 'filter': None},
+                'racks': {'endpoint': 'Rack', 'filter': None},
+                'others': {'endpoint': 'Computer', 'filter': lambda c: (not c.get('name', '').upper().startswith('KS') and 
+                                                                     not c.get('name', '').upper().startswith('KT') and 
+                                                                     not c.get('name', '').upper().startswith('SRV'))}
+            }
+            
+            # Check if category is valid
+            if category not in category_map:
+                print(f"Invalid category: {category}")
+                return base_data
+                
+            # Get category info
+            cat_info = category_map[category]
+            
+            # Fetch data from API
+            items = self.get_all_items(cat_info['endpoint'], headers)
+            
+            # Apply filter if applicable
+            if cat_info['filter']:
+                items = [item for item in items if cat_info['filter'](item)]
+                
+            print(f"Retrieved {len(items)} items for category '{category}'")
+                
+            # Archive each item to the database
+            for item in items:
+                if cat_info['endpoint'] == 'Computer':
+                    asset_type = 'workstation' if item.get('name', '').upper().startswith('KS') else \
+                                 'terminal' if item.get('name', '').upper().startswith('KT') else \
+                                 'server' if item.get('name', '').upper().startswith('SRV') else 'other'
+                    
+                    asset_data = {
+                        'name': item.get('name'),
+                        'type': asset_type,
+                        'serial_number': item.get('serial'),
+                        'model': item.get('computermodels_id'),
+                        'manufacturer': item.get('manufacturers_id'),
+                        'location': item.get('location_name'),
+                        'ip_address': self.get_device_ip(item['id'], headers) if 'id' in item else '',
+                        'mac_address': item.get('mac'),
+                        'os_info': json.dumps({
+                            'os': item.get('operatingsystems_id'),
+                            'version': item.get('operatingsystemversions_id')
+                        }),
+                        'status': 'active',
+                        'specifications': json.dumps(item)
+                    }
+                elif cat_info['endpoint'] == 'NetworkEquipment':
+                    asset_data = {
+                        'name': item.get('name'),
+                        'type': 'network',
+                        'serial_number': item.get('serial'),
+                        'model': item.get('networkequipmentmodels_id'),
+                        'manufacturer': item.get('manufacturers_id'),
+                        'location': item.get('location_name'),
+                        'ip_address': item.get('ip'),
+                        'mac_address': item.get('mac'),
+                        'os_info': json.dumps({}),
+                        'status': 'active',
+                        'specifications': json.dumps(item)
+                    }
+                elif cat_info['endpoint'] == 'Printer':
+                    asset_data = {
+                        'name': item.get('name'),
+                        'type': 'printer',
+                        'serial_number': item.get('serial'),
+                        'model': item.get('printermodels_id'),
+                        'manufacturer': item.get('manufacturers_id'),
+                        'location': item.get('location_name'),
+                        'ip_address': item.get('ip'),
+                        'mac_address': item.get('mac'),
+                        'os_info': json.dumps({}),
+                        'status': 'active',
+                        'specifications': json.dumps(item)
+                    }
+                else:
+                    # Generic handling for other types
+                    asset_data = {
+                        'name': item.get('name'),
+                        'type': cat_info['endpoint'].lower(),
+                        'serial_number': item.get('serial'),
+                        'model': None,
+                        'manufacturer': item.get('manufacturers_id'),
+                        'location': item.get('location_name') if 'location_name' in item else None,
+                        'ip_address': None,
+                        'mac_address': None,
+                        'os_info': json.dumps({}),
+                        'status': 'active',
+                        'specifications': json.dumps(item)
+                    }
+                    
+                # Archive to database
+                archive_asset(asset_data)
+                
+            # Log success
+            with get_db_cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO system_logs (source, severity, host_name, message)
+                    VALUES ('glpi', 'info', 'system', %s)
+                """, (f"GLPI category '{category}' refresh completed successfully",))
+                    
+            # Return updated data from database
+            return self.get_devices_from_db()
+            
+        except Exception as e:
+            print(f"Error refreshing category '{category}' from API: {e}")
+            import traceback
+            traceback.print_exc()
+            
+            # Log error
+            with get_db_cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO system_logs (source, severity, host_name, message)
+                    VALUES ('glpi', 'error', 'system', %s)
+                """, (f"Error refreshing category '{category}': {str(e)}",))
+                
+            return base_data
+
+def get_glpi_data(refresh=False, category=None):
+    """
+    Get GLPI data - from database by default or API if refresh requested.
+    Optional category parameter to only refresh specific category data.
+    """
     try:
         client = GLPIClient()
         if refresh:
-            return client.refresh_from_api()
+            # If category is specified, only refresh that category
+            if category:
+                print(f"Refreshing specific category '{category}' from GLPI API")
+                return client.refresh_category_from_api(category)
+            else:
+                print("Refreshing all GLPI data from API")
+                return client.refresh_from_api()
+        
+        # Default: get data from database
+        print("Getting GLPI data from database")
         return client.get_devices_from_db()
     except Exception as e:
         print(f"Error in get_glpi_data: {e}")
+        import traceback
+        traceback.print_exc()
         return GLPIClient().get_empty_response()
