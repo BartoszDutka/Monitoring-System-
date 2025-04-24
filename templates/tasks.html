@@ -439,6 +439,24 @@ document.addEventListener('DOMContentLoaded', function() {
             viewTaskModal.style.display = 'none';
         }
     });
+
+    // Handle task deletion
+    const deleteTaskBtns = document.querySelectorAll('.delete-task');
+    deleteTaskBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const taskId = this.getAttribute('data-task-id');
+            const taskTitle = this.closest('.task-item').querySelector('.task-title').textContent;
+            
+            if (confirm(`Are you sure you want to delete task "${taskTitle}"? This action cannot be undone.`)) {
+                // Create form for POST request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/tasks/delete/${taskId}`;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    });
 });
 
 // Function to load GLPI devices

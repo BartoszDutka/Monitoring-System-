@@ -158,7 +158,7 @@
 // Dodaj funkcję wyszukiwania
 function filterDevices() {
     const searchTerm = document.getElementById('deviceSearch').value.toLowerCase();
-    const cards = document.querySelectorAll('.host-card');
+    const cards = document.querySelectorAll('.glpi-host-card');
     let hasResults = false;
 
     cards.forEach(card => {
@@ -178,14 +178,13 @@ function filterDevices() {
             message.id = 'noResults';
             message.className = 'no-results';
             message.innerHTML = '<i class="fas fa-search"></i> Nie znaleziono urządzeń';
-            document.querySelector('.hosts-container').appendChild(message);
+            document.querySelector('.glpi-hosts-container').appendChild(message);
         }
     } else if (noResults) {
         noResults.remove();
     }
 }
 
-// Dodaj nasłuchiwanie na input
 document.getElementById('deviceSearch').addEventListener('input', filterDevices);
 
 function refreshData(type) {
@@ -295,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Add debug code to check VNC button visibility
 document.addEventListener('DOMContentLoaded', function() {
     // Count how many VNC buttons should be visible
-    const hosts = document.querySelectorAll('.host-card');
+    const hosts = document.querySelectorAll('.glpi-host-card');
     let vncButtonCount = 0;
     
     hosts.forEach(host => {

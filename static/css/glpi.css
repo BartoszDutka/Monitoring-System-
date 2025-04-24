@@ -1,5 +1,10 @@
 /* Simple, clean, modern GLPI Category styles */
 
+/* Apply box-sizing to all elements to prevent overflow */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 :root {
   --glpi-primary: #4a6cf7;
   --glpi-secondary: #6c757d;
@@ -22,6 +27,9 @@
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 4px 12px rgba(74, 108, 247, 0.2);
+  position: relative; /* Added for proper positioning of pseudo-elements */
+  overflow: hidden; /* Prevent decorative elements from causing overflow */
+  width: 100%;
 }
 
 .glpi-dashboard-header::before {
@@ -153,9 +161,11 @@
 /* Clean, modern card grid */
 .glpi-hosts-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); /* Increased from 320px */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Changed from auto-fill to auto-fit and reduced min width */
   gap: 1.2rem;
   margin-top: 1.5rem;
+  width: 100%;
+  padding: 0;
 }
 
 /* Simplified card design */
@@ -171,6 +181,8 @@
   border: 1px solid rgba(0, 0, 0, 0.04);
   height: auto;
   margin-bottom: 20px; /* Prevent overlapping */
+  width: 100%; /* Ensure cards don't exceed container width */
+  max-width: 100%;
 }
 
 .glpi-host-card:hover {
@@ -238,8 +250,10 @@
   margin-top: 0.5rem;
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden; /* Prevent horizontal scrolling in details */
   max-height: 420px; /* Increased from 320px to reduce scrolling */
   padding-right: 6px;
+  width: 100%;
 }
 
 /* Minimal scrollbar */
@@ -269,9 +283,9 @@
 
 /* Consistent styling for ALL label elements */
 .device-details p strong {
-  flex: 0 0 110px; /* Fixed width, no shrinking, no growing */
-  width: 110px;
-  min-width: 110px; /* Ensure minimum width */
+  flex: 0 0 100px; /* Reduced from 110px to prevent potential overflow */
+  width: 100px;
+  min-width: 100px; /* Ensure minimum width */
   font-weight: 600;
   color: var(--glpi-secondary);
   font-size: 0.85rem;
@@ -279,7 +293,7 @@
   text-align: left; /* Left-align the text */
   display: block; /* For better alignment */
   vertical-align: top; /* Align to top */
-  flex-basis: 110px;
+  flex-basis: 100px;
   flex-shrink: 0;
   flex-grow: 0;
   box-sizing: border-box;
@@ -384,6 +398,19 @@
     flex-direction: column;
   }
   
+  .search-container {
+    width: 100%;
+  }
+  
+  .refresh-controls {
+    width: 100%;
+  }
+  
+  .refresh-button {
+    flex: 1;
+    justify-content: center;
+  }
+  
   .glpi-hosts-container {
     grid-template-columns: 1fr;
   }
@@ -392,12 +419,19 @@
 /* Media query adjustments */
 @media (min-width: 1600px) {
   .glpi-hosts-container {
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); /* Even larger on big screens */
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* Adjusted for better fit */
   }
   
   .device-details {
     max-height: 480px; /* More space on large screens */
   }
+}
+
+/* Add a container constraint to prevent overflow */
+.content-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 /* Hide debug info */
