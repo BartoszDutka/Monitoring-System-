@@ -4,6 +4,9 @@ class DashboardUpdater {
         this.zabbixInterval = 120000; // 2 minutes
         this.setupAutoRefresh();
         this.setupManualRefresh();
+        
+        // Add initialization for GLPI cards on dashboard
+        this.updateGLPICardCounts();
     }
 
     setupAutoRefresh() {
@@ -69,6 +72,9 @@ class DashboardUpdater {
                 } else {
                     console.log('GLPI data refreshed successfully');
                 }
+                
+                // Update GLPI card counts
+                this.updateGLPICardCounts();
             }
 
         } catch (error) {
@@ -106,9 +112,19 @@ class DashboardUpdater {
         const categories = ['workstations', 'terminals', 'servers', 'network', 'printers', 'monitors', 'racks', 'other'];
         
         categories.forEach(category => {
-            const countElement = document.querySelector(`.glpi-category-${category} .count`);
+            const countElement = document.querySelector(`.dashboard-nav-link[href*="/glpi/${category}"] .count`);
             if (countElement) {
                 countElement.textContent = data.category_counts[category] || 0;
+                
+                // Update visual indicator based on count
+                const linkElement = countElement.closest('.dashboard-nav-link');
+                if (linkElement) {
+                    if (parseInt(countElement.textContent) === 0) {
+                        linkElement.classList.add('empty-category');
+                    } else {
+                        linkElement.classList.remove('empty-category');
+                    }
+                }
             }
         });
         
@@ -122,10 +138,40 @@ class DashboardUpdater {
         if (window.location.pathname.startsWith('/glpi/')) {
             window.location.reload();
         }
+        
+        this.updateGLPICardCounts();
+    }
+
+    updateGLPICardCounts() {
+        // Update GLPI category counts on dashboard cards
+        const glpiLinks = document.querySelectorAll('.glpi-card .dashboard-nav-link');
+        
+        glpiLinks.forEach(link => {
+            // Check if the link has a count span
+            const countSpan = link.querySelector('.count');
+            if (countSpan && countSpan.textContent) {
+                // If count is 0, add a class to highlight it's empty
+                if (countSpan.textContent === '0') {
+                    link.classList.add('empty-category');
+                } else {
+                    link.classList.remove('empty-category');
+                }
+            }
+        });
+        
+        console.log('GLPI card counts updated');
     }
 }
 
 // Initialize dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.dashboardUpdater = new DashboardUpdater();
+    
+    // If we're on the index page after login, check GLPI data
+    if (window.location.pathname === '/') {
+        // Update GLPI card counts
+        if (window.dashboardUpdater) {
+            window.dashboardUpdater.updateGLPICardCounts();
+        }
+    }
 });

@@ -145,6 +145,9 @@ def login():
                 try:
                     # Initialize GLPI data from database with clear parameters
                     global glpi_cache
+                    logger.info("Loading GLPI data from database after successful login...")
+                    
+                    # Explicitly force loading from assets table in database
                     data = get_glpi_data(refresh_api=False, from_db=True)
                     
                     if not data or not isinstance(data, dict):
@@ -173,6 +176,10 @@ def login():
                                 'other': 0
                             }
                         }
+                    
+                    # Log the number of devices loaded
+                    logger.info(f"Loaded {data.get('total_count', 0)} devices from database")
+                    logger.info(f"Category counts: {data.get('category_counts', {})}")
                     
                     # Update both global cache and Flask cache
                     glpi_cache = data

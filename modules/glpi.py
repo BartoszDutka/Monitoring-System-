@@ -520,7 +520,8 @@ class GLPIClient:
         try:
             logger.info("Retrieving devices from assets table in database")
             with get_db_cursor() as cursor:
-                # Pobierz wszystkie aktywa z bazy danych z ostatnich 24 godzin lub bez ostatniego widzenia
+                # Get all assets from database regardless of last_seen timestamp
+                # to ensure we load everything on login
                 cursor.execute("""
                     SELECT 
                         name,
@@ -535,9 +536,7 @@ class GLPIClient:
                         status,
                         specifications,
                         last_seen
-                    FROM assets 
-                    WHERE last_seen >= NOW() - INTERVAL 24 HOUR
-                    OR last_seen IS NULL
+                    FROM assets
                 """)
                 assets = cursor.fetchall()
 
@@ -558,6 +557,10 @@ class GLPIClient:
                 printers = []
                 monitors = []
                 racks = []
+
+                # Log some sample assets to verify data loading
+                if assets and len(assets) > 0:
+                    logger.info(f"Sample asset: {assets[0]['name']}, Type: {assets[0]['type']}")
 
                 for asset in assets:
                     # Konwertuj specifications z JSON na słownik jeśli istnieje

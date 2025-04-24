@@ -139,6 +139,58 @@ class RequestDebugger:
                 "timestamp": datetime.now().isoformat()
             }
 
+def debug_glpi_data_loading():
+    """
+    Debug function to check GLPI data loading from the database
+    
+    Returns:
+        dict: Diagnostic information about assets in the database
+    """
+    from modules.database import get_db_cursor
+    
+    try:
+        with get_db_cursor() as cursor:
+            # Get counts from assets table
+            cursor.execute("""
+                SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN name LIKE 'KS%' THEN 1 ELSE 0 END) as workstations,
+                    SUM(CASE WHEN name LIKE 'KT%' THEN 1 ELSE 0 END) as terminals,
+                    SUM(CASE WHEN name LIKE 'SRV%' THEN 1 ELSE 0 END) as servers,
+                    SUM(CASE WHEN type = 'network' THEN 1 ELSE 0 END) as network_devices,
+                    SUM(CASE WHEN type = 'printer' THEN 1 ELSE 0 END) as printers,
+                    SUM(CASE WHEN type = 'monitor' THEN 1 ELSE 0 END) as monitors,
+                    SUM(CASE WHEN type = 'rack' THEN 1 ELSE 0 END) as racks
+                FROM assets
+            """)
+            counts = cursor.fetchone()
+            
+            # Get sample assets from each category
+            cursor.execute("""
+                (SELECT name, type, ip_address FROM assets WHERE name LIKE 'KS%' LIMIT 1)
+                UNION ALL
+                (SELECT name, type, ip_address FROM assets WHERE name LIKE 'KT%' LIMIT 1)
+                UNION ALL
+                (SELECT name, type, ip_address FROM assets WHERE name LIKE 'SRV%' LIMIT 1)
+                UNION ALL
+                (SELECT name, type, ip_address FROM assets WHERE type = 'network' LIMIT 1)
+                UNION ALL
+                (SELECT name, type, ip_address FROM assets WHERE type = 'printer' LIMIT 1)
+            """)
+            samples = cursor.fetchall()
+            
+            return {
+                "counts": counts,
+                "samples": samples,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+    except Exception as e:
+        return {
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
 # API endpoint for debugging
 def register_debug_endpoints(app):
     """
