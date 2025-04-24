@@ -6,6 +6,17 @@ from flask import session
 from modules.database import archive_asset, get_db_cursor
 import json
 from datetime import datetime
+from flask_caching import Cache
+import logging
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
+# Configure caching
+cache = Cache(config={
+    'CACHE_TYPE': 'SimpleCache',
+    'CACHE_DEFAULT_TIMEOUT': 300
+})
 
 class GLPIClient:
     def __init__(self):
@@ -507,17 +518,23 @@ class GLPIClient:
     def get_devices_from_db(self):
         """Get devices from local database"""
         try:
+            logger.info("Retrieving devices from assets table in database")
             with get_db_cursor() as cursor:
-                # Pobierz wszystkie aktywa z bazy danych
+                # Pobierz wszystkie aktywa z bazy danych z ostatnich 24 godzin lub bez ostatniego widzenia
                 cursor.execute("""
                     SELECT 
                         name,
                         type,
                         serial_number,
                         model,
+                        manufacturer,
                         location,
+                        ip_address,
+                        mac_address,
+                        os_info,
                         status,
-                        specifications
+                        specifications,
+                        last_seen
                     FROM assets 
                     WHERE last_seen >= NOW() - INTERVAL 24 HOUR
                     OR last_seen IS NULL
@@ -525,8 +542,10 @@ class GLPIClient:
                 assets = cursor.fetchall()
 
                 if not assets:
-                    print("No assets found in database")
+                    logger.warning("No assets found in database")
                     return self.get_empty_response()
+                
+                logger.info(f"Found {len(assets)} assets in database")
 
                 # Kategoryzuj aktywa
                 categorized = {
@@ -551,17 +570,32 @@ class GLPIClient:
                     name = asset['name'].upper() if asset['name'] else ''
                     asset_type = asset['type'].lower() if asset['type'] else ''
                     
-                    # Mapuj urządzenia do odpowiednich kategorii
+                    # Enhance device data with proper structure
                     device_data = {
+                        'id': asset.get('specifications', {}).get('id', 0),
                         'name': asset['name'],
-                        'serial_number': asset['serial_number'],
-                        'model': asset['model'],
-                        'location': asset['location'],
-                        'type': asset['type'],
-                        'status': asset['status'],
-                        'specifications': asset['specifications']
+                        'serial': asset['serial_number'],
+                        'model_name': asset['model'],
+                        'manufacturer_name': asset['manufacturer'],
+                        'location_name': asset['location'],
+                        'ip_address': asset['ip_address'],
+                        'mac_address': asset['mac_address'],
+                        'status': 'active' if asset['status'] == 'active' else 'inactive',
+                        'type': asset_type,
+                        # Include all original specifications
+                        **asset.get('specifications', {})
                     }
+                    
+                    # Extract OS info
+                    if asset['os_info']:
+                        try:
+                            os_info = json.loads(asset['os_info'])
+                            device_data['os_name'] = os_info.get('os', '')
+                            device_data['os_version'] = os_info.get('version', '')
+                        except:
+                            pass
 
+                    # Mapuj urządzenia do odpowiednich kategorii
                     if name.startswith('KS'):
                         categorized['workstations'].append(device_data)
                     elif name.startswith('KT'):
@@ -579,6 +613,7 @@ class GLPIClient:
                     else:
                         categorized['other'].append(device_data)
 
+                # Create full response with proper counts and structure
                 response = {
                     'computers': [*categorized['workstations'], *categorized['terminals'], 
                                 *categorized['servers'], *categorized['other']],
@@ -597,13 +632,17 @@ class GLPIClient:
                         'printers': len(printers),
                         'monitors': len(monitors),
                         'racks': len(racks)
-                    }
+                    },
+                    'last_refresh': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 }
 
+                logger.info(f"Successfully processed database assets into {response['total_count']} devices")
                 return response
 
         except Exception as e:
-            print(f"Error getting devices from database: {e}")
+            logger.error(f"Error getting devices from database: {e}")
+            import traceback
+            traceback.print_exc()
             return self.get_empty_response()
 
     def get_last_refresh_time(self):
@@ -862,7 +901,7 @@ class GLPIClient:
                     INSERT INTO system_logs (source, severity, host_name, message)
                     VALUES ('glpi', 'info', 'system', %s)
                 """, (f"GLPI category '{category}' refresh completed successfully",))
-                    
+            
             # Return updated data from database
             return self.get_devices_from_db()
             
@@ -880,27 +919,55 @@ class GLPIClient:
                 
             return base_data
 
-def get_glpi_data(refresh=False, category=None):
+def get_glpi_data(refresh_api=False, from_db=True, category=None):
     """
-    Get GLPI data - from database by default or API if refresh requested.
-    Optional category parameter to only refresh specific category data.
+    Get GLPI data with flexible source control.
     """
     try:
         client = GLPIClient()
-        if refresh:
-            # If category is specified, only refresh that category
-            if category:
-                print(f"Refreshing specific category '{category}' from GLPI API")
-                return client.refresh_category_from_api(category)
-            else:
-                print("Refreshing all GLPI data from API")
-                return client.refresh_from_api()
+        logger.info(f"Getting GLPI data (refresh_api={refresh_api}, from_db={from_db}, category={category})")
         
-        # Default: get data from database
-        print("Getting GLPI data from database")
-        return client.get_devices_from_db()
+        # Initialize session if we need API access
+        if refresh_api and not client.init_session():
+            logger.error("Failed to initialize GLPI session")
+            return client.get_empty_response()
+        
+        if refresh_api:
+            # Update database with fresh API data
+            if category:
+                logger.info(f"Refreshing category '{category}' from API to database")
+                api_data = client.refresh_category_from_api(category)
+                logger.info(f"Category '{category}' refreshed with {len(api_data.get('computers', []))} computers")
+            else:
+                logger.info("Refreshing all data from API to database")
+                api_data = client.refresh_from_api()
+                logger.info(f"All GLPI data refreshed with {len(api_data.get('computers', []))} computers")
+        
+        # Get data from database if requested
+        if from_db:
+            logger.info("Getting GLPI data from database")
+            db_data = client.get_devices_from_db()
+            
+            # Validate data structure
+            if db_data and isinstance(db_data, dict):
+                logger.info(f"Retrieved {db_data.get('total_count', 0)} devices from database")
+                return db_data
+            
+            logger.error("Invalid data format from database")
+            return client.get_empty_response()
+        
+        # Return API data if we did a refresh but don't want DB data
+        if refresh_api and not from_db:
+            if 'api_data' in locals() and api_data and isinstance(api_data, dict):
+                logger.info(f"Returning data from API with {api_data.get('total_count', 0)} total devices")
+                return api_data
+        
+        # Default fallback
+        logger.warning("No valid data found, returning empty response")
+        return client.get_empty_response()
+        
     except Exception as e:
-        print(f"Error in get_glpi_data: {e}")
+        logger.error(f"Error in get_glpi_data: {e}")
         import traceback
         traceback.print_exc()
-        return GLPIClient().get_empty_response()
+        return client.get_empty_response()

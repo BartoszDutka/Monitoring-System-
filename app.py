@@ -71,6 +71,10 @@ cache = Cache(config={
 })
 cache.init_app(app)
 
+# Initialize GLPI module cache
+from modules.glpi import cache as glpi_cache
+glpi_cache.init_app(app)
+
 # Custom filter for checking if a character is a digit
 @app.template_filter('isdigit')
 def isdigit_filter(s):
@@ -124,7 +128,7 @@ def login():
         
         # Najpierw próbujemy logowania LDAP
         if authenticate_user(username, password):
-            user_info = get_user_info(username)  # Pobierz dane z lokalnej bazy
+            user_info = get_user_info(username)
             if user_info:
                 session['logged_in'] = True
                 session['username'] = username
@@ -137,9 +141,51 @@ def login():
                         SET last_login = CURRENT_TIMESTAMP 
                         WHERE username = %s
                     """, (username,))
+                
+                try:
+                    # Initialize GLPI data from database with clear parameters
+                    global glpi_cache
+                    data = get_glpi_data(refresh_api=False, from_db=True)
                     
+                    if not data or not isinstance(data, dict):
+                        logger.error("Invalid GLPI data format from database")
+                        data = {
+                            'computers': [],
+                            'categorized': {
+                                'workstations': [],
+                                'terminals': [],
+                                'servers': [],
+                                'other': []
+                            },
+                            'network_devices': [],
+                            'printers': [],
+                            'monitors': [],
+                            'racks': [],
+                            'total_count': 0,
+                            'category_counts': {
+                                'workstations': 0,
+                                'terminals': 0,
+                                'servers': 0,
+                                'network': 0,
+                                'printers': 0,
+                                'monitors': 0,
+                                'racks': 0,
+                                'other': 0
+                            }
+                        }
+                    
+                    # Update both global cache and Flask cache
+                    glpi_cache = data
+                    cache.set('glpi_data', data)
+                    logger.info("GLPI data initialized from database successfully")
+                    
+                except Exception as e:
+                    logger.error(f"Error initializing GLPI data: {e}")
+                    import traceback
+                    traceback.print_exc()
+                
                 return redirect(url_for('index'))
-        
+                
         # Jeśli LDAP nie zadziała, próbujemy lokalnej bazy
         elif verify_user(username, password):
             user_info = get_user_info(username)
@@ -164,27 +210,26 @@ def logout():
 @app.route('/api/glpi/refresh')
 @login_required
 def refresh_glpi():
-    """Endpoint to refresh GLPI data from API or get from database"""
+    """Endpoint to refresh GLPI data from API and update database"""
     try:
         global glpi_cache
+        logger.info("Starting GLPI data refresh from API")
         
-        # Check if we should force API refresh
-        force_api = request.args.get('force_api', '0') == '1'
+        # First refresh data from API to database with clear parameters
+        refreshed_data = get_glpi_data(refresh_api=True, from_db=False)
         
-        if force_api:
-            # Force refresh from API and update database
-            glpi_cache = get_glpi_data(refresh=True)
-            logger.info("Refreshed GLPI data from API and updated database")
-        else:
-            # Get data from database
-            glpi_cache = get_glpi_data(refresh=False)
-            logger.info("Retrieved GLPI data from database")
-            
+        # Then get fresh data from database
+        glpi_cache = get_glpi_data(refresh_api=False, from_db=True)
+        
+        # Update the Flask cache
+        cache.set('glpi_data', glpi_cache)
+        
+        logger.info("GLPI data refresh complete")
         return jsonify({
             "status": "success",
-            "message": "Data retrieved successfully",
-            "source": "api" if force_api else "database",
-            "last_refresh": glpi_cache.get('last_refresh')
+            "message": "Data refreshed and retrieved from database",
+            "last_refresh": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            "category_counts": glpi_cache.get('category_counts', {})
         })
     except Exception as e:
         logger.error(f"Error in refresh_glpi: {str(e)}")
@@ -203,41 +248,23 @@ def refresh_glpi_category(category):
         if force_api:
             # Force refresh specific category from API
             logger.info(f"Forcing refresh of category '{category}' from API")
-            new_data = get_glpi_data(refresh=True, category=category)
+            new_data = get_glpi_data(refresh_api=True, from_db=False, category=category)
+            
+            # Get updated data from database
+            glpi_cache = get_glpi_data(refresh_api=False, from_db=True)
         else:
             # Get data from database
             logger.info(f"Retrieving category '{category}' from database")
-            new_data = get_glpi_data(refresh=False)
+            glpi_cache = get_glpi_data(refresh_api=False, from_db=True)
             
-        # Initialize glpi_cache if needed
-        if glpi_cache is None:
-            glpi_cache = new_data
-        else:
-            # Update only the specific category
-            if category == 'workstations':
-                glpi_cache['categorized']['workstations'] = new_data['categorized']['workstations']
-            elif category == 'terminals':
-                glpi_cache['categorized']['terminals'] = new_data['categorized']['terminals']
-            elif category == 'servers':
-                glpi_cache['categorized']['servers'] = new_data['categorized']['servers']
-            elif category == 'network':
-                glpi_cache['network_devices'] = new_data['network_devices']
-            elif category == 'printers':
-                glpi_cache['printers'] = new_data['printers']
-            elif category == 'monitors':
-                glpi_cache['monitors'] = new_data['monitors']
-            elif category == 'racks':
-                glpi_cache['racks'] = new_data['racks']
-            elif category == 'others':
-                glpi_cache['categorized']['other'] = new_data['categorized']['other']
-            
-            # Update counters
-            glpi_cache['category_counts'] = new_data['category_counts']
+        # Update the Flask cache
+        cache.set('glpi_data', glpi_cache)
             
         return jsonify({
             "status": "success",
             "message": f"Category '{category}' refreshed successfully",
-            "source": "api" if force_api else "database"
+            "source": "api" if force_api else "database",
+            "category_counts": glpi_cache.get('category_counts', {})
         })
     except Exception as e:
         logger.error(f"Error in refresh_glpi_category: {str(e)}")
@@ -247,45 +274,124 @@ def refresh_glpi_category(category):
 @app.route('/api/glpi/data')
 @login_required
 def get_cached_glpi_data():
+    """Get GLPI data with proper caching"""
     start_time = datetime.now()
     
     # Check if force refresh is requested
     force_api = request.args.get('force_api', '0') == '1'
     
-    @cache.cached(timeout=300, key_prefix='glpi_data')
     def get_data():
-        return get_glpi_data(refresh=False)  # Always get from database by default
+        try:
+            # Be explicit about parameters to ensure we get database data
+            data = get_glpi_data(refresh_api=False, from_db=True)
+            if not isinstance(data, dict) or 'category_counts' not in data:
+                # Initialize with proper default structure if invalid data
+                return {
+                    'computers': [],
+                    'categorized': {
+                        'workstations': [],
+                        'terminals': [],
+                        'servers': [],
+                        'other': []
+                    },
+                    'network_devices': [],
+                    'printers': [],
+                    'monitors': [],
+                    'racks': [],
+                    'total_count': 0,
+                    'category_counts': {
+                        'workstations': 0,
+                        'terminals': 0,
+                        'servers': 0,
+                        'network': 0,
+                        'printers': 0,
+                        'monitors': 0,
+                        'racks': 0,
+                        'other': 0
+                    }
+                }
+            return data
+        except Exception as e:
+            logger.error(f"Error getting GLPI data: {e}")
+            return {
+                'computers': [],
+                'categorized': {
+                    'workstations': [],
+                    'terminals': [],
+                    'servers': [],
+                    'other': []
+                },
+                'network_devices': [],
+                'printers': [],
+                'monitors': [],
+                'racks': [],
+                'total_count': 0,
+                'category_counts': {
+                    'workstations': 0,
+                    'terminals': 0,
+                    'servers': 0,
+                    'network': 0,
+                    'printers': 0,
+                    'monitors': 0,
+                    'racks': 0,
+                    'other': 0
+                }
+            }
     
     # Either use cached data or force refresh
     if force_api:
         cache.delete('glpi_data')
-        data = get_glpi_data(refresh=True)
+        data = get_glpi_data(refresh_api=True, from_db=True)
     else:
-        data = get_data()
+        data = cache.get('glpi_data')
+        if data is None:
+            data = get_data()
+            cache.set('glpi_data', data)
     
     response_time = (datetime.now() - start_time).total_seconds()
-    logger.info(f"GLPI data retrieved in {response_time:.2f} seconds (source: {'API' if force_api else 'database'})")
+    logger.info(f"GLPI data retrieved in {response_time:.2f} seconds (source: {'API' if force_api else 'cache/db'})")
     
-    return jsonify(data) if request.path.startswith('/api/') else data
+    return data if request.path.startswith('/api/') else data
 
-# Modify index route to use cached data
 @app.route('/')
 @login_required
 def index():
+    """Main dashboard route with proper error handling and caching"""
     start_time = datetime.now()
     
-    zabbix_data = get_cached_zabbix_data()
-    graylog_data = get_cached_graylog_data()
-    glpi_data = get_cached_glpi_data()
-    
-    response_time = (datetime.now() - start_time).total_seconds()
-    logger.info(f"Dashboard loaded in {response_time:.2f} seconds")
-    
-    return render_template('index.html',
-                         zabbix=zabbix_data,
-                         graylog=graylog_data,
-                         glpi=glpi_data,
-                         request=request)
+    try:
+        # Get GLPI data with proper structure
+        glpi_data = get_cached_glpi_data()
+        if not isinstance(glpi_data, dict) or 'category_counts' not in glpi_data:
+            glpi_data = {
+                'category_counts': {
+                    'workstations': 0,
+                    'terminals': 0,
+                    'servers': 0,
+                    'network': 0,
+                    'printers': 0,
+                    'monitors': 0,
+                    'racks': 0,
+                    'other': 0
+                }
+            }
+        
+        # Get other monitoring data
+        zabbix_data = get_cached_zabbix_data()
+        graylog_data = get_cached_graylog_data()
+        
+        response_time = (datetime.now() - start_time).total_seconds()
+        logger.info(f"Dashboard loaded in {response_time:.2f} seconds")
+        
+        return render_template('index.html',
+                             zabbix=zabbix_data,
+                             graylog=graylog_data,
+                             glpi=glpi_data,
+                             request=request)
+                             
+    except Exception as e:
+        logger.error(f"Error loading dashboard: {e}")
+        return render_template('error.html', error=str(e)), 500
 
 # Add new API endpoints for cached data
 @app.route('/api/zabbix/refresh')
@@ -328,8 +434,25 @@ def force_refresh_zabbix():
 @app.route('/api/glpi/force_refresh')
 @login_required
 def force_refresh_glpi():
-    cache.delete('glpi_data')
-    return jsonify(get_cached_glpi_data())
+    """Force refresh of GLPI data from API"""
+    try:
+        global glpi_cache
+        cache.delete('glpi_data')
+        
+        # Explicitly refresh from API and then get from database
+        get_glpi_data(refresh_api=True, from_db=False)
+        glpi_cache = get_glpi_data(refresh_api=False, from_db=True)
+        
+        cache.set('glpi_data', glpi_cache)
+        
+        return jsonify({
+            "status": "success", 
+            "message": "GLPI data refreshed from API",
+            "category_counts": glpi_cache.get('category_counts', {})
+        })
+    except Exception as e:
+        logger.error(f"Error in force_refresh_glpi: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/graylog/force_refresh')
 @login_required
@@ -744,7 +867,7 @@ def upload_avatar():
         if file and allowed_file(file.filename):
             # Delete old avatar if exists
             old_avatar = session.get('user_info', {}).get('avatar_path')
-            if old_avatar:
+            if (old_avatar):
                 old_path = os.path.join(app.config['UPLOAD_FOLDER'], old_avatar)
                 if os.path.exists(old_path):
                     os.remove(old_path)
