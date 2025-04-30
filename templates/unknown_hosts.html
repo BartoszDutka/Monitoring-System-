@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="dashboard-header">
-    <h1>Unknown Hosts</h1>
+    <h1 data-en="Unknown Hosts" data-pl="Nieznane hosty">Unknown Hosts</h1>
 </div>
 
 <div class="dashboard-grid">
@@ -11,19 +11,19 @@
             <nav class="dashboard-nav horizontal">
                 <a href="/" class="dashboard-nav-link">
                     <i class="fas fa-home"></i>
-                    <span>Dashboard</span>
+                    <span data-en="Dashboard" data-pl="Pulpit">Dashboard</span>
                 </a>
                 <a href="/available-hosts" class="dashboard-nav-link available">
                     <i class="fas fa-check-circle"></i>
-                    <span>Available</span>
+                    <span data-en="Available" data-pl="Dostępne">Available</span>
                 </a>
                 <a href="/unavailable-hosts" class="dashboard-nav-link unavailable">
                     <i class="fas fa-times-circle"></i>
-                    <span>Unavailable</span>
+                    <span data-en="Unavailable" data-pl="Niedostępne">Unavailable</span>
                 </a>
                 <a href="/unknown-hosts" class="dashboard-nav-link unknown active">
                     <i class="fas fa-question-circle"></i>
-                    <span>Unknown</span>
+                    <span data-en="Unknown" data-pl="Nieznane">Unknown</span>
                 </a>
             </nav>
         </div>
@@ -32,11 +32,11 @@
     <div class="dashboard-card full-width">
         <div class="card-header">
             <i class="fas fa-server"></i>
-            <h2>Host Status</h2>
+            <h2 data-en="Host Status" data-pl="Status hostów">Host Status</h2>
             <div class="header-actions">
                 <div class="search-container">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="host-search" placeholder="Search unknown hosts...">
+                    <input type="text" class="host-search" placeholder="Search unknown hosts..." data-en-placeholder="Search unknown hosts..." data-pl-placeholder="Wyszukaj nieznane hosty...">
                 </div>
             </div>
         </div>
@@ -47,4 +47,22 @@
         </div>
     </div>
 </div>
+
+<!-- Add this JavaScript block at the end of your content block -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update placeholder text when language changes
+    document.addEventListener('languageChanged', function(e) {
+        const lang = e.detail.language;
+        const searchInput = document.querySelector('.host-search');
+        if (searchInput) {
+            const placeholder = searchInput.getAttribute(`data-${lang}-placeholder`);
+            if (placeholder) {
+                searchInput.placeholder = placeholder;
+            }
+        }
+    });
+});
+</script>
+
 {% endblock %}

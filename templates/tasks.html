@@ -6,11 +6,11 @@
 
 {% block content %}
 <div class="dashboard-header">
-    <h1>Task Management</h1>
+    <h1 data-en="Task Management" data-pl="Zarządzanie zadaniami">Task Management</h1>
     <div class="header-actions">
         {% if is_admin %}
         <button class="btn primary-btn" id="create-task-btn">
-            <i class="fas fa-plus"></i> New Task
+            <i class="fas fa-plus"></i> <span data-en="New Task" data-pl="Nowe zadanie">New Task</span>
         </button>
         {% endif %}
     </div>
@@ -20,24 +20,24 @@
 <div class="filter-container">
     <div class="filters">
         <select id="status-filter" class="filter-select">
-            <option value="all">All Statuses</option>
-            <option value="new">New</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="all" data-en="All Statuses" data-pl="Wszystkie statusy">All Statuses</option>
+            <option value="new" data-en="New" data-pl="Nowe">New</option>
+            <option value="in_progress" data-en="In Progress" data-pl="W trakcie">In Progress</option>
+            <option value="completed" data-en="Completed" data-pl="Zakończone">Completed</option>
+            <option value="cancelled" data-en="Cancelled" data-pl="Anulowane">Cancelled</option>
         </select>
         
         <select id="priority-filter" class="filter-select">
-            <option value="all">All Priorities</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-            <option value="critical">Critical</option>
+            <option value="all" data-en="All Priorities" data-pl="Wszystkie priorytety">All Priorities</option>
+            <option value="low" data-en="Low" data-pl="Niski">Low</option>
+            <option value="medium" data-en="Medium" data-pl="Średni">Medium</option>
+            <option value="high" data-en="High" data-pl="Wysoki">High</option>
+            <option value="critical" data-en="Critical" data-pl="Krytyczny">Critical</option>
         </select>
         
         {% if is_admin %}
         <select id="assignee-filter" class="filter-select">
-            <option value="all">All Assignees</option>
+            <option value="all" data-en="All Assignees" data-pl="Wszyscy przypisani">All Assignees</option>
             {% for user in users %}
             <option value="{{ user.username }}">{{ user.display_name or user.username }}</option>
             {% endfor %}
@@ -46,7 +46,7 @@
     </div>
     
     <div class="search-container">
-        <input type="text" id="task-search" placeholder="Search tasks...">
+        <input type="text" id="task-search" placeholder="Search tasks..." data-en-placeholder="Search tasks..." data-pl-placeholder="Szukaj zadań...">
         <i class="fas fa-search"></i>
     </div>
 </div>
@@ -57,12 +57,12 @@
     <div class="task-list">
         <div class="task-header">
             <div class="task-id">#</div>
-            <div class="task-title">Title</div>
-            <div class="task-assignee">Assignee</div>
-            <div class="task-status">Status</div>
-            <div class="task-priority">Priority</div>
-            <div class="task-due-date">Due Date</div>
-            <div class="task-actions">Actions</div>
+            <div class="task-title" data-en="Title" data-pl="Tytuł">Title</div>
+            <div class="task-assignee" data-en="Assignee" data-pl="Przypisane do">Assignee</div>
+            <div class="task-status" data-en="Status" data-pl="Status">Status</div>
+            <div class="task-priority" data-en="Priority" data-pl="Priorytet">Priority</div>
+            <div class="task-due-date" data-en="Due Date" data-pl="Termin">Due Date</div>
+            <div class="task-actions" data-en="Actions" data-pl="Akcje">Actions</div>
         </div>
         
         {% for task in tasks %}
@@ -98,9 +98,9 @@
     {% else %}
     <div class="no-tasks">
         <i class="fas fa-tasks"></i>
-        <p>No tasks found</p>
+        <p data-en="No tasks found" data-pl="Nie znaleziono zadań">No tasks found</p>
         {% if is_admin %}
-        <button class="btn primary-btn" id="no-tasks-create-btn">Create New Task</button>
+        <button class="btn primary-btn" id="no-tasks-create-btn" data-en="Create New Task" data-pl="Utwórz nowe zadanie">Create New Task</button>
         {% endif %}
     </div>
     {% endif %}
@@ -111,89 +111,89 @@
 <div id="create-task-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Create New Task</h3>
+            <h3 data-en="Create New Task" data-pl="Utwórz nowe zadanie">Create New Task</h3>
             <span class="close">&times;</span>
         </div>
         <form action="{{ url_for('tasks.create_task') }}" method="POST" class="modal-form" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="title">Title*</label>
+                <label for="title" data-en="Title*" data-pl="Tytuł*">Title*</label>
                 <input type="text" id="title" name="title" required>
             </div>
             
             <div class="form-group">
-                <label for="description">Description</label>
+                <label for="description" data-en="Description" data-pl="Opis">Description</label>
                 <textarea id="description" name="description" rows="4"></textarea>
             </div>
             
             <div class="form-row">
                 <div class="form-group half">
-                    <label for="assignee">Assignee*</label>
+                    <label for="assignee" data-en="Assignee*" data-pl="Przypisane do*">Assignee*</label>
                     <select id="assignee" name="assignee" required>
-                        <option value="">Select Assignee</option>
+                        <option value="" data-en="Select Assignee" data-pl="Wybierz osobę">Select Assignee</option>
                         {% for user in users %}
                         <option value="{{ user.username }}">{{ user.display_name or user.username }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="form-group half">
-                    <label for="priority">Priority</label>
+                    <label for="priority" data-en="Priority" data-pl="Priorytet">Priority</label>
                     <select id="priority" name="priority">
-                        <option value="low">Low</option>
-                        <option value="medium" selected>Medium</option>
-                        <option value="high">High</option>
-                        <option value="critical">Critical</option>
+                        <option value="low" data-en="Low" data-pl="Niski">Low</option>
+                        <option value="medium" selected data-en="Medium" data-pl="Średni">Medium</option>
+                        <option value="high" data-en="High" data-pl="Wysoki">High</option>
+                        <option value="critical" data-en="Critical" data-pl="Krytyczny">Critical</option>
                     </select>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group half">
-                    <label for="due_date">Due Date</label>
+                    <label for="due_date" data-en="Due Date" data-pl="Termin">Due Date</label>
                     <input type="date" id="due_date" name="due_date">
                 </div>
                 <div class="form-group half">
-                    <label for="related_type">Related To</label>
+                    <label for="related_type" data-en="Related To" data-pl="Powiązane z">Related To</label>
                     <select id="related_type" name="related_type">
-                        <option value="">Not Related</option>
-                        <option value="glpi_device">GLPI Device</option>
-                        <option value="zabbix_alert">Zabbix Alert</option>
+                        <option value="" data-en="Not Related" data-pl="Niepowiązane">Not Related</option>
+                        <option value="glpi_device" data-en="GLPI Device" data-pl="Urządzenie GLPI">GLPI Device</option>
+                        <option value="zabbix_alert" data-en="Zabbix Alert" data-pl="Alert Zabbix">Zabbix Alert</option>
                     </select>
                 </div>
             </div>
             <div id="related-container" class="form-group" style="display: none;">
                 <div id="glpi-device-selector" style="display: none;">
-                    <label for="glpi_device_search">Search Device</label>
-                    <input type="text" id="glpi_device_search" placeholder="Type to search devices..." class="device-search">
+                    <label for="glpi_device_search" data-en="Search Device" data-pl="Wyszukaj urządzenie">Search Device</label>
+                    <input type="text" id="glpi_device_search" placeholder="Type to search devices..." data-en-placeholder="Type to search devices..." data-pl-placeholder="Wpisz, aby wyszukać urządzenia..." class="device-search">
                     <div class="select-container">
                         <select id="glpi_device_id" name="related_id" class="related-select" size="10">
-                            <option value="">Loading devices...</option>
+                            <option value="" data-en="Loading devices..." data-pl="Ładowanie urządzeń...">Loading devices...</option>
                         </select>
                     </div>
                 </div>
                 <div id="zabbix-alert-selector" style="display: none;">
-                    <label for="zabbix_alert_search">Search Alert</label>
-                    <input type="text" id="zabbix_alert_search" placeholder="Type to search alerts..." class="device-search">
+                    <label for="zabbix_alert_search" data-en="Search Alert" data-pl="Wyszukaj alert">Search Alert</label>
+                    <input type="text" id="zabbix_alert_search" placeholder="Type to search alerts..." data-en-placeholder="Type to search alerts..." data-pl-placeholder="Wpisz, aby wyszukać alerty..." class="device-search">
                     <div class="select-container">
                         <select id="zabbix_alert_id" name="related_id" class="related-select" size="10">
-                            <option value="">Loading alerts...</option>
+                            <option value="" data-en="Loading alerts..." data-pl="Ładowanie alertów...">Loading alerts...</option>
                         </select>
                     </div>
                 </div>
                 <input type="hidden" id="related_data" name="related_data" value="{}">
             </div>
             <div class="form-group">
-                <label for="attachment">Attachment</label>
+                <label for="attachment" data-en="Attachment" data-pl="Załącznik">Attachment</label>
                 <input type="file" id="attachment" name="attachment" accept="image/*" class="file-input">
                 <div class="file-input-placeholder">
-                    <span>Choose an image file</span>
+                    <span data-en="Choose an image file" data-pl="Wybierz plik obrazu">Choose an image file</span>
                 </div>
                 <div class="file-preview-container" style="display: none;">
                     <img id="file-preview" src="" alt="Preview">
-                    <button type="button" class="btn remove-file" id="remove-file">Remove</button>
+                    <button type="button" class="btn remove-file" id="remove-file" data-en="Remove" data-pl="Usuń">Remove</button>
                 </div>
             </div>
             <div class="form-actions">
-                <button type="button" class="btn cancel-btn" id="cancel-create">Cancel</button>
-                <button type="submit" class="btn primary-btn">Create Task</button>
+                <button type="button" class="btn cancel-btn" id="cancel-create" data-en="Cancel" data-pl="Anuluj">Cancel</button>
+                <button type="submit" class="btn primary-btn" data-en="Create Task" data-pl="Utwórz zadanie">Create Task</button>
             </div>
         </form>
     </div>
@@ -204,43 +204,43 @@
 <div id="view-task-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 id="view-task-title">Task Details</h3>
+            <h3 id="view-task-title" data-en="Task Details" data-pl="Szczegóły zadania">Task Details</h3>
             <span class="close">&times;</span>
         </div>
         <div class="task-details">
             <div class="task-info-grid">
                 <div class="info-group">
-                    <label>Status</label>
+                    <label data-en="Status" data-pl="Status">Status</label>
                     <span id="view-task-status" class="status-badge"></span>
                 </div>
                 <div class="info-group">
-                    <label>Priority</label>
+                    <label data-en="Priority" data-pl="Priorytet">Priority</label>
                     <span id="view-task-priority" class="priority-badge"></span>
                 </div>
                 <div class="info-group">
-                    <label>Assignee</label>
+                    <label data-en="Assignee" data-pl="Przypisane do">Assignee</label>
                     <span id="view-task-assignee"></span>
                 </div>
                 <div class="info-group">
-                    <label>Created By</label>
+                    <label data-en="Created By" data-pl="Utworzone przez">Created By</label>
                     <span id="view-task-creator"></span>
                 </div>
                 <div class="info-group">
-                    <label>Created At</label>
+                    <label data-en="Created At" data-pl="Data utworzenia">Created At</label>
                     <span id="view-task-created"></span>
                 </div>
                 <div class="info-group">
-                    <label>Due Date</label>
+                    <label data-en="Due Date" data-pl="Termin">Due Date</label>
                     <span id="view-task-due"></span>
                 </div>
             </div>
             <div class="task-description-container">
-                <h4>Description</h4>
+                <h4 data-en="Description" data-pl="Opis">Description</h4>
                 <div id="view-task-description" class="task-description"></div>
             </div>
             <div id="view-task-attachment" class="task-attachment-container" style="display: none;"></div>
             <div id="related-item-container" style="display:none;">
-                <h4>Related Item</h4>
+                <h4 data-en="Related Item" data-pl="Powiązany element">Related Item</h4>
                 <div id="related-item-details" class="related-details"></div>
             </div>
             <div class="update-status-section">
@@ -248,27 +248,27 @@
                     <div class="form-row">
                         <div class="form-group">
                             <select id="new-status" name="status">
-                                <option value="new">New</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="completed">Completed</option>
-                                <option value="cancelled">Cancelled</option>
+                                <option value="new" data-en="New" data-pl="Nowe">New</option>
+                                <option value="in_progress" data-en="In Progress" data-pl="W trakcie">In Progress</option>
+                                <option value="completed" data-en="Completed" data-pl="Zakończone">Completed</option>
+                                <option value="cancelled" data-en="Cancelled" data-pl="Anulowane">Cancelled</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <button type="submit" class="btn primary-btn">Update</button>
+                            <button type="submit" class="btn primary-btn" data-en="Update" data-pl="Aktualizuj">Update</button>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="comments-section">
-                <h4>Comments</h4>
+                <h4 data-en="Comments" data-pl="Komentarze">Comments</h4>
                 <div id="task-comments" class="comments-list"></div>
                 <form id="add-comment-form" action="" method="POST">
                     <div class="form-group">
-                        <textarea name="comment" placeholder="Add a comment..." required></textarea>
+                        <textarea name="comment" placeholder="Add a comment..." data-en-placeholder="Add a comment..." data-pl-placeholder="Dodaj komentarz..." required></textarea>
                     </div>
                     <div class="form-group text-right">
-                        <button type="submit" class="btn primary-btn">Add Comment</button>
+                        <button type="submit" class="btn primary-btn" data-en="Add Comment" data-pl="Dodaj komentarz">Add Comment</button>
                     </div>
                 </form>
             </div>
@@ -544,26 +544,49 @@ function loadTaskDetails(taskId) {
         .then(response => response.json())
         .then(data => {
             const task = data.task;
+            const language = document.documentElement.getAttribute('data-language') || 'en';
             
             // Update task details
             document.getElementById('view-task-title').textContent = task.title;
             
-            // Update status badge
+            // Status translations
+            const statusTranslations = {
+                'new': { 'en': 'New', 'pl': 'Nowe' },
+                'in_progress': { 'en': 'In Progress', 'pl': 'W trakcie' },
+                'completed': { 'en': 'Completed', 'pl': 'Zakończone' },
+                'cancelled': { 'en': 'Cancelled', 'pl': 'Anulowane' }
+            };
+            
+            // Priority translations
+            const priorityTranslations = {
+                'low': { 'en': 'Low', 'pl': 'Niski' },
+                'medium': { 'en': 'Medium', 'pl': 'Średni' },
+                'high': { 'en': 'High', 'pl': 'Wysoki' },
+                'critical': { 'en': 'Critical', 'pl': 'Krytyczny' }
+            };
+            
+            // Update status badge with translation
             const statusBadge = document.getElementById('view-task-status');
-            statusBadge.textContent = task.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const statusText = statusTranslations[task.status] ? 
+                statusTranslations[task.status][language] : 
+                task.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            statusBadge.textContent = statusText;
             statusBadge.className = 'status-badge ' + task.status;
             
-            // Update priority badge
+            // Update priority badge with translation
             const priorityBadge = document.getElementById('view-task-priority');
-            priorityBadge.textContent = task.priority.replace(/\b\w/g, l => l.toUpperCase());
+            const priorityText = priorityTranslations[task.priority] ? 
+                priorityTranslations[task.priority][language] : 
+                task.priority.replace(/\b\w/g, l => l.toUpperCase());
+            priorityBadge.textContent = priorityText;
             priorityBadge.className = 'priority-badge ' + task.priority;
             
             // Update other fields
             document.getElementById('view-task-assignee').textContent = task.assignee_name || task.assignee;
             document.getElementById('view-task-creator').textContent = task.creator;
             document.getElementById('view-task-created').textContent = task.created_at;
-            document.getElementById('view-task-due').textContent = task.due_date || 'Not set';
-            document.getElementById('view-task-description').textContent = task.description || 'No description provided';
+            document.getElementById('view-task-due').textContent = task.due_date || (language === 'pl' ? 'Nie ustawiono' : 'Not set');
+            document.getElementById('view-task-description').textContent = task.description || (language === 'pl' ? 'Nie podano opisu' : 'No description provided');
 
             // Handle attachment if present
             const attachmentContainer = document.getElementById('view-task-attachment');
@@ -571,13 +594,13 @@ function loadTaskDetails(taskId) {
                 attachmentContainer.style.display = 'block';
                 attachmentContainer.innerHTML = `
                     <div class="task-attachment">
-                        <h4>Attachment</h4>
+                        <h4>${language === 'pl' ? 'Załącznik' : 'Attachment'}</h4>
                         <div class="attachment-wrapper">
                             <a href="${task.attachment_url}" target="_blank" class="attachment-link">
-                                <img src="${task.attachment_url}" alt="Task attachment" class="task-attachment-img">
+                                <img src="${task.attachment_url}" alt="${language === 'pl' ? 'Załącznik zadania' : 'Task attachment'}" class="task-attachment-img">
                                 <div class="attachment-overlay">
                                     <i class="fas fa-search-plus"></i>
-                                    <span>View Full Size</span>
+                                    <span>${language === 'pl' ? 'Zobacz pełny rozmiar' : 'View Full Size'}</span>
                                 </div>
                             </a>
                         </div>
@@ -594,7 +617,7 @@ function loadTaskDetails(taskId) {
             if (task.related_type && task.related_id) {
                 // Show loading state
                 relatedItemContainer.style.display = 'block';
-                relatedItemDetails.innerHTML = '<p>Loading related item details...</p>';
+                relatedItemDetails.innerHTML = `<p>${language === 'pl' ? 'Ładowanie powiązanych elementów...' : 'Loading related item details...'}</p>`;
                 
                 if (task.related_type === 'glpi_device') {
                     // Fetch device details
@@ -602,30 +625,39 @@ function loadTaskDetails(taskId) {
                         .then(response => response.json())
                         .then(device => {
                             if (device.error) {
-                                relatedItemDetails.innerHTML = `<p class="text-danger">Error: ${device.error}</p>`;
+                                relatedItemDetails.innerHTML = `<p class="text-danger">${language === 'pl' ? 'Błąd: ' : 'Error: '}${device.error}</p>`;
                                 return;
                             }
                             
-                            // Show device details
+                            // Show device details with proper translations
+                            const typeLabel = language === 'pl' ? 'Typ' : 'Type';
+                            const locationLabel = language === 'pl' ? 'Lokalizacja' : 'Location';
+                            const serialLabel = language === 'pl' ? 'Nr seryjny' : 'Serial';
+                            const modelLabel = language === 'pl' ? 'Model' : 'Model';
+                            const ipLabel = language === 'pl' ? 'Adres IP' : 'IP Address';
+                            const lastSeenLabel = language === 'pl' ? 'Ostatnio widziany' : 'Last Seen';
+                            const notSpecifiedText = language === 'pl' ? 'Nie określono' : 'Not specified';
+                            const unknownText = language === 'pl' ? 'Nieznany' : 'Unknown';
+                            
                             relatedItemDetails.innerHTML = `
                                 <div class="related-info">
                                     <h5>${device.name}</h5>
-                                    <p><strong>Type:</strong> ${device.type}</p>
-                                    <p><strong>Location:</strong> ${device.location || 'Not specified'}</p>
-                                    <p><strong>Serial:</strong> ${device.serial_number || 'Not specified'}</p>
-                                    <p><strong>Model:</strong> ${device.model || 'Not specified'}</p>
-                                    <p><strong>IP Address:</strong> ${device.ip_address || 'Not specified'}</p>
-                                    <p><strong>Last Seen:</strong> ${device.last_seen || 'Unknown'}</p>
+                                    <p><strong>${typeLabel}:</strong> ${device.type}</p>
+                                    <p><strong>${locationLabel}:</strong> ${device.location || notSpecifiedText}</p>
+                                    <p><strong>${serialLabel}:</strong> ${device.serial_number || notSpecifiedText}</p>
+                                    <p><strong>${modelLabel}:</strong> ${device.model || notSpecifiedText}</p>
+                                    <p><strong>${ipLabel}:</strong> ${device.ip_address || notSpecifiedText}</p>
+                                    <p><strong>${lastSeenLabel}:</strong> ${device.last_seen || unknownText}</p>
                                 </div>
                             `;
                         })
                         .catch(error => {
                             console.error('Error loading device details:', error);
-                            relatedItemDetails.innerHTML = '<p class="text-danger">Failed to load device details</p>';
+                            relatedItemDetails.innerHTML = `<p class="text-danger">${language === 'pl' ? 'Nie udało się załadować szczegółów urządzenia' : 'Failed to load device details'}</p>`;
                         });
                 } else if (task.related_type === 'zabbix_alert') {
                     // Handle Zabbix alert
-                    relatedItemDetails.innerHTML = `<p>Zabbix Alert ID: ${task.related_id}</p>`;
+                    relatedItemDetails.innerHTML = `<p>${language === 'pl' ? 'Alert Zabbix ID' : 'Zabbix Alert ID'}: ${task.related_id}</p>`;
                 }
             } else {
                 relatedItemContainer.style.display = 'none';
@@ -665,7 +697,7 @@ function loadTaskDetails(taskId) {
                     
                     commentsContainer.innerHTML = commentElements;
                 } else {
-                    commentsContainer.innerHTML = '<div class="no-comments">No comments yet</div>';
+                    commentsContainer.innerHTML = `<div class="no-comments">${language === 'pl' ? 'Brak komentarzy' : 'No comments yet'}</div>`;
                 }
             }
 

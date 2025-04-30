@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="dashboard-header">
-    <h1>Available Hosts</h1>
+    <h1 data-en="Available Hosts" data-pl="Dostępne hosty">Available Hosts</h1>
 </div>
 
 <div class="dashboard-grid">
@@ -11,19 +11,19 @@
             <nav class="dashboard-nav horizontal">
                 <a href="/" class="dashboard-nav-link">
                     <i class="fas fa-home"></i>
-                    <span>Dashboard</span>
+                    <span data-en="Dashboard" data-pl="Pulpit">Dashboard</span>
                 </a>
                 <a href="/available-hosts" class="dashboard-nav-link available active">
                     <i class="fas fa-check-circle"></i>
-                    <span>Available</span>
+                    <span data-en="Available" data-pl="Dostępne">Available</span>
                 </a>
                 <a href="/unavailable-hosts" class="dashboard-nav-link unavailable">
                     <i class="fas fa-times-circle"></i>
-                    <span>Unavailable</span>
+                    <span data-en="Unavailable" data-pl="Niedostępne">Unavailable</span>
                 </a>
                 <a href="/unknown-hosts" class="dashboard-nav-link unknown">
                     <i class="fas fa-question-circle"></i>
-                    <span>Unknown</span>
+                    <span data-en="Unknown" data-pl="Nieznane">Unknown</span>
                 </a>
             </nav>
         </div>
@@ -32,11 +32,11 @@
     <div class="dashboard-card full-width">
         <div class="card-header">
             <i class="fas fa-server"></i>
-            <h2>Host Status</h2>
+            <h2 data-en="Host Status" data-pl="Status hostów">Host Status</h2>
             <div class="header-actions">
                 <div class="search-container">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="host-search" placeholder="Search available hosts...">
+                    <input type="text" class="host-search" placeholder="Search available hosts..." data-en-placeholder="Search available hosts..." data-pl-placeholder="Wyszukaj dostępne hosty...">
                 </div>
             </div>
         </div>
@@ -51,22 +51,46 @@
 <!-- Add this JavaScript block at the end of your content block -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Update placeholder text when language changes
+    document.addEventListener('languageChanged', function(e) {
+        const lang = e.detail.language;
+        const searchInput = document.querySelector('.host-search');
+        if (searchInput) {
+            const placeholder = searchInput.getAttribute(`data-${lang}-placeholder`);
+            if (placeholder) {
+                searchInput.placeholder = placeholder;
+            }
+        }
+    });
+
     // Example of rendering a host with the new structure and alerts
     function renderHost(host) {
+        // Get current language
+        const lang = document.documentElement.getAttribute('data-language') || 'en';
+        
+        const onlineText = lang === 'pl' ? 'Online' : 'Online';
+        const detailsText = lang === 'pl' ? 'Szczegóły' : 'Details';
+        const connectText = lang === 'pl' ? 'Połącz' : 'Connect';
+        const ipText = lang === 'pl' ? 'Adres IP' : 'IP Address';
+        const systemText = lang === 'pl' ? 'System' : 'System';
+        const unknownText = lang === 'pl' ? 'Nieznane' : 'Unknown';
+        const uptimeText = lang === 'pl' ? 'Czas pracy' : 'Uptime';
+        const naText = lang === 'pl' ? 'Niedostępne' : 'N/A';
+        
         return `
         <div class="host-card available">
             <h3><i class="fas fa-server"></i>${host.name}</h3>
             
             <div class="status-badge online">
                 <i class="fas fa-circle"></i>
-                <span>Online</span>
+                <span>${onlineText}</span>
             </div>
             
             <div class="device-details">
                 <div class="detail-item">
                     <i class="fas fa-network-wired"></i>
                     <div class="detail-content">
-                        <span class="detail-label">IP Address</span>
+                        <span class="detail-label">${ipText}</span>
                         <span class="detail-value">${host.ip}</span>
                     </div>
                 </div>
@@ -74,30 +98,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="detail-item">
                     <i class="fas fa-microchip"></i>
                     <div class="detail-content">
-                        <span class="detail-label">System</span>
-                        <span class="detail-value">${host.os || 'Unknown'}</span>
+                        <span class="detail-label">${systemText}</span>
+                        <span class="detail-value">${host.os || unknownText}</span>
                     </div>
                 </div>
                 
                 <div class="detail-item">
                     <i class="fas fa-clock"></i>
                     <div class="detail-content">
-                        <span class="detail-label">Uptime</span>
-                        <span class="detail-value">${host.uptime || 'N/A'}</span>
+                        <span class="detail-label">${uptimeText}</span>
+                        <span class="detail-value">${host.uptime || naText}</span>
                     </div>
                 </div>
                 
-                ${renderAlerts(host.alerts)}
+                ${renderAlerts(host.alerts, lang)}
             </div>
             
             <div class="device-actions">
                 <a href="#" class="action-button">
                     <i class="fas fa-info-circle"></i>
-                    <span>Details</span>
+                    <span>${detailsText}</span>
                 </a>
                 <a href="${host.vnc_url}" class="vnc-button">
                     <i class="fas fa-desktop"></i>
-                    <span>Connect</span>
+                    <span>${connectText}</span>
                 </a>
             </div>
         </div>
@@ -105,21 +129,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Render alerts in a scrollable container
-    function renderAlerts(alerts) {
+    function renderAlerts(alerts, lang) {
         if (!alerts || alerts.length === 0) return '';
         
-        const alertsHtml = alerts.map(alert => `
+        const alertsHtml = alerts.map(alert => {
+            // Tłumaczenie tytułów alertów
+            let alertTitle = alert.title;
+            if (lang === 'pl') {
+                if (alertTitle.includes('Critical')) alertTitle = alertTitle.replace('Critical', 'Krytyczny');
+                if (alertTitle.includes('Warning')) alertTitle = alertTitle.replace('Warning', 'Ostrzeżenie');
+                if (alertTitle.includes('Info')) alertTitle = alertTitle.replace('Info', 'Informacja');
+            }
+            
+            return `
             <div class="alert-item ${alert.level || 'info'}">
                 <div class="alert-icon">
                     <i class="fas ${getAlertIcon(alert.level)}"></i>
                 </div>
                 <div class="alert-content">
-                    <div class="alert-title">${alert.title}</div>
+                    <div class="alert-title">${alertTitle}</div>
                     <div class="alert-message">${alert.message}</div>
                     <div class="alert-time">${alert.time}</div>
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
         
         return `
             <div class="alert-container">

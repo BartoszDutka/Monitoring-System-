@@ -7,6 +7,9 @@ class DashboardUpdater {
         
         // Add initialization for GLPI cards on dashboard
         this.updateGLPICardCounts();
+        
+        // Add listener for language changes
+        this.setupLanguageChangeListener();
     }
 
     setupAutoRefresh() {
@@ -25,6 +28,17 @@ class DashboardUpdater {
         // GLPI manual refresh button
         document.getElementById('refresh-glpi').addEventListener('click', () => {
             this.refreshGLPIData();
+        });
+    }
+
+    setupLanguageChangeListener() {
+        // Listen for language change events
+        document.addEventListener('languageChanged', (e) => {
+            // Refresh Zabbix content when language changes
+            this.refreshZabbixData();
+            
+            // Also refresh Graylog content if needed
+            this.refreshGraylogData();
         });
     }
 
@@ -100,8 +114,112 @@ class DashboardUpdater {
 
     updateZabbixUI(data) {
         // Update Zabbix section of the dashboard
-        // Implementation depends on your HTML structure
-        console.log('Updating Zabbix UI with:', data);
+        // Get current language setting
+        const currentLanguage = document.documentElement.getAttribute('data-language') || 'en';
+        console.log('Updating Zabbix UI with:', data, 'Language:', currentLanguage);
+        
+        // Apply translations to static Zabbix UI elements
+        this.translateZabbixStaticElements(currentLanguage);
+        
+        // Process and display Zabbix data with proper translations
+        if (data && data.hosts) {
+            this.displayZabbixHosts(data.hosts, currentLanguage);
+        }
+    }
+    
+    translateZabbixStaticElements(lang) {
+        // Translate static elements in the Zabbix section
+        const translations = {
+            'en': {
+                'hostStatus': 'Host Status',
+                'available': 'Available',
+                'unavailable': 'Unavailable',
+                'unknown': 'Unknown',
+                'noProblems': 'No problems',
+                'problems': 'Problems detected',
+                'lastUpdate': 'Last updated',
+                'refreshing': 'Refreshing...'
+            },
+            'pl': {
+                'hostStatus': 'Status hosta',
+                'available': 'Dostępny',
+                'unavailable': 'Niedostępny',
+                'unknown': 'Nieznany',
+                'noProblems': 'Brak problemów',
+                'problems': 'Wykryto problemy',
+                'lastUpdate': 'Ostatnia aktualizacja',
+                'refreshing': 'Odświeżanie...'
+            }
+        };
+        
+        // Find all elements with data-translation attribute in the Zabbix section
+        const zabbixSection = document.querySelector('.zabbix-section') || document.querySelector('[data-section="zabbix"]');
+        if (zabbixSection) {
+            const translatableElements = zabbixSection.querySelectorAll('[data-translation]');
+            
+            translatableElements.forEach(element => {
+                const translationKey = element.getAttribute('data-translation');
+                if (translations[lang] && translations[lang][translationKey]) {
+                    element.textContent = translations[lang][translationKey];
+                }
+            });
+        }
+    }
+    
+    displayZabbixHosts(hosts, lang) {
+        // Display hosts with the correct language
+        const hostContainer = document.querySelector('.zabbix-hosts-container') || document.querySelector('[data-container="zabbix-hosts"]');
+        if (!hostContainer) return;
+        
+        // Clear the container before adding new host information
+        // hostContainer.innerHTML = '';
+        
+        // Process each host and update/create elements with the correct language
+        hosts.forEach(host => {
+            // Find or create host element
+            let hostElement = document.getElementById(`zabbix-host-${host.hostid}`);
+            
+            // Apply translations based on the current language
+            if (hostElement) {
+                // Update existing host element with the correct language
+                this.updateHostElementLanguage(hostElement, host, lang);
+            }
+            // If you need to create new elements, do it here
+        });
+    }
+    
+    updateHostElementLanguage(element, host, lang) {
+        // Update host element with the correct language
+        const statusTexts = {
+            'en': {
+                '0': 'Available',
+                '1': 'Unavailable',
+                '2': 'Unknown'
+            },
+            'pl': {
+                '0': 'Dostępny',
+                '1': 'Niedostępny',
+                '2': 'Nieznany'
+            }
+        };
+        
+        // Update status text
+        const statusElement = element.querySelector('.host-status');
+        if (statusElement && host.status) {
+            statusElement.textContent = statusTexts[lang][host.status] || statusTexts['en'][host.status];
+        }
+        
+        // Update other language-dependent elements
+        const problemsElement = element.querySelector('.host-problems');
+        if (problemsElement) {
+            if (host.problems && host.problems.length > 0) {
+                problemsElement.textContent = lang === 'pl' ? 
+                    `Wykryto ${host.problems.length} problem(ów)` : 
+                    `${host.problems.length} problem(s) detected`;
+            } else {
+                problemsElement.textContent = lang === 'pl' ? 'Brak problemów' : 'No problems';
+            }
+        }
     }
 
     updateGLPIUI(data) {

@@ -95,31 +95,52 @@
 <div class="loading-container">
     <div class="loading-content">
         <i class="fas fa-database loading-icon"></i>
-        <h1 class="loading-title">Loading Graylog Data</h1>
-        <p class="loading-message">Please wait while we fetch and process the log data...</p>
+        <h1 class="loading-title" data-en="Loading Graylog Data" data-pl="Ładowanie danych Graylog">Loading Graylog Data</h1>
+        <p class="loading-message" data-en="Please wait while we fetch and process the log data..." data-pl="Proszę czekać, trwa pobieranie i przetwarzanie danych logów...">Please wait while we fetch and process the log data...</p>
         
         <div class="progress-bar">
             <div class="progress" id="progressBar"></div>
         </div>
         
-        <p class="loading-details" id="loadingDetails">Initializing...</p>
+        <p class="loading-details" id="loadingDetails" data-en="Initializing..." data-pl="Inicjalizacja...">Initializing...</p>
     </div>
 </div>
 
 <script>
-    const messages = [
-        'Connecting to Graylog server...',
-        'Fetching recent logs...',
-        'Processing log entries...',
-        'Analyzing log patterns...',
-        'Preparing data visualization...',
-        'Almost done...'
-    ];
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    
+    // Translate messages based on language
+    const messages = {
+        en: [
+            'Connecting to Graylog server...',
+            'Fetching recent logs...',
+            'Processing log entries...',
+            'Analyzing log patterns...',
+            'Preparing data visualization...',
+            'Almost done...'
+        ],
+        pl: [
+            'Łączenie z serwerem Graylog...',
+            'Pobieranie najnowszych logów...',
+            'Przetwarzanie wpisów logów...',
+            'Analizowanie wzorców logów...',
+            'Przygotowanie wizualizacji danych...',
+            'Prawie gotowe...'
+        ]
+    };
+
+    // Translate all elements with data-en and data-pl attributes
+    document.querySelectorAll('[data-en][data-pl]').forEach(el => {
+        el.textContent = el.getAttribute(`data-${language}`) || el.getAttribute('data-en');
+    });
 
     const progressBar = document.getElementById('progressBar');
     const loadingDetails = document.getElementById('loadingDetails');
     let currentProgress = 0;
     let messageIndex = 0;
+    
+    // Use the translated messages
+    const currentMessages = messages[language] || messages['en'];
 
     async function fetchLogs() {
         try {
@@ -140,7 +161,7 @@
             return await response.json();
         } catch (error) {
             console.error('Error fetching logs:', error);
-            loadingDetails.textContent = 'Error loading data. Retrying...';
+            loadingDetails.textContent = language === 'pl' ? 'Błąd ładowania danych. Ponawiam próbę...' : 'Error loading data. Retrying...';
             return null;
         }
     }
@@ -148,7 +169,7 @@
     async function updateProgress() {
         if (currentProgress < 100) {
             if (currentProgress === 0) {
-                loadingDetails.textContent = messages[0];
+                loadingDetails.textContent = currentMessages[0];
                 const logsData = await fetchLogs();
                 
                 if (!logsData) {
@@ -161,15 +182,15 @@
             currentProgress = Math.min(currentProgress + increment, 100);
             progressBar.style.width = `${currentProgress}%`;
 
-            if (currentProgress > messageIndex * 20 && messageIndex < messages.length) {
-                loadingDetails.textContent = messages[messageIndex];
+            if (currentProgress > messageIndex * 20 && messageIndex < currentMessages.length) {
+                loadingDetails.textContent = currentMessages[messageIndex];
                 messageIndex++;
             }
 
             if (currentProgress < 100) {
                 setTimeout(updateProgress, 500);
             } else {
-                loadingDetails.textContent = 'Redirecting...';
+                loadingDetails.textContent = language === 'pl' ? 'Przekierowywanie...' : 'Redirecting...';
                 setTimeout(() => {
                     window.location.href = '{{ target_page }}';
                 }, 500);

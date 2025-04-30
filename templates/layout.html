@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" data-language="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,18 +14,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-light.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-dark.css') }}">
     <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <!-- Language support -->
+    <script src="{{ url_for('static', filename='js/localization/language.js') }}"></script>
 </head>
 <body class="with-sidebar">
     <!-- Top Navigation -->
     <nav class="top-nav">
         <div class="nav-brand">
             <i class="fas fa-chart-line"></i>
-            Monitoring System
+            <span class="brand-text" data-en="Monitoring System" data-pl="System Monitoringu">Monitoring System</span>
         </div>
         {% if session.logged_in %}
         <div class="nav-items">
             <button id="theme-toggle" class="theme-toggle" title="Toggle theme">
                 <i class="fas fa-sun"></i>
+            </button>
+            <button id="language-toggle" class="language-toggle" title="Change language">
+                <i class="fas fa-language"></i>
+                <span>EN</span>
             </button>
             <a href="{{ url_for('profile') }}" class="user-info">
                 {% if session.user_info and session.user_info.avatar_path %}
@@ -39,7 +45,7 @@
             </a>
             <a href="{{ url_for('logout') }}" class="logout-button">
                 <i class="fas fa-sign-out-alt"></i>
-                Wyloguj
+                <span data-en="Logout" data-pl="Wyloguj">Logout</span>
             </a>
         </div>
         {% endif %}
@@ -48,77 +54,77 @@
     <!-- Side Navigation -->
     <nav class="side-nav">
         <div class="nav-section">
-            <h3>Main Menu</h3>
+            <h3 data-en="Main Menu" data-pl="Menu Główne">Main Menu</h3>
             <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
-                <i class="fas fa-home"></i> Dashboard
+                <i class="fas fa-home"></i> <span data-en="Dashboard" data-pl="Pulpit">Dashboard</span>
             </a>
         </div>
         
         <div class="nav-section">
             <h3>Zabbix</h3>
             <a href="/available-hosts" class="nav-link available {% if request.path == '/available-hosts' %}active{% endif %}">
-                <i class="fas fa-check-circle"></i> Available
+                <i class="fas fa-check-circle"></i> <span data-en="Available" data-pl="Dostępne">Available</span>
             </a>
             <a href="/unavailable-hosts" class="nav-link unavailable {% if request.path == '/unavailable-hosts' %}active{% endif %}">
-                <i class="fas fa-times-circle"></i> Unavailable
+                <i class="fas fa-times-circle"></i> <span data-en="Unavailable" data-pl="Niedostępne">Unavailable</span>
             </a>
             <a href="/unknown-hosts" class="nav-link unknown {% if request.path == '/unknown-hosts' %}active{% endif %}">
-                <i class="fas fa-question-circle"></i> Unknown
+                <i class="fas fa-question-circle"></i> <span data-en="Unknown" data-pl="Nieznane">Unknown</span>
             </a>
         </div>
         
         <div class="nav-section">
-            <h3>Tools</h3>
+            <h3 data-en="Tools" data-pl="Narzędzia">Tools</h3>
             <a href="/reports" class="nav-link {% if request.path == '/reports' %}active{% endif %}">
-                <i class="fas fa-file-alt"></i> Reports
+                <i class="fas fa-file-alt"></i> <span data-en="Reports" data-pl="Raporty">Reports</span>
             </a>
         </div>
 
         <div class="nav-section">
-            <h3>Functions</h3>
+            <h3 data-en="Functions" data-pl="Funkcje">Functions</h3>
             <a href="/inventory" class="nav-link {% if request.path == '/inventory' %}active{% endif %}">
-                <i class="fas fa-boxes"></i> Item Inventory
+                <i class="fas fa-boxes"></i> <span data-en="Item Inventory" data-pl="Inwentaryzacja">Item Inventory</span>
             </a>
             <a href="/tasks" class="nav-link {% if request.path == '/tasks' %}active{% endif %}">
-                <i class="fas fa-tasks"></i> Task Management
+                <i class="fas fa-tasks"></i> <span data-en="Task Management" data-pl="Zarządzanie zadaniami">Task Management</span>
             </a>
         </div>
 
         <div class="nav-section">
-            <h3>GLPI Inventory</h3>
+            <h3 data-en="GLPI Inventory" data-pl="Inwentaryzacja GLPI">GLPI Inventory</h3>
             <a href="/glpi/workstations" class="nav-link {% if request.path == '/glpi/workstations' %}active{% endif %}">
-                <i class="fas fa-desktop"></i> Workstations (KS)
+                <i class="fas fa-desktop"></i> <span data-en="Workstations (KS)" data-pl="Stacje robocze (KS)">Workstations (KS)</span>
             </a>
             <a href="/glpi/terminals" class="nav-link {% if request.path == '/glpi/terminals' %}active{% endif %}">
-                <i class="fas fa-terminal"></i> Terminals (KT)
+                <i class="fas fa-terminal"></i> <span data-en="Terminals (KT)" data-pl="Terminale (KT)">Terminals (KT)</span>
             </a>
             <a href="/glpi/servers" class="nav-link {% if request.path == '/glpi/servers' %}active{% endif %}">
-                <i class="fas fa-server"></i> Servers
+                <i class="fas fa-server"></i> <span data-en="Servers" data-pl="Serwery">Servers</span>
             </a>
             <a href="/glpi/network" class="nav-link {% if request.path == '/glpi/network' %}active{% endif %}">
-                <i class="fas fa-network-wired"></i> Network Devices
+                <i class="fas fa-network-wired"></i> <span data-en="Network Devices" data-pl="Urządzenia sieciowe">Network Devices</span>
             </a>
             <a href="/glpi/printers" class="nav-link {% if request.path == '/glpi/printers' %}active{% endif %}">
-                <i class="fas fa-print"></i> Printers
+                <i class="fas fa-print"></i> <span data-en="Printers" data-pl="Drukarki">Printers</span>
             </a>
             <a href="/glpi/monitors" class="nav-link {% if request.path == '/glpi/monitors' %}active{% endif %}">
-                <i class="fas fa-tv"></i> Monitors
+                <i class="fas fa-tv"></i> <span data-en="Monitors" data-pl="Monitory">Monitors</span>
             </a>
             <a href="/glpi/racks" class="nav-link {% if request.path == '/glpi/racks' %}active{% endif %}">
-                <i class="fas fa-server"></i> Racks
+                <i class="fas fa-server"></i> <span data-en="Racks" data-pl="Szafy serwerowe">Racks</span>
             </a>
             <a href="/glpi/others" class="nav-link {% if request.path == '/glpi/others' %}active{% endif %}">
-                <i class="fas fa-microchip"></i> Other Devices
+                <i class="fas fa-microchip"></i> <span data-en="Other Devices" data-pl="Inne urządzenia">Other Devices</span>
             </a>
         </div>
 
         <div class="nav-section">
             <h3>Graylog</h3>
             <a href="/graylog/logs?refresh=1" class="nav-link {% if request.path == '/graylog/logs' %}active{% endif %}">
-                <i class="fas fa-history"></i> Recent Logs
+                <i class="fas fa-history"></i> <span data-en="Recent Logs" data-pl="Ostatnie logi">Recent Logs</span>
             </a>
             <a href="/graylog/loading?target=/graylog/messages-over-time" class="nav-link {% if request.path == '/graylog/messages-over-time' %}active{% endif %}">
-                <i class="fas fa-chart-line"></i> Messages Over Time
+                <i class="fas fa-chart-line"></i> <span data-en="Messages Over Time" data-pl="Wiadomości w czasie">Messages Over Time</span>
             </a>
         </div>
     </nav>
@@ -132,21 +138,21 @@
     <footer class="main-footer">
         <div class="footer-content">
             <div class="footer-section">
-                <h4>Monitoring System</h4>
+                <h4 data-en="Monitoring System" data-pl="System Monitoringu">Monitoring System</h4>
                 <p>Version 1.0.0</p>
             </div>
             <div class="footer-section">
-                <h4>Quick Links</h4>
-                <a href="#">Documentation</a>
-                <a href="#">Support</a>
+                <h4 data-en="Quick Links" data-pl="Szybkie linki">Quick Links</h4>
+                <a href="#" data-en="Documentation" data-pl="Dokumentacja">Documentation</a>
+                <a href="#" data-en="Support" data-pl="Wsparcie">Support</a>
             </div>
             <div class="footer-section">
-                <h4>Contact</h4>
+                <h4 data-en="Contact" data-pl="Kontakt">Contact</h4>
                 <p>bartosz.dutka82@student.pk.edu.pl</p>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2024 Monitoring System. All rights reserved.</p>
+            <p data-en="&copy; 2024 Monitoring System. All rights reserved." data-pl="&copy; 2024 System Monitoringu. Wszelkie prawa zastrzeżone.">&copy; 2024 Monitoring System. All rights reserved.</p>
         </div>
     </footer>
     

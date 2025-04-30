@@ -2,11 +2,11 @@
 
 {% block content %}
 <div class="dashboard-header">
-    <h1>Messages Over Time</h1>
+    <h1 data-en="Messages Over Time" data-pl="Wiadomości w czasie">Messages Over Time</h1>
     <div class="header-controls">
         <div class="time-controls">
             <div class="control-group">
-                <label>Time Range:</label>
+                <label data-en="Time Range:" data-pl="Zakres czasu:">Time Range:</label>
                 <div class="select-group">
                     <select id="timeRangeValue" onchange="updateChart()">
                         <option value="15">15</option>
@@ -15,21 +15,21 @@
                         <option value="60">60</option>
                     </select>
                     <select id="timeRangeUnit" onchange="updateTimeOptions()">
-                        <option value="minutes">Minutes</option>
-                        <option value="hours">Hours</option>
-                        <option value="days">Days</option>
+                        <option value="minutes" data-en="Minutes" data-pl="Minuty">Minutes</option>
+                        <option value="hours" data-en="Hours" data-pl="Godziny">Hours</option>
+                        <option value="days" data-en="Days" data-pl="Dni">Days</option>
                     </select>
                 </div>
             </div>
             <div class="control-group">
-                <label>Interval:</label>
+                <label data-en="Interval:" data-pl="Interwał:">Interval:</label>
                 <select id="timeInterval" onchange="updateChart()">
                     <!-- Options will be added dynamically -->
                 </select>
             </div>
             <button class="refresh-button" onclick="refreshChart()">
                 <i class="fas fa-sync"></i>
-                Refresh
+                <span data-en="Refresh" data-pl="Odśwież">Refresh</span>
             </button>
         </div>
     </div>
@@ -43,19 +43,19 @@
             </div>
             <div class="timeline-stats">
                 <div class="stat-box">
-                    <h3>Total Messages</h3>
+                    <h3 data-en="Total Messages" data-pl="Łączna liczba wiadomości">Total Messages</h3>
                     <span class="stat-value">{{ graylog.total_results }}</span>
                 </div>
                 <div class="stat-box error">
-                    <h3>Errors</h3>
+                    <h3 data-en="Errors" data-pl="Błędy">Errors</h3>
                     <span class="stat-value">{{ graylog.stats.error_count }}</span>
                 </div>
                 <div class="stat-box warning">
-                    <h3>Warnings</h3>
+                    <h3 data-en="Warnings" data-pl="Ostrzeżenia">Warnings</h3>
                     <span class="stat-value">{{ graylog.stats.warn_count }}</span>
                 </div>
                 <div class="stat-box info">
-                    <h3>Info</h3>
+                    <h3 data-en="Info" data-pl="Informacje">Info</h3>
                     <span class="stat-value">{{ graylog.stats.info_count }}</span>
                 </div>
             </div>
@@ -72,6 +72,7 @@ function updateTimeOptions() {
     const rangeUnit = document.getElementById('timeRangeUnit').value;
     const rangeSelect = document.getElementById('timeRangeValue');
     const intervalSelect = document.getElementById('timeInterval');
+    const language = document.documentElement.getAttribute('data-language') || 'en';
     
     // Wyczyść opcje
     rangeSelect.innerHTML = '';
@@ -84,7 +85,10 @@ function updateTimeOptions() {
         });
         // Dla minut pokazuj interwały 1-5 minut
         [1, 2, 5, 10, 15].forEach(val => {
-            intervalSelect.add(new Option(`${val} minute${val > 1 ? 's' : ''}`, `${val} minutes`));
+            const label = language === 'pl' ? 
+                `${val} ${val === 1 ? 'minuta' : val < 5 ? 'minuty' : 'minut'}` : 
+                `${val} minute${val > 1 ? 's' : ''}`;
+            intervalSelect.add(new Option(label, `${val} minutes`));
         });
     } else if (rangeUnit === 'hours') {
         [1, 2, 3, 6, 12, 24].forEach(val => {
@@ -92,7 +96,10 @@ function updateTimeOptions() {
         });
         // Dla godzin pokazuj interwały 15-60 minut
         [15, 30, 60].forEach(val => {
-            intervalSelect.add(new Option(`${val} minutes`, `${val} minutes`));
+            const label = language === 'pl' ? 
+                `${val} ${val === 1 ? 'minuta' : val < 5 ? 'minuty' : 'minut'}` : 
+                `${val} minutes`;
+            intervalSelect.add(new Option(label, `${val} minutes`));
         });
     } else { // days
         [1, 2, 3, 7, 14, 30].forEach(val => {
@@ -100,7 +107,10 @@ function updateTimeOptions() {
         });
         // Dla dni pokazuj interwały w dniach
         [1].forEach(val => {
-            intervalSelect.add(new Option(`${val} day`, `${val} day`));
+            const label = language === 'pl' ? 
+                `${val} ${val === 1 ? 'dzień' : 'dni'}` : 
+                `${val} day`;
+            intervalSelect.add(new Option(label, `${val} day`));
         });
     }
     
@@ -113,6 +123,7 @@ function updateChart() {
     const interval = document.getElementById('timeInterval').value;
     const button = document.querySelector('.refresh-button');
     const icon = button.querySelector('i');
+    const language = document.documentElement.getAttribute('data-language') || 'en';
     
     button.disabled = true;
     icon.classList.add('fa-spin');
@@ -125,6 +136,23 @@ function updateChart() {
             }
             
             const ctx = document.getElementById('messageTimeline').getContext('2d');
+            
+            // Translate chart labels based on language
+            if (language === 'pl') {
+                // Translate dataset labels
+                data.datasets.forEach(dataset => {
+                    if (dataset.label === 'Errors') dataset.label = 'Błędy';
+                    if (dataset.label === 'Warnings') dataset.label = 'Ostrzeżenia';
+                    if (dataset.label === 'Info') dataset.label = 'Informacje';
+                });
+            }
+            
+            const rangeUnitTranslation = {
+                'minutes': language === 'pl' ? 'minut' : 'minutes',
+                'hours': language === 'pl' ? 'godzin' : 'hours',
+                'days': language === 'pl' ? 'dni' : 'days'
+            };
+            
             timelineChart = new Chart(ctx, {
                 type: 'bar',
                 data: data,
@@ -153,7 +181,9 @@ function updateChart() {
                         },
                         title: {
                             display: true,
-                            text: `Message Distribution (Last ${rangeValue} ${rangeUnit})`
+                            text: language === 'pl' ? 
+                                `Rozkład wiadomości (ostatnie ${rangeValue} ${rangeUnitTranslation[rangeUnit]})` :
+                                `Message Distribution (Last ${rangeValue} ${rangeUnit})`
                         }
                     }
                 }
@@ -188,6 +218,12 @@ function refreshChart() {
 // Inicjalizacja
 document.addEventListener('DOMContentLoaded', () => {
     updateTimeOptions();
+    
+    // Nasłuchuj zmian języka
+    document.addEventListener('languageChanged', function(e) {
+        // Update selector options and chart
+        updateTimeOptions();
+    });
     
     // Nasłuchuj zmian zakresu czasu
     document.getElementById('timeRangeUnit').addEventListener('change', updateTimeOptions);
