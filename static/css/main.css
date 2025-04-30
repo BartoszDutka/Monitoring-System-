@@ -14,3 +14,4 @@
 @import 'details.css'; /* Widoki szczegółowe */
 @import 'charts.css'; /* Wykresy i wizualizacje */
 @import 'messages.css'; /* Wyświetlanie wiadomości */
+@import 'reports.css'; /* Style dla generatora raportów */

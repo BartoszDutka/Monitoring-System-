@@ -21,13 +21,15 @@ from modules.database import (
     get_messages_timeline,
     get_detailed_messages  # Dodaj ten import
 )
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta  # Keep this import as is
 from modules.user_data import update_user_profile
 from inventory import inventory  # Import the inventory blueprint
 from werkzeug.exceptions import Forbidden  # Add this import
 from flask_caching import Cache
 import logging
 from modules.tasks import tasks, setup_tasks_tables  # Import from the modules directory
+from modules.reports import ReportGenerator, get_recent_reports, get_report_by_id, delete_report, REPORTS_DIR
+from flask import send_from_directory
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -1046,6 +1048,96 @@ def get_glpi_devices():
     """API endpoint to get all GLPI devices for tasks relationship - redirects to tasks/api/devices"""
     # Redirect to the new endpoint in the tasks module
     return redirect(url_for('tasks.get_devices'))
+
+@app.route('/reports')
+@login_required
+def reports_page():
+    """Show the reports generation interface."""
+    # Get list of recent reports
+    recent_reports = get_recent_reports()
+    return render_template('reports.html', recent_reports=recent_reports)
+
+@app.route('/generate-report', methods=['POST'])
+@login_required
+def generate_report():
+    """Handle report generation requests."""
+    try:
+        # Get form data
+        report_type = request.form.get('reportType') or request.form.get('modal-report-type')
+        output_format = request.form.get('outputFormat', 'pdf')  # Default to PDF if not specified
+        date_range = request.form.get('dateRange') or request.form.get('modal-date-range')
+        start_date = request.form.get('startDate') or request.form.get('modal-start-date')
+        end_date = request.form.get('endDate') or request.form.get('modal-end-date')
+        fields = request.form.getlist('fields')
+        record_limit = request.form.get('recordLimit', '500')
+        is_preview = request.form.get('preview') == 'true'
+        
+        # Convert string dates to datetime objects if provided
+        if date_range == 'custom' and start_date and end_date:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+        
+        # Initialize report generator
+        report_gen = ReportGenerator(
+            report_type=report_type,
+            output_format=output_format,
+            date_range=date_range,
+            fields=fields,
+            start_date=start_date,
+            end_date=end_date,
+            record_limit=record_limit,
+            preview=is_preview
+        )
+        
+        # Generate report
+        result = report_gen.generate_report()
+        
+        if is_preview:
+            # Return preview HTML for AJAX request
+            return jsonify(result)
+        
+        if result['success']:
+            # Redirect to download page or show success message
+            flash('Report generated successfully!', 'success')
+            return redirect(url_for('reports_page'))
+        else:
+            # Show error message
+            flash(f'Error generating report: {result.get("error", "Unknown error")}', 'error')
+            return redirect(url_for('reports_page'))
+            
+    except Exception as e:
+        flash(f'Error processing report request: {str(e)}', 'error')
+        return redirect(url_for('reports_page'))
+
+@app.route('/download-report/<report_id>')
+@login_required
+def download_report(report_id):
+    """Download a generated report."""
+    # Get report info
+    report = get_report_by_id(report_id)
+    
+    if not report:
+        flash('Report not found', 'error')
+        return redirect(url_for('reports_page'))
+    
+    # Send the file as an attachment
+    return send_from_directory(
+        REPORTS_DIR, 
+        report['path'],
+        as_attachment=True,
+        download_name=report['name']
+    )
+
+@app.route('/delete-report/<report_id>', methods=['DELETE'])
+@login_required
+def delete_report_route(report_id):
+    """Delete a generated report."""
+    success = delete_report(report_id)
+    
+    if success:
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'error': 'Failed to delete report'}), 404
 
 if __name__ == '__main__':
     # Import required modules
