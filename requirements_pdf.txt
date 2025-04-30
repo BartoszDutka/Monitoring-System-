@@ -1,0 +1,8 @@
+# PDF Generation Requirements
+
+# Required for PDF generation
+WeasyPrint>=53.0
+pdfkit>=1.0.0
+
+# wkhtmltopdf binary must be installed separately:
+# Download from: https://wkhtmltopdf.org/downloads.html

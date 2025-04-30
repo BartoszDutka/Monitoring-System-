@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session, flash
+from flask import redirect, url_for, abort, send_from_directory
 from modules.zabbix import get_hosts, get_unknown_hosts
 from modules.graylog import get_logs
 from modules.glpi import get_glpi_data
@@ -10,7 +11,6 @@ import subprocess
 import os
 import json  # Add this import
 from functools import wraps
-from flask import redirect, url_for, abort
 from werkzeug.utils import secure_filename
 import time  # Dodaj na początku pliku z innymi importami
 from modules.user_data import update_user_avatar, get_user_avatar, verify_user, get_user_info
@@ -28,8 +28,61 @@ from werkzeug.exceptions import Forbidden  # Add this import
 from flask_caching import Cache
 import logging
 from modules.tasks import tasks, setup_tasks_tables  # Import from the modules directory
-from modules.reports import ReportGenerator, get_recent_reports, get_report_by_id, delete_report, REPORTS_DIR
-from flask import send_from_directory
+
+# Handle PDF dependency imports
+import importlib.util
+PDF_CAPABILITY = "none"
+PDF_STATUS_MESSAGE = ""
+
+# Try to import weasyprint first
+try:
+    if importlib.util.find_spec('weasyprint') is not None:
+        from modules.reports import ReportGenerator, get_recent_reports, get_report_by_id, delete_report, REPORTS_DIR
+        PDF_CAPABILITY = "weasyprint"
+        PDF_STATUS_MESSAGE = "Using WeasyPrint for PDF generation"
+        print("WeasyPrint is available for PDF generation")
+    else:
+        PDF_STATUS_MESSAGE = "WeasyPrint module not found"
+        print("WeasyPrint not available, checking pdfkit...")
+except ImportError as e:
+    PDF_STATUS_MESSAGE = f"WeasyPrint import error: {str(e)}"
+    print(f"WeasyPrint import error: {e}")
+
+# Try pdfkit next if weasyprint failed
+if PDF_CAPABILITY == "none" and importlib.util.find_spec('pdfkit') is not None:
+    try:
+        import pdfkit
+        from modules.reports import ReportGenerator, get_recent_reports, get_report_by_id, delete_report, REPORTS_DIR
+        PDF_CAPABILITY = "pdfkit"
+        PDF_STATUS_MESSAGE = "Using PDFKit for PDF generation"
+        print("PDFKit is available for PDF generation")
+        
+        # Check if wkhtmltopdf is installed
+        try:
+            version = subprocess.check_output(['wkhtmltopdf', '--version'], stderr=subprocess.STDOUT)
+            print(f"wkhtmltopdf is installed: {version.decode().strip()}")
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            PDF_STATUS_MESSAGE += " (wkhtmltopdf not installed/not in PATH)"
+            print("Warning: wkhtmltopdf is not installed or not in PATH.")
+            print("PDF generation may not work correctly.")
+            print("Please run: python install_pdf_deps.py")
+    except ImportError:
+        PDF_STATUS_MESSAGE += ", PDFKit not available"
+
+# If all else failed, use the modules with fallback modes
+if PDF_CAPABILITY == "none":
+    try:
+        from modules.reports import ReportGenerator, get_recent_reports, get_report_by_id, delete_report, REPORTS_DIR
+        PDF_STATUS_MESSAGE = "No PDF library available. PDF reports will be saved as text files or Excel."
+        print("Warning: No PDF generation library is available.")
+        print("PDF reports will be saved as text files.")
+        print("Please run: python install_pdf_deps.py to install PDF dependencies")
+    except ImportError as e:
+        print(f"Critical error importing reports module: {e}")
+
+# Show PDF capability status for debugging
+print(f"PDF Generation Capability: {PDF_CAPABILITY}")
+print(f"Status: {PDF_STATUS_MESSAGE}")
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -1053,60 +1106,161 @@ def get_glpi_devices():
 @login_required
 def reports_page():
     """Show the reports generation interface."""
-    # Get list of recent reports
-    recent_reports = get_recent_reports()
-    return render_template('reports.html', recent_reports=recent_reports)
+    try:
+        # Get list of recent reports with proper formatting
+        reports = get_recent_reports()
+        
+        # Format dates and add necessary fields
+        formatted_reports = []
+        for report in reports:
+            formatted_report = {
+                'id': report['id'],
+                'name': report['name'],
+                'type': report['type'].capitalize(),
+                'date': report['generated_at'].strftime('%Y-%m-%d %H:%M:%S') if isinstance(report['generated_at'], datetime) else report['generated_at'],
+                'records': report['record_count']
+            }
+            formatted_reports.append(formatted_report)
+            
+        return render_template('reports.html', reports=formatted_reports)
+    except Exception as e:
+        logger.error(f"Error loading reports page: {e}")
+        return render_template('error.html', error=str(e)), 500
 
 @app.route('/generate-report', methods=['POST'])
 @login_required
 def generate_report():
-    """Handle report generation requests."""
+    """Handle report generation requests with improved error handling."""
     try:
-        # Get form data
-        report_type = request.form.get('reportType') or request.form.get('modal-report-type')
-        output_format = request.form.get('outputFormat', 'pdf')  # Default to PDF if not specified
-        date_range = request.form.get('dateRange') or request.form.get('modal-date-range')
-        start_date = request.form.get('startDate') or request.form.get('modal-start-date')
-        end_date = request.form.get('endDate') or request.form.get('modal-end-date')
-        fields = request.form.getlist('fields')
-        record_limit = request.form.get('recordLimit', '500')
-        is_preview = request.form.get('preview') == 'true'
+        logger.info("Report generation request received")
         
+        # Get form data
+        report_type = request.form.get('reportType')
+        output_format = request.form.get('outputFormat', 'pdf')
+        date_range = request.form.get('dateRange')
+        start_date = request.form.get('startDate')
+        end_date = request.form.get('endDate')
+        
+        logger.info(f"Report parameters: type={report_type}, format={output_format}, range={date_range}")
+        logger.info(f"Custom dates: start={start_date}, end={end_date}")
+        
+        # Validate required inputs
+        if not report_type:
+            return jsonify({
+                'success': False, 
+                'message': 'Report type is required'
+            }), 400
+            
+        if not date_range:
+            return jsonify({
+                'success': False, 
+                'message': 'Date range is required'
+            }), 400
+            
         # Convert string dates to datetime objects if provided
-        if date_range == 'custom' and start_date and end_date:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d')
-            end_date = datetime.strptime(end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+        start_date_obj = None
+        end_date_obj = None
+        
+        if date_range == 'custom':
+            if not start_date or not end_date:
+                return jsonify({
+                    'success': False, 
+                    'message': 'Start and end dates are required for custom date range'
+                }), 400
+                
+            try:
+                start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
+                end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+            except ValueError as e:
+                logger.error(f"Date parsing error: {e}")
+                return jsonify({
+                    'success': False,
+                    'message': f'Invalid date format: {str(e)}'
+                }), 400
         
         # Initialize report generator
-        report_gen = ReportGenerator(
-            report_type=report_type,
-            output_format=output_format,
-            date_range=date_range,
-            fields=fields,
-            start_date=start_date,
-            end_date=end_date,
-            record_limit=record_limit,
-            preview=is_preview
-        )
+        try:
+            logger.info("Initializing report generator")
+            report_gen = ReportGenerator(
+                report_type=report_type,
+                output_format=output_format,
+                date_range=date_range,
+                start_date=start_date_obj,
+                end_date=end_date_obj,
+                record_limit=500,
+                preview=False
+            )
+        except Exception as e:
+            logger.error(f"Error initializing report generator: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({
+                'success': False,
+                'message': f'Error initializing report: {str(e)}'
+            }), 500
         
         # Generate report
-        result = report_gen.generate_report()
+        try:
+            logger.info("Generating report...")
+            result = report_gen.generate_report()
+            logger.info(f"Report generation result: {result}")
+        except Exception as e:
+            logger.error(f"Error generating report: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({
+                'success': False,
+                'message': f'Error generating report: {str(e)}'
+            }), 500
         
-        if is_preview:
-            # Return preview HTML for AJAX request
-            return jsonify(result)
-        
-        if result['success']:
-            # Redirect to download page or show success message
-            flash('Report generated successfully!', 'success')
-            return redirect(url_for('reports_page'))
+        if result.get('success'):
+            # Return success response with report details
+            return jsonify({
+                'success': True,
+                'message': 'Report generated successfully',
+                'report_id': result.get('report_id')
+            })
         else:
-            # Show error message
-            flash(f'Error generating report: {result.get("error", "Unknown error")}', 'error')
-            return redirect(url_for('reports_page'))
+            # Return error details
+            return jsonify({
+                'success': False,
+                'message': result.get('error', 'Unknown error generating report')
+            }), 500
             
     except Exception as e:
-        flash(f'Error processing report request: {str(e)}', 'error')
+        logger.error(f"Unexpected error in generate_report: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'message': f'An unexpected error occurred: {str(e)}'
+        }), 500
+
+@app.route('/view-report/<report_id>')
+@login_required
+def view_report(report_id):
+    """View a generated report."""
+    try:
+        # Get report info
+        report = get_report_by_id(report_id)
+        
+        if not report:
+            flash('Report not found', 'error')
+            return redirect(url_for('reports_page'))
+        
+        # For HTML reports, we can display them directly
+        if report['format'] == 'html':
+            with open(os.path.join(REPORTS_DIR, report['path']), 'r', encoding='utf-8') as f:
+                html_content = f.read()
+            return render_template('report_viewer.html', 
+                                 report=report,
+                                 html_content=html_content)
+        else:
+            # For other formats, redirect to download
+            return redirect(url_for('download_report', report_id=report_id))
+    except Exception as e:
+        logger.error(f"Error viewing report: {str(e)}")
+        flash(f'Error viewing report: {str(e)}', 'error')
         return redirect(url_for('reports_page'))
 
 @app.route('/download-report/<report_id>')

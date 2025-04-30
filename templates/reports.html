@@ -30,14 +30,15 @@
                     <select id="report-type">
                         <option value="all">All Types</option>
                         <option value="messages">Messages</option>
-                        <option value="performance">Performance</option>
                         <option value="errors">Errors</option>
+                        <option value="performance">Performance</option>
                         <option value="summary">Summary</option>
                     </select>
                 </div>
                 <div class="filter-group">
                     <label for="date-range">Date Range:</label>
                     <select id="date-range">
+                        <option value="all">All Time</option>
                         <option value="today">Today</option>
                         <option value="week">Last 7 Days</option>
                         <option value="month">Last 30 Days</option>
@@ -143,7 +144,9 @@
                     <option value="pdf">PDF</option>
                     <option value="excel">Excel</option>
                     <option value="csv">CSV</option>
+                    <option value="html">HTML</option>
                 </select>
+                <span class="format-hint">Note: PDF generation requires WeasyPrint or pdfkit package to be installed.</span>
             </div>
             <div class="form-actions">
                 <button type="button" id="cancel-report" class="btn secondary-btn">Cancel</button>
@@ -152,6 +155,16 @@
         </form>
     </div>
 </div>
+
+<style>
+    .format-hint {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.8rem;
+        color: #888;
+        font-style: italic;
+    }
+</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -177,6 +190,14 @@
 
         generateBtn.addEventListener('click', function() {
             modal.style.display = 'block';
+            
+            // Set default dates for custom range
+            const today = new Date();
+            const lastWeek = new Date();
+            lastWeek.setDate(lastWeek.getDate() - 7);
+            
+            document.getElementById('modal-end-date').valueAsDate = today;
+            document.getElementById('modal-start-date').valueAsDate = lastWeek;
         });
 
         closeBtn.addEventListener('click', function() {
@@ -190,6 +211,19 @@
         modalDateRange.addEventListener('change', function() {
             if (this.value === 'custom') {
                 modalCustomDate.style.display = 'flex';
+                
+                // Set default dates if they haven't been set
+                const startDateInput = document.getElementById('modal-start-date');
+                const endDateInput = document.getElementById('modal-end-date');
+                
+                if (!startDateInput.value || !endDateInput.value) {
+                    const today = new Date();
+                    const lastWeek = new Date();
+                    lastWeek.setDate(lastWeek.getDate() - 7);
+                    
+                    endDateInput.valueAsDate = today;
+                    startDateInput.valueAsDate = lastWeek;
+                }
             } else {
                 modalCustomDate.style.display = 'none';
             }
@@ -210,75 +244,48 @@
                     // Add AJAX call to delete the report
                     fetch(`/delete-report/${reportId}`, {
                         method: 'DELETE',
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Remove the row from the table
-                            this.closest('tr').remove();
-                            // Check if table is empty
-                            if (document.querySelector('.reports-table tbody').children.length === 0) {
-                                document.querySelector('.reports-list').innerHTML = `
-                                <div class="no-reports">
-                                    <i class="fas fa-file-alt no-data-icon"></i>
-                                    <p>No reports available</p>
-                                    <p class="sub-message">Generate a new report to see it here</p>
-                                </div>`;
-                            }
-                        } else {
-                            alert('Failed to delete report: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while deleting the report');
-                    });
+                    }).then(response => response.json())
+                      .then(data => {
+                          if(data.success) {
+                              // Remove the row from the table
+                              this.closest('tr').remove();
+                          } else {
+                              alert('Failed to delete the report.');
+                          }
+                      }).catch(error => {
+                          console.error('Error:', error);
+                          alert('An error occurred while deleting the report.');
+                      });
                 }
             });
         });
 
-        // Form submission
+        // Form submission with improved error handling
         document.getElementById('report-form').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const reportType = document.getElementById('modal-report-type').value;
-            const dateRange = document.getElementById('modal-date-range').value;
-            const outputFormat = document.getElementById('output-format').value;
-            let startDate = '';
-            let endDate = '';
-            
-            if (dateRange === 'custom') {
-                startDate = document.getElementById('modal-start-date').value;
-                endDate = document.getElementById('modal-end-date').value;
-                
-                if (!startDate || !endDate) {
-                    alert('Please select both start and end dates for custom range');
-                    return;
-                }
-            }
-            
-            // Show loading indicator
             const formActions = document.querySelector('.form-actions');
             const originalContent = formActions.innerHTML;
-            formActions.innerHTML = '<div class="loading">Generating report... <div class="spinner"></div></div>';
             
-            // Prepare data for submission
-            const formData = new FormData();
-            formData.append('reportType', reportType);
-            formData.append('dateRange', dateRange);
-            formData.append('outputFormat', outputFormat);
-            if (dateRange === 'custom') {
-                formData.append('startDate', startDate);
-                formData.append('endDate', endDate);
-            }
+            // Show loading state
+            formActions.innerHTML = '<div class="loading-spinner"></div><p>Generating report...</p>';
+            
+            // Collect form data
+            const formData = new FormData(this);
             
             // Submit form data
             fetch('{{ url_for("generate_report") }}', {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Report generation response:', data);
                 if (data.success) {
                     // Close modal and redirect or show success
                     modal.style.display = 'none';
@@ -286,13 +293,13 @@
                 } else {
                     // Show error
                     formActions.innerHTML = originalContent;
-                    alert('Failed to generate report: ' + data.message);
+                    alert('Failed to generate report: ' + (data.message || 'Unknown error'));
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 formActions.innerHTML = originalContent;
-                alert('An error occurred while generating the report');
+                alert(`An error occurred while generating the report: ${error.message}`);
             });
         });
     });

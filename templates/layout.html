@@ -72,12 +72,6 @@
             <a href="/reports" class="nav-link {% if request.path == '/reports' %}active{% endif %}">
                 <i class="fas fa-file-alt"></i> Reports
             </a>
-            <a href="#" class="nav-link">
-                <i class="fas fa-chart-bar"></i> Reports
-            </a>
-            <a href="#" class="nav-link">
-                <i class="fas fa-history"></i> History
-            </a>
         </div>
 
         <div class="nav-section">
@@ -107,6 +101,12 @@
             <a href="/glpi/printers" class="nav-link {% if request.path == '/glpi/printers' %}active{% endif %}">
                 <i class="fas fa-print"></i> Printers
             </a>
+            <a href="/glpi/monitors" class="nav-link {% if request.path == '/glpi/monitors' %}active{% endif %}">
+                <i class="fas fa-tv"></i> Monitors
+            </a>
+            <a href="/glpi/racks" class="nav-link {% if request.path == '/glpi/racks' %}active{% endif %}">
+                <i class="fas fa-server"></i> Racks
+            </a>
             <a href="/glpi/others" class="nav-link {% if request.path == '/glpi/others' %}active{% endif %}">
                 <i class="fas fa-microchip"></i> Other Devices
             </a>
@@ -114,9 +114,11 @@
 
         <div class="nav-section">
             <h3>Graylog</h3>
-            <a href="/graylog/logs?refresh=1" class="nav-link">
-                <i class="fas fa-history"></i>
-                <span>Recent Logs</span>
+            <a href="/graylog/logs?refresh=1" class="nav-link {% if request.path == '/graylog/logs' %}active{% endif %}">
+                <i class="fas fa-history"></i> Recent Logs
+            </a>
+            <a href="/graylog/loading?target=/graylog/messages-over-time" class="nav-link {% if request.path == '/graylog/messages-over-time' %}active{% endif %}">
+                <i class="fas fa-chart-line"></i> Messages Over Time
             </a>
         </div>
     </nav>

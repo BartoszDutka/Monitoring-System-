@@ -14,7 +14,7 @@
         </div>
         <div class="card-content">
             <div class="dashboard-nav">
-                <a href="/graylog/loading?target=/graylog/logs&query_string=limit={{ session.get('graylog_limit', 300) }}&refresh=1" class="dashboard-nav-link">
+                <a href="/graylog/logs?refresh=1" class="dashboard-nav-link">
                     <i class="fas fa-history"></i>
                     <span>Recent Logs</span>
                     <span class="count">{{ session.get('graylog_limit', 300) }}</span>
@@ -36,15 +36,15 @@
             <nav class="dashboard-nav">
                 <a href="/available-hosts" class="dashboard-nav-link available">
                     <i class="fas fa-check-circle"></i>
-                    <span>Available Hosts</span>
+                    <span>Available</span>
                 </a>
                 <a href="/unavailable-hosts" class="dashboard-nav-link unavailable">
                     <i class="fas fa-times-circle"></i>
-                    <span>Unavailable Hosts</span>
+                    <span>Unavailable</span>
                 </a>
                 <a href="/unknown-hosts" class="dashboard-nav-link unknown">
                     <i class="fas fa-question-circle"></i>
-                    <span>Unknown Hosts</span>
+                    <span>Unknown</span>
                 </a>
             </nav>
         </div>
@@ -68,7 +68,7 @@
                 </a>
                 <a href="/reports" class="dashboard-nav-link">
                     <i class="fas fa-file-alt"></i>
-                    <span>Reports Generator</span>
+                    <span>Reports</span>
                 </a>
             </nav>
         </div>
