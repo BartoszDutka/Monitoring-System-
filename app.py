@@ -127,8 +127,8 @@ cache = Cache(config={
 cache.init_app(app)
 
 # Initialize GLPI module cache
-from modules.glpi import cache as glpi_cache
-glpi_cache.init_app(app)
+from modules.glpi import init_cache
+init_cache(app)
 
 # Custom filter for checking if a character is a digit
 @app.template_filter('isdigit')

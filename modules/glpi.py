@@ -13,10 +13,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Configure caching
-cache = Cache(config={
-    'CACHE_TYPE': 'SimpleCache',
-    'CACHE_DEFAULT_TIMEOUT': 300
-})
+cache = Cache()
+
+# Cache initialization function - will be called from app.py
+def init_cache(app):
+    cache.init_app(app)
 
 class GLPIClient:
     def __init__(self):
