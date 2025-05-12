@@ -72,6 +72,15 @@ function translatePage(lang) {
         }
     });
     
+    // Znajdź i zaktualizuj wszystkie placeholdery
+    const inputElements = document.querySelectorAll('input[data-en-placeholder][data-pl-placeholder]');
+    inputElements.forEach(input => {
+        const placeholderTranslation = input.getAttribute(`data-${lang}-placeholder`);
+        if (placeholderTranslation) {
+            input.placeholder = placeholderTranslation;
+        }
+    });
+    
     // Dispatch event that language has changed (for other components)
     document.dispatchEvent(new CustomEvent('languageChanged', { 
         detail: { language: lang } 
