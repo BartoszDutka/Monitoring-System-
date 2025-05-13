@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="glpi-dashboard-header">
-    <h1 data-en="{{ category_title }}" data-pl="{{ category_title }}">{{ category_title }}</h1>
+    <h1 data-en="{{ category_title }}" data-pl="{% if category_title == 'Workstations (KS)' %}Stacje robocze (KS){% elif category_title == 'Terminals (KT)' %}Terminale (KT){% elif category_title == 'Servers' %}Serwery{% elif category_title == 'Network Devices' %}Urządzenia sieciowe{% elif category_title == 'Printers' %}Drukarki{% elif category_title == 'Monitors' %}Monitory{% elif category_title == 'Racks' %}Szafy serwerowe{% elif category_title == 'Other Devices' %}Inne urządzenia{% else %}{{ category_title }}{% endif %}">{{ category_title }}</h1>
     <div class="glpi-header-actions">
         <div class="search-container">
             <i class="fas fa-search search-icon"></i>
@@ -16,7 +16,7 @@
         </div>
         <div class="refresh-controls">
             <button id="refresh-current" class="refresh-button">
-                <i class="fas fa-sync-alt"></i> <span data-en="Refresh {{ category_title }}" data-pl="Odśwież {{ category_title }}">Refresh {{ category_title }}</span>
+                <i class="fas fa-sync-alt"></i> <span data-en="Refresh {{ category_title }}" data-pl="Odśwież {% if category_title == 'Workstations (KS)' %}stacje robocze (KS){% elif category_title == 'Terminals (KT)' %}terminale (KT){% elif category_title == 'Servers' %}serwery{% elif category_title == 'Network Devices' %}urządzenia sieciowe{% elif category_title == 'Printers' %}drukarki{% elif category_title == 'Monitors' %}monitory{% elif category_title == 'Racks' %}szafy serwerowe{% elif category_title == 'Other Devices' %}inne urządzenia{% else %}{{ category_title }}{% endif %}">Refresh {{ category_title }}</span>
             </button>
             <button id="refresh-all" class="refresh-button secondary">
                 <i class="fas fa-sync-alt"></i> <span data-en="Refresh All" data-pl="Odśwież wszystkie">Refresh All</span>
