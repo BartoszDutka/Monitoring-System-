@@ -23,18 +23,34 @@ function initializeLanguageSystem() {
     
     // Załaduj zapisany język lub użyj domyślnego (angielski)
     const savedLanguage = localStorage.getItem('language') || 'en';
-    updateLanguage(savedLanguage);
+    
+    // Sprawdź czy to jest odświeżenie strony po zmianie języka
+    const justChanged = sessionStorage.getItem('language_just_changed');
+    if (justChanged) {
+        // Usuń flagę, aby nie wpaść w pętlę
+        sessionStorage.removeItem('language_just_changed');
+        updateLanguageWithoutRefresh(savedLanguage);
+    } else {
+        // Normalne uruchomienie
+        updateLanguageWithoutRefresh(savedLanguage);
+    }
     
     // Obsługa kliknięcia przycisku zmiany języka
     languageToggleBtn.addEventListener('click', () => {
         const currentLang = html.getAttribute('data-language') || 'en';
         const newLang = currentLang === 'en' ? 'pl' : 'en';
-        updateLanguage(newLang);
+        
+        // Ustaw języki w storage
+        localStorage.setItem('language', newLang);
+        sessionStorage.setItem('language_just_changed', 'true');
+        
+        // Po prostu odśwież stronę
+        window.location.reload();
     });
 }
 
-// Aktualizacja języka / Update language
-function updateLanguage(lang) {
+// Aktualizacja języka bez odświeżania / Update language without refresh
+function updateLanguageWithoutRefresh(lang) {
     if (!Object.keys(LANGUAGES).includes(lang)) {
         console.error(`Unsupported language: ${lang}`);
         lang = 'en'; // Fallback to English
@@ -46,7 +62,6 @@ function updateLanguage(lang) {
     // Aktualizuj atrybuty HTML
     html.setAttribute('lang', lang);
     html.setAttribute('data-language', lang);
-    localStorage.setItem('language', lang);
     
     // Aktualizuj przycisk przełączania
     if (languageToggleBtn) {

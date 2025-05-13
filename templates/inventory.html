@@ -14,6 +14,73 @@
     `;
 </script>
 <script src="{{ url_for('static', filename='js/inventory.js') }}"></script>
+<script>
+    // Force Polish translations directly in HTML
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if language is set to Polish
+        const isPolish = document.documentElement.getAttribute('data-language') === 'pl';
+        if (isPolish) {
+            // Force translations for department selection items
+            const departmentSelect = document.getElementById('departmentSelect');
+            if (departmentSelect) {
+                Array.from(departmentSelect.options).forEach(option => {
+                    // Replace " items)" with " elementów)"
+                    if (option.text.includes(' items)')) {
+                        option.text = option.text.replace(' items)', ' elementów)');
+                    }
+                });
+            }
+            
+            // Also translate items in inventory tables
+            document.querySelectorAll('select option').forEach(option => {
+                if (option.text.includes(' items)')) {
+                    option.text = option.text.replace(' items)', ' elementów)');
+                }
+            });
+
+            // Setup observer to handle dynamically loaded equipment items
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes.length) {
+                        // Translate any "hardware" to "sprzęt"
+                        document.querySelectorAll('td').forEach(cell => {
+                            if (cell.textContent.trim().toLowerCase() === 'hardware') {
+                                cell.textContent = 'sprzęt';
+                            }
+                            // Replace N/A with Brak danych
+                            if (cell.textContent.trim() === 'N/A') {
+                                cell.textContent = 'Brak danych';
+                            }
+                        });
+                        
+                        // Also handle any new option elements that might have been added dynamically
+                        document.querySelectorAll('select option').forEach(option => {
+                            if (option.text.includes(' items)')) {
+                                option.text = option.text.replace(' items)', ' elementów)');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Start observing the equipment table body
+            const equipmentTableBody = document.getElementById('equipmentTableBody');
+            if (equipmentTableBody) {
+                observer.observe(equipmentTableBody, { childList: true, subtree: true });
+            }
+            
+            // Initial run for any existing elements
+            document.querySelectorAll('td').forEach(cell => {
+                if (cell.textContent.trim().toLowerCase() === 'hardware') {
+                    cell.textContent = 'sprzęt';
+                }
+                if (cell.textContent.trim() === 'N/A') {
+                    cell.textContent = 'Brak danych';
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}
 
 {% block content %}
@@ -130,7 +197,7 @@
                                         <option value="" data-en="Select Department" data-pl="Wybierz dział">Select Department</option>
                                         {% for dept in departments %}
                                         <option value="{{ dept.name }}" {% if dept.name == current_department %}selected{% endif %}>
-                                            {{ dept.name }} ({{ dept.equipment_count }} items)
+                                            {{ dept.name }} ({{ dept.equipment_count }} {% if lang == 'pl' %}elementów{% else %}items{% endif %})
                                         </option>
                                         {% endfor %}
                                     </select>
@@ -264,7 +331,7 @@
                             <option value="" data-en="Unassigned" data-pl="Nieprzypisane">Unassigned</option>
                             {% for dept in departments %}
                             <option value="{{ dept.name }}" {% if dept.name == current_department %}selected{% endif %}>
-                                {{ dept.name }} ({{ dept.equipment_count }} items)
+                                {{ dept.name }} ({{ dept.equipment_count }} {% if lang == 'pl' %}elementów{% else %}items{% endif %})
                             </option>
                             {% endfor %}
                         </select>
@@ -292,7 +359,7 @@
                     <option value="" data-en="Choose a department..." data-pl="Wybierz dział...">Choose a department...</option>
                     {% for dept in departments %}
                     <option value="{{ dept.name }}" {% if dept.name == current_department %}selected{% endif %}>
-                        {{ dept.name }} ({{ dept.equipment_count or 0 }} items)
+                        {{ dept.name }} ({{ dept.equipment_count or 0 }} {% if lang == 'pl' %}elementów{% else %}items{% endif %})
                     </option>
                     {% endfor %}
                 </select>

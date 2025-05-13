@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicjalne tłumaczenie
+    translateUIElements();
+    
+    // Konfiguracja obserwerów
+    setupMutationObserver();
+    
     const methodBtns = document.querySelectorAll('.method-btn');
     const sections = {
         manual: document.querySelector('.manual-section'),
@@ -441,6 +447,59 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Funkcja tłumacząca elementy interfejsu w zależności od języka
+function translateUIElements() {
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    if (language !== 'pl') return; // Tłumaczenie tylko na polski
+    
+    // Tłumaczenie "items" w opcjach wyboru departamentu
+    document.querySelectorAll('select option').forEach(option => {
+        if (option.text.includes(' items)')) {
+            option.text = option.text.replace(' items)', ' elementów)');
+        }
+    });
+    
+    // Tłumaczenie wartości w komórkach tabeli
+    document.querySelectorAll('td').forEach(cell => {
+        const text = cell.textContent.trim();
+        if (text.toLowerCase() === 'hardware') {
+            cell.textContent = 'sprzęt';
+        } else if (text.toLowerCase() === 'network') {
+            cell.textContent = 'urz. sieciowe';
+        } else if (text === 'N/A') {
+            cell.textContent = 'Brak danych';
+        }
+    });
+}
+
+// Dodanie funkcji do wywoływania przy zmianach w DOM
+function setupMutationObserver() {
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    if (language !== 'pl') return; // Obserwacja tylko dla polskiego języka
+    
+    // Obserwuj zmiany w tabeli sprzętu
+    const equipmentTableBody = document.getElementById('equipmentTableBody');
+    if (equipmentTableBody) {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes.length) {
+                    // Tłumaczenie nowo dodanych elementów
+                    translateUIElements();
+                }
+            });
+        });
+        
+        observer.observe(equipmentTableBody, { childList: true, subtree: true });
+    }
+    
+    // Obserwuj też zmiany w dropdown departamentów
+    const departmentSelect = document.getElementById('departmentSelect');
+    if (departmentSelect) {
+        const observer = new MutationObserver(translateUIElements);
+        observer.observe(departmentSelect, { childList: true, subtree: true });
+    }
+}
+
 function guessProductCategory(name) {
     if (!name) return 'Other';
     
@@ -608,27 +667,67 @@ function importProductToInventory(product, showAlert = true) {
 function loadUserEquipment(userId) {
     const equipmentList = document.getElementById('userEquipmentList');
     
+    // Get current language
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    const noDataText = language === 'pl' ? 'Brak danych' : 'N/A';
+    
     fetch(`/api/person_equipment/${userId}`)
         .then(response => response.json())
         .then(data => {
             const tbody = document.getElementById('equipmentTableBody');
             equipmentList.style.display = 'block';
             
-            tbody.innerHTML = data.equipment.map(item => `
+            tbody.innerHTML = data.equipment.map(item => {
+                // Translate type value if it's "hardware" for Polish language
+                let typeValue = item.type || noDataText;
+                if (language === 'pl') {
+                    if (typeValue.toLowerCase() === 'hardware') {
+                        typeValue = 'sprzęt';
+                    } else if (typeValue.toLowerCase() === 'network') {
+                        typeValue = 'urz. sieciowe';
+                    }
+                }
+                
+                // Replace N/A with Brak danych for Polish
+                let serialNumber = item.serial_number;
+                if (language === 'pl') {
+                    if (!serialNumber || serialNumber === 'N/A') {
+                        serialNumber = noDataText;
+                    }
+                } else {
+                    serialNumber = serialNumber || noDataText;
+                }
+                
+                let assignedDate = item.assigned_date || noDataText;
+                if (language === 'pl' && (assignedDate === 'N/A' || !item.assigned_date)) {
+                    assignedDate = noDataText;
+                }
+                
+                let status = item.status || noDataText;
+                if (language === 'pl' && (status === 'N/A' || !item.status)) {
+                    status = noDataText;
+                }
+                
+                return `
                 <tr>
-                    <td>${item.name}</td>
-                    <td>${item.type}</td>
-                    <td>${item.serial_number || 'N/A'}</td>
+                    <td>${item.name || noDataText}</td>
+                    <td>${typeValue}</td>
+                    <td>${serialNumber}</td>
                     <td>${item.quantity || 1}</td>
-                    <td>${item.assigned_date || 'N/A'}</td>
-                    <td><span class="status-badge ${item.status}">${item.status}</span></td>
+                    <td>${assignedDate}</td>
+                    <td><span class="status-badge ${item.status}">${status}</span></td>
                     <td>
                         <button class="btn-icon" onclick="unassignEquipment(${item.id})">
                             <i class="fas fa-unlink"></i>
                         </button>
                     </td>
                 </tr>
-            `).join('') || '<tr><td colspan="7">No equipment assigned</td></tr>';
+            `}).join('') || `<tr><td colspan="7">${language === 'pl' ? 'Brak przypisanego sprzętu' : 'No equipment assigned'}</td></tr>`;
+            
+            // Po załadowaniu sprzętu przetłumacz elementy
+            if (language === 'pl') {
+                translateUIElements();
+            }
         })
         .catch(error => console.error('Error:', error));
 }
@@ -661,20 +760,49 @@ function loadDepartmentEquipment(departmentName) {
     loadingSpinner.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
     equipmentList.appendChild(loadingSpinner);
 
+    // Get current language
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    const noDataText = language === 'pl' ? 'Brak danych' : 'N/A';
+
     fetch(`/api/department_equipment/${encodeURIComponent(departmentName)}`)
         .then(response => response.json())
         .then(data => {
             const tbody = document.getElementById('equipmentTableBody');
             
             if (data.equipment && data.equipment.length > 0) {
-                tbody.innerHTML = data.equipment.map(item => `
+                tbody.innerHTML = data.equipment.map(item => {
+                    // Always translate hardware to sprzęt in Polish
+                    let typeValue = item.type || noDataText;
+                    if (language === 'pl') {
+                        if (typeValue.toLowerCase() === 'hardware') {
+                            typeValue = 'sprzęt';
+                        } else if (typeValue.toLowerCase() === 'network') {
+                            typeValue = 'urz. sieciowe';
+                        }
+                    }
+
+                    // Always replace N/A with proper Polish text
+                    let serialNumber = item.serial_number;
+                    if (language === 'pl') {
+                        if (!serialNumber || serialNumber === 'N/A') {
+                            serialNumber = noDataText;
+                        }
+                    } else {
+                        serialNumber = serialNumber || noDataText;
+                    }
+                    
+                    const assignedDate = item.assigned_date || noDataText;
+                    const status = item.status || noDataText;
+
+                    return `
                     <tr>
-                        <td>${item.name || 'N/A'}</td>
-                        <td>${item.type || 'N/A'}</td>
-                        <td>${item.serial_number || 'N/A'}</td>
+                        <td>${item.name || noDataText}</td>
+                        <td>${typeValue}</td>
+                        <td>${serialNumber}</td>
                         <td>${item.quantity || 1}</td>
-                        <td>${item.assigned_date || 'N/A'}</td>
-                        <td><span class="status-badge ${item.status}">${item.status || 'N/A'}</span></td>
+                        <td>${assignedDate}</td>
+                        <td><span class="status-badge ${item.status}">${status}</span></td>
+                        <td></td>
                         <td>
                             <button class="btn-icon" onclick="unassignFromDepartment(${item.id})">
                                 <i class="fas fa-unlink"></i>
@@ -684,16 +812,24 @@ function loadDepartmentEquipment(departmentName) {
                             </button>
                         </td>
                     </tr>
-                `).join('');
+                    `;
+                }).join('');
+                
+                // Po załadowaniu sprzętu przetłumacz elementy
+                if (language === 'pl') {
+                    translateUIElements();
+                }
             } else {
-                tbody.innerHTML = '<tr><td colspan="7">No equipment assigned to this department</td></tr>';
+                const noEquipmentText = language === 'pl' ? 'Brak sprzętu przypisanego do tego działu' : 'No equipment assigned to this department';
+                tbody.innerHTML = `<tr><td colspan="8">${noEquipmentText}</td></tr>`;
             }
             
             loadingSpinner.remove();
         })
         .catch(error => {
             console.error('Error:', error);
-            equipmentList.innerHTML = '<div class="error-message">Failed to load equipment data</div>';
+            const errorText = language === 'pl' ? 'Nie udało się załadować danych sprzętu' : 'Failed to load equipment data';
+            equipmentList.innerHTML = `<div class="error-message">${errorText}</div>`;
         });
 }
 

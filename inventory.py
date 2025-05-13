@@ -39,9 +39,13 @@ def view_inventory():
             if user:
                 current_department = user['Department']
     
+    # Get language preference from session or default to English
+    lang = session.get('language', 'en')
+    
     return render_template('inventory.html', 
                          departments=departments, 
-                         current_department=current_department)
+                         current_department=current_department,
+                         lang=lang)
 
 @inventory.route('/api/department_equipment/<department>')
 def get_department_equipment(department):
