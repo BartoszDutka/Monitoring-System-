@@ -2,8 +2,8 @@
 
 {% block content %}
 <div class="dashboard-header">
-    <h1>User Management</h1>
-    <p>Manage user roles and permissions</p>
+    <h1 data-en="User Management" data-pl="Zarządzanie użytkownikami">User Management</h1>
+    <p data-en="Manage user roles and permissions" data-pl="Zarządzaj rolami i uprawnieniami użytkowników">Manage user roles and permissions</p>
 </div>
 
 <div class="users-container">
@@ -11,12 +11,12 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Department</th>
-                    <th>Last Login</th>
-                    <th>Actions</th>
+                    <th data-en="Username" data-pl="Nazwa użytkownika">Username</th>
+                    <th data-en="Email" data-pl="Email">Email</th>
+                    <th data-en="Role" data-pl="Rola">Role</th>
+                    <th data-en="Department" data-pl="Dział">Department</th>
+                    <th data-en="Last Login" data-pl="Ostatnie logowanie">Last Login</th>
+                    <th data-en="Actions" data-pl="Akcje">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,37 +31,47 @@
                         <form action="{{ url_for('update_user_role') }}" method="POST" class="role-form">
                             <input type="hidden" name="user_id" value="{{ user.user_id }}">
                             <select name="role" onchange="this.form.submit()" {% if user.username == session.username %}disabled{% endif %}>
-                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
-                                <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
-                                <option value="viewer" {% if user.role == 'viewer' %}selected{% endif %}>Viewer</option>
+                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %} data-en="Admin" data-pl="Administrator">Admin</option>
+                                <option value="user" {% if user.role == 'user' %}selected{% endif %} data-en="User" data-pl="Użytkownik">User</option>
+                                <option value="viewer" {% if user.role == 'viewer' %}selected{% endif %} data-en="Viewer" data-pl="Przeglądający">Viewer</option>
                             </select>
                         </form>
                     </td>
                     <td>
                         <span class="editable-field" id="department-{{ user.user_id }}">{{ user.department }}</span>
-                        <input type="text" class="edit-input d-none" value="{{ user.department }}">
+                        <select class="edit-input d-none department-select" id="department-select-{{ user.user_id }}">
+                            <option value="" data-en="Select Department" data-pl="Wybierz dział">Select Department</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.name }}" 
+                                    {% if dept.name == user.department %}selected{% endif %}
+                                    data-desc-en="{{ dept.description_en }}"
+                                    data-desc-pl="{{ dept.description_pl }}">
+                                {{ dept.name }} (<span class="dept-description">{{ dept.description_en if lang == 'en' else dept.description_pl }}</span>)
+                            </option>
+                            {% endfor %}
+                        </select>
                     </td>
                     <td>{{ user.last_login|default('Never') }}</td>
                     <td>
                         {% if user.username == session.username %}
                             <button class="btn btn-primary btn-sm me-2" onclick="toggleEdit({{ user.user_id }})">
-                                <i class="fas fa-edit"></i> Edit
+                                <i class="fas fa-edit"></i> <span data-en="Edit" data-pl="Edytuj">Edit</span>
                             </button>
                             <button class="btn btn-success btn-sm me-2 d-none" onclick="saveChanges({{ user.user_id }})">
-                                <i class="fas fa-save"></i> Save
+                                <i class="fas fa-save"></i> <span data-en="Save" data-pl="Zapisz">Save</span>
                             </button>
                             <button class="btn btn-danger btn-sm" disabled>
-                                <i class="fas fa-trash"></i> Delete
+                                <i class="fas fa-trash"></i> <span data-en="Delete" data-pl="Usuń">Delete</span>
                             </button>
                         {% else %}
                             <button class="btn btn-primary btn-sm me-2" onclick="toggleEdit({{ user.user_id }})">
-                                <i class="fas fa-edit"></i> Edit
+                                <i class="fas fa-edit"></i> <span data-en="Edit" data-pl="Edytuj">Edit</span>
                             </button>
                             <button class="btn btn-success btn-sm me-2 d-none" onclick="saveChanges({{ user.user_id }})">
-                                <i class="fas fa-save"></i> Save
+                                <i class="fas fa-save"></i> <span data-en="Save" data-pl="Zapisz">Save</span>
                             </button>
                             <button class="btn btn-danger btn-sm" onclick="deleteUser({{ user.user_id }})">
-                                <i class="fas fa-trash"></i> Delete
+                                <i class="fas fa-trash"></i> <span data-en="Delete" data-pl="Usuń">Delete</span>
                             </button>
                         {% endif %}
                     </td>
@@ -83,7 +93,12 @@ function toggleEdit(userId) {
     editableFields.forEach((field, index) => {
         field.classList.toggle('d-none');
         editInputs[index].classList.toggle('d-none');
-        editInputs[index].value = field.textContent.trim();
+        
+        if (editInputs[index].tagName === 'SELECT') {
+            // For department select, we don't need to set a value, it's already set via the selected attribute
+        } else {
+            editInputs[index].value = field.textContent.trim();
+        }
     });
 
     editBtn.classList.toggle('d-none');
@@ -93,7 +108,8 @@ function toggleEdit(userId) {
 function saveChanges(userId) {
     const row = document.getElementById(`user-row-${userId}`);
     const email = row.querySelector('input[type="email"]').value;
-    const department = row.querySelector('input[type="text"]').value;
+    const departmentSelect = row.querySelector('.department-select');
+    const department = departmentSelect ? departmentSelect.value : row.querySelector('input[type="text"]').value;
 
     fetch('/api/update_user', {
         method: 'POST',
@@ -112,7 +128,15 @@ function saveChanges(userId) {
             const emailField = document.getElementById(`email-${userId}`);
             const departmentField = document.getElementById(`department-${userId}`);
             emailField.textContent = email;
-            departmentField.textContent = department;
+            
+            // If department dropdown used, get selected option text
+            if (departmentSelect) {
+                const selectedOption = departmentSelect.options[departmentSelect.selectedIndex];
+                departmentField.textContent = department;
+            } else {
+                departmentField.textContent = department;
+            }
+            
             toggleEdit(userId);
         } else {
             alert('Failed to update user information');
@@ -121,7 +145,15 @@ function saveChanges(userId) {
 }
 
 function deleteUser(userId) {
-    if (confirm('Are you sure you want to delete this user?')) {
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    const confirmText = language === 'pl' ? 
+        'Czy na pewno chcesz usunąć tego użytkownika?' : 
+        'Are you sure you want to delete this user?';
+    const failText = language === 'pl' ? 
+        'Nie udało się usunąć użytkownika' : 
+        'Failed to delete user';
+        
+    if (confirm(confirmText)) {
         fetch('/api/delete_user', {
             method: 'POST',
             headers: {
@@ -136,10 +168,36 @@ function deleteUser(userId) {
             if (data.success) {
                 document.getElementById(`user-row-${userId}`).remove();
             } else {
-                alert('Failed to delete user');
+                alert(failText);
             }
         });
     }
 }
+
+// Function to update department descriptions based on language
+function updateDepartmentDescriptions() {
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    
+    document.querySelectorAll('.department-select option').forEach(option => {
+        if (option.value && option.querySelector('.dept-description')) {
+            const descSpan = option.querySelector('.dept-description');
+            if (language === 'pl' && option.hasAttribute('data-desc-pl')) {
+                descSpan.textContent = option.getAttribute('data-desc-pl');
+            } else if (option.hasAttribute('data-desc-en')) {
+                descSpan.textContent = option.getAttribute('data-desc-en');
+            }
+        }
+    });
+}
+
+// Apply translations when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    updateDepartmentDescriptions();
+    
+    // Also listen for language changes
+    document.addEventListener('languageChanged', function(e) {
+        updateDepartmentDescriptions();
+    });
+});
 </script>
 {% endblock %}

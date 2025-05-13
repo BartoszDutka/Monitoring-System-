@@ -48,8 +48,10 @@
                         <select name="department" class="form-control">
                             <option value="" data-en="Select Department" data-pl="Wybierz dział">Select Department</option>
                             {% for dept in departments %}
-                            <option value="{{ dept.name }}" {% if dept.name == user_info.department %}selected{% endif %}>
-                                {{ dept.name }} ({{ dept.description }})
+                            <option value="{{ dept.name }}" {% if dept.name == user_info.department %}selected{% endif %}
+                                data-dept-en="{{ dept.description.en }}"
+                                data-dept-pl="{{ dept.description.pl }}">
+                                {{ dept.name }} (<span class="dept-description">{{ dept.description.en }}</span>)
                             </option>
                             {% endfor %}
                         </select>
@@ -155,6 +157,40 @@ document.addEventListener('DOMContentLoaded', function() {
     if (avatarInput) {
         avatarInput.addEventListener('change', function() {
             validateAndSubmit(this);
+        });
+    }
+
+    // Function to update department descriptions based on the selected language
+    function updateDepartmentDescriptions() {
+        const lang = document.documentElement.getAttribute('data-language') || 'en';
+        const deptOptions = document.querySelectorAll('select[name="department"] option');
+        
+        deptOptions.forEach(option => {
+            if (option.value) { // Skip the placeholder option
+                const descSpan = option.querySelector('.dept-description');
+                if (descSpan) {
+                    // Get description based on language
+                    const description = option.getAttribute(`data-dept-${lang}`);
+                    descSpan.textContent = description;
+                }
+            }
+        });
+    }
+
+    // Update descriptions when page loads
+    updateDepartmentDescriptions();
+
+    // Also update when language changes (assuming you have a language switcher)
+    document.addEventListener('language-changed', updateDepartmentDescriptions);
+
+    // If you have a language switcher with click events
+    const languageSwitchers = document.querySelectorAll('.language-switcher');
+    if (languageSwitchers.length) {
+        languageSwitchers.forEach(switcher => {
+            switcher.addEventListener('click', function() {
+                // Allow a moment for the language to update
+                setTimeout(updateDepartmentDescriptions, 100);
+            });
         });
     }
 });

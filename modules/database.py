@@ -355,38 +355,82 @@ def get_detailed_messages(start_time: datetime, end_time: datetime, limit: int =
         }
 
 def setup_departments_table():
-    """Create departments table if not exists"""
+    """Create departments table if not exists and migrate existing table structure if needed"""
     with get_db_cursor() as cursor:
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS departments (
-                name VARCHAR(255) PRIMARY KEY,
-                description TEXT,
-                location VARCHAR(255),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            )
-        """)
+        # First check if table exists
+        cursor.execute("SHOW TABLES LIKE 'departments'")
+        table_exists = cursor.fetchone() is not None
+        
+        if not table_exists:
+            # Create new table with the correct structure
+            cursor.execute("""
+                CREATE TABLE departments (
+                    name VARCHAR(255) PRIMARY KEY,
+                    description_en TEXT,
+                    description_pl TEXT,
+                    location VARCHAR(255),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                )
+            """)
+            print("Created departments table with new structure")
+        else:
+            # Table exists, check for columns
+            cursor.execute("DESCRIBE departments")
+            columns = {row['Field']: row for row in cursor.fetchall()}
+            
+            # Check if we need to modify the table
+            modifications_needed = False
+            
+            # Check if description_en and description_pl columns exist
+            if 'description_en' not in columns and 'description' in columns:
+                # We have the old 'description' column but not the new columns
+                # Need to rename existing description to description_en
+                cursor.execute("""
+                    ALTER TABLE departments 
+                    CHANGE COLUMN description description_en TEXT
+                """)
+                print("Renamed description column to description_en")
+                modifications_needed = True
+                
+            if 'description_pl' not in columns:
+                # Add the Polish description column
+                cursor.execute("""
+                    ALTER TABLE departments
+                    ADD COLUMN description_pl TEXT AFTER description_en
+                """)
+                print("Added description_pl column")
+                modifications_needed = True
+                
+            if modifications_needed:
+                print("Successfully migrated departments table structure")
+            else:
+                print("Departments table already has the correct structure")
 
 def ensure_default_departments():
-    """Ensure that default departments exist in the database"""
+    """Ensure that default departments exist in the database with translations"""
     default_departments = [
-        ('IT', 'Information Technology Department', 'Floor 1'),
-        ('HR', 'Human Resources', 'Floor 2'),
-        ('Administration', 'Administration Department', 'Floor 1'),
-        ('Research', 'Research and Development', 'Floor 3'),
-        ('Operations', 'Operations Department', 'Floor 2'),
-        ('Finance', 'Finance Department', 'Floor 2'),
-        ('Marketing', 'Marketing Department', 'Floor 3'),
-        ('Sales', 'Sales Department', 'Floor 3'),
-        ('Support', 'Technical Support', 'Floor 1'),
-        ('Development', 'Software Development', 'Floor 3')
+        ('IT', 'Information Technology Department', 'Dział Technologii Informacyjnej', 'Floor 1'),
+        ('HR', 'Human Resources', 'Zasoby Ludzkie', 'Floor 2'),
+        ('Administration', 'Administration Department', 'Dział Administracji', 'Floor 1'),
+        ('Research', 'Research and Development', 'Badania i Rozwój', 'Floor 3'),
+        ('Operations', 'Operations Department', 'Dział Operacyjny', 'Floor 2'),
+        ('Finance', 'Finance Department', 'Dział Finansowy', 'Floor 2'),
+        ('Marketing', 'Marketing Department', 'Dział Marketingu', 'Floor 3'),
+        ('Sales', 'Sales Department', 'Dział Sprzedaży', 'Floor 3'),
+        ('Support', 'Technical Support', 'Wsparcie Techniczne', 'Floor 1'),
+        ('Development', 'Software Development', 'Rozwój Oprogramowania', 'Floor 3')
     ]
     
     with get_db_cursor() as cursor:
         for dept in default_departments:
             cursor.execute("""
-                INSERT IGNORE INTO departments (name, description, location)
-                VALUES (%s, %s, %s)
+                INSERT INTO departments (name, description_en, description_pl, location)
+                VALUES (%s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                description_en = VALUES(description_en),
+                description_pl = VALUES(description_pl),
+                location = VALUES(location)
             """, dept)
 
 def get_departments():
@@ -395,12 +439,13 @@ def get_departments():
         cursor.execute('''
             SELECT 
                 d.name,
-                d.description,
+                d.description_en,
+                d.description_pl,
                 d.location,
                 COUNT(e.id) as equipment_count
             FROM departments d
             LEFT JOIN equipment e ON e.assigned_to_department = d.name
-            GROUP BY d.name, d.description, d.location
+            GROUP BY d.name, d.description_en, d.description_pl, d.location
             ORDER BY d.name
         ''')
         return cursor.fetchall()
@@ -415,6 +460,6 @@ def get_department_info(department_name):
             FROM departments d
             LEFT JOIN equipment e ON e.assigned_to_department = d.name
             WHERE d.name = %s
-            GROUP BY d.name, d.description, d.location
+            GROUP BY d.name, d.description_en, d.description_pl, d.location
         ''', (department_name,))
         return cursor.fetchone()

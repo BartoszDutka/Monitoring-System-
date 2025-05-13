@@ -907,14 +907,22 @@ def profile():
     if not user_info:
         return redirect(url_for('login'))
     
-    # Get departments list
+    # Get departments list with translations
     with get_db_cursor() as cursor:
         cursor.execute('''
-            SELECT name, description
+            SELECT name, description_en, description_pl
             FROM departments
             ORDER BY name
         ''')
-        departments = cursor.fetchall()
+        departments = []
+        for dept in cursor.fetchall():
+            departments.append({
+                'name': dept['name'],
+                'description': {
+                    'en': dept['description_en'],
+                    'pl': dept['description_pl']
+                }
+            })
         
     session['user_info'] = user_info
     return render_template('profile.html',

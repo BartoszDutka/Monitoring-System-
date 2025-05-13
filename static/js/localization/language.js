@@ -73,6 +73,9 @@ function updateLanguageWithoutRefresh(lang) {
     
     // Przetłumacz wszystkie elementy
     translatePage(lang);
+    
+    // Update department translations
+    translateDepartments(lang);
 }
 
 // Tłumaczenie strony / Translate page content
@@ -100,6 +103,75 @@ function translatePage(lang) {
     document.dispatchEvent(new CustomEvent('languageChanged', { 
         detail: { language: lang } 
     }));
+}
+
+// Funkcja tłumacząca opisy działów / Function to translate department descriptions
+function translateDepartments(lang) {
+    // Find all department dropdowns and update descriptions
+    document.querySelectorAll('select option').forEach(option => {
+        // Check if this option contains department description (has format "Name (Description)")
+        const match = option.textContent.match(/(.*) \((.*)\)/);
+        if (match) {
+            const deptName = match[1];
+            
+            // Check if we have translation data attributes
+            if (option.hasAttribute(`data-desc-${lang}`)) {
+                const translatedDesc = option.getAttribute(`data-desc-${lang}`);
+                option.textContent = `${deptName} (${translatedDesc})`;
+            }
+            // Check if this is an option with a dept-description span
+            else if (option.querySelector('.dept-description')) {
+                const descSpan = option.querySelector('.dept-description');
+                if (descSpan && option.hasAttribute(`data-dept-${lang}`)) {
+                    descSpan.textContent = option.getAttribute(`data-dept-${lang}`);
+                }
+            }
+        }
+    });
+    
+    // Find all department descriptions in dynamic content (table cells, spans, etc.)
+    const departmentTranslations = {
+        'en': {
+            'Information Technology Department': 'Information Technology Department',
+            'Human Resources': 'Human Resources',
+            'Administration Department': 'Administration Department',
+            'Research and Development': 'Research and Development',
+            'Finance Department': 'Finance Department',
+            'Marketing Department': 'Marketing Department',
+            'Sales Department': 'Sales Department',
+            'Operations Department': 'Operations Department',
+            'Technical Support': 'Technical Support',
+            'Software Development': 'Software Development'
+        },
+        'pl': {
+            'Information Technology Department': 'Dział Technologii Informacyjnej',
+            'Human Resources': 'Zasoby Ludzkie',
+            'Administration Department': 'Dział Administracji',
+            'Research and Development': 'Badania i Rozwój',
+            'Finance Department': 'Dział Finansowy',
+            'Marketing Department': 'Dział Marketingu',
+            'Sales Department': 'Dział Sprzedaży',
+            'Operations Department': 'Dział Operacyjny', 
+            'Technical Support': 'Wsparcie Techniczne',
+            'Software Development': 'Rozwój Oprogramowania'
+        }
+    };
+    
+    // Replace department descriptions in text nodes
+    document.querySelectorAll('span, td, div, option').forEach(el => {
+        if (!el.children.length && el.textContent) {
+            // Check if element contains any of the English department descriptions in ()
+            Object.keys(departmentTranslations.en).forEach(engDesc => {
+                const pattern = new RegExp(`\\(${engDesc}\\)`, 'g');
+                if (pattern.test(el.textContent) && lang === 'pl') {
+                    el.textContent = el.textContent.replace(
+                        pattern, 
+                        `(${departmentTranslations.pl[engDesc]})`
+                    );
+                }
+            });
+        }
+    });
 }
 
 // Funkcja pomocnicza do tłumaczenia tekstu / Helper function for text translation
@@ -132,7 +204,19 @@ function translateText(key, lang = null) {
             'main_menu': 'Main Menu',
             'tools': 'Tools',
             'functions': 'Functions',
-            'glpi_inventory': 'GLPI Inventory'
+            'glpi_inventory': 'GLPI Inventory',
+            
+            // Department translations
+            'Information Technology Department': 'Information Technology Department',
+            'Human Resources': 'Human Resources',
+            'Administration Department': 'Administration Department',
+            'Research and Development': 'Research and Development',
+            'Finance Department': 'Finance Department',
+            'Marketing Department': 'Marketing Department',
+            'Sales Department': 'Sales Department',
+            'Operations Department': 'Operations Department', 
+            'Technical Support': 'Technical Support',
+            'Software Development': 'Software Development'
         },
         'pl': {
             'dashboard': 'Pulpit',
@@ -156,7 +240,19 @@ function translateText(key, lang = null) {
             'main_menu': 'Menu Główne',
             'tools': 'Narzędzia',
             'functions': 'Funkcje',
-            'glpi_inventory': 'Inwentaryzacja GLPI'
+            'glpi_inventory': 'Inwentaryzacja GLPI',
+            
+            // Department translations
+            'Information Technology Department': 'Dział Technologii Informacyjnej',
+            'Human Resources': 'Zasoby Ludzkie',
+            'Administration Department': 'Dział Administracji',
+            'Research and Development': 'Badania i Rozwój',
+            'Finance Department': 'Dział Finansowy',
+            'Marketing Department': 'Dział Marketingu',
+            'Sales Department': 'Dział Sprzedaży',
+            'Operations Department': 'Dział Operacyjny', 
+            'Technical Support': 'Wsparcie Techniczne',
+            'Software Development': 'Rozwój Oprogramowania'
         }
     };
     
