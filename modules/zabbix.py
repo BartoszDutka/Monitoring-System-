@@ -38,13 +38,13 @@ def get_hosts():
                 # Przetwarzamy dane dla każdego hosta
                 for host in data['result']:
                     metrics = {
-                        'cpu': 'N/A',
-                        'memory': 'N/A',
-                        'disk': 'N/A',
-                        'network': 'N/A',
-                        'ping': 'N/A',
-                        'uptime': 'N/A',
-                        'last_restart': 'N/A'
+                        'cpu': 'Brak danych',
+                        'memory': 'Brak danych',
+                        'disk': 'Brak danych',
+                        'network': 'Brak danych',
+                        'ping': 'Brak danych',
+                        'uptime': 'Brak danych',
+                        'last_restart': 'Brak danych'
                     }
                     
                     # Status dostępności
@@ -68,10 +68,13 @@ def get_hosts():
                         elif 'net.if.in' in key or 'net.if.out' in key:
                             metrics['network'] = f"{float(value)/1024/1024:.2f} MB/s"
                         elif 'icmpping' in key:
+                            # Dodano obsługę polskiej wersji
                             metrics['ping'] = 'OK' if value == '1' else 'Failed'
                         elif 'system.uptime' in key:
                             uptime_seconds = float(value)
-                            metrics['uptime'] = f"{uptime_seconds/86400:.1f} days"
+                            # Format liczby z przecinkiem zamiast kropki dla Polski i "dni" zamiast "days"
+                            uptime_days = uptime_seconds/86400
+                            metrics['uptime'] = f"{uptime_days:.1f}".replace('.', ',') + " dni"
                     
                     # Dodanie metryk do hosta
                     host['metrics'] = metrics
