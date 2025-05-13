@@ -2,32 +2,32 @@
 
 {% block content %}
 <div class="dashboard-header">
-    <h1>System Logs Monitor</h1>
+    <h1 data-en="System Logs Monitor" data-pl="Monitor logów systemowych">System Logs Monitor</h1>
 </div>
 
 <div class="dashboard-grid">
     <div class="dashboard-card graylog-card full-width">
         <div class="card-header">
             <i class="fas fa-shield-alt"></i>
-            <h2>Critical System Events</h2>
+            <h2 data-en="Critical System Events" data-pl="Krytyczne zdarzenia systemowe">Critical System Events</h2>
             <div class="header-actions">
                 <div class="logs-summary">
                     <div class="log-stat error">
-                        <span class="stat-label">Critical Events</span>
+                        <span class="stat-label" data-en="Critical Events" data-pl="Zdarzenia krytyczne">Critical Events</span>
                         <span class="stat-count">{{ graylog.stats.error_count }}</span>
                         <div class="stat-content">
                             <i class="fas fa-exclamation-circle"></i>
                         </div>
                     </div>
                     <div class="log-stat warning">
-                        <span class="stat-label">Warnings</span>
+                        <span class="stat-label" data-en="Warnings" data-pl="Ostrzeżenia">Warnings</span>
                         <span class="stat-count">{{ graylog.stats.warn_count }}</span>
                         <div class="stat-content">
                             <i class="fas fa-exclamation-triangle"></i>
                         </div>
                     </div>
                     <div class="log-stat info">
-                        <span class="stat-label">Alerts</span>
+                        <span class="stat-label" data-en="Alerts" data-pl="Alerty">Alerts</span>
                         <span class="stat-count">{{ graylog.stats.info_count }}</span>
                         <div class="stat-content">
                             <i class="fas fa-info-circle"></i>
@@ -36,7 +36,7 @@
                 </div>
                 <button class="refresh-button" onclick="refreshLogs()">
                     <i class="fas fa-sync"></i>
-                    Refresh
+                    <span data-en="Refresh" data-pl="Odśwież">Refresh</span>
                 </button>
             </div>
         </div>
@@ -47,7 +47,7 @@
                     <span class="time-range">{{ graylog.time_range }}</span>
                 </div>
                 <div class="logs-limit-controls">
-                    <span class="limit-label">Show entries:</span>
+                    <span class="limit-label" data-en="Show entries:" data-pl="Pokaż wpisy:">Show entries:</span>
                     <div class="limit-buttons">
                         {% set current_limit = request.args.get('limit', '300')|int %}
                         <button class="limit-btn {% if current_limit == 100 %}active{% endif %}" data-limit="100">100</button>
@@ -61,11 +61,11 @@
             
             <div class="logs-categories">
                 {% set categories = {
-                    'System Error': {'icon': 'fas fa-exclamation-circle', 'class': 'error'},
-                    'Security Alert': {'icon': 'fas fa-shield-alt', 'class': 'security'},
-                    'Performance Issue': {'icon': 'fas fa-tachometer-alt', 'class': 'performance'},
-                    'Service Status': {'icon': 'fas fa-server', 'class': 'service'},
-                    'General Warning': {'icon': 'fas fa-exclamation-triangle', 'class': 'warning'}
+                    'System Error': {'icon': 'fas fa-exclamation-circle', 'class': 'error', 'pl': 'Błędy systemowe'},
+                    'Security Alert': {'icon': 'fas fa-shield-alt', 'class': 'security', 'pl': 'Alerty bezpieczeństwa'},
+                    'Performance Issue': {'icon': 'fas fa-tachometer-alt', 'class': 'performance', 'pl': 'Problemy wydajnościowe'},
+                    'Service Status': {'icon': 'fas fa-server', 'class': 'service', 'pl': 'Status usług'},
+                    'General Warning': {'icon': 'fas fa-exclamation-triangle', 'class': 'warning', 'pl': 'Ogólne ostrzeżenia'}
                 } %}
 
                 {% for category_name, meta in categories.items() %}
@@ -74,7 +74,7 @@
                         <div class="log-category {{ meta.class }}">
                             <div class="category-header" onclick="toggleCategory(this)">
                                 <i class="{{ meta.icon }}"></i>
-                                <span>{{ category_name }}</span>
+                                <span data-en="{{ category_name }}" data-pl="{{ meta.pl }}">{{ category_name }}</span>
                                 <span class="count">{{ category_logs|length }}</span>
                                 <i class="fas fa-chevron-down"></i>
                             </div>
@@ -102,18 +102,18 @@
                                             <div class="detail-section">
                                                 <div class="section-header">
                                                     <i class="fas fa-id-card"></i>
-                                                    Session Details
+                                                    <span data-en="Session Details" data-pl="Szczegóły sesji">Session Details</span>
                                                 </div>
                                                 <div class="section-content">
                                                     {% if log.details.formssessionname %}
                                                     <div class="detail-field">
-                                                        <span class="field-label">Session Name</span>
+                                                        <span class="field-label" data-en="Session Name" data-pl="Nazwa sesji">Session Name</span>
                                                         <span class="field-value code">{{ log.details.formssessionname }}</span>
                                                     </div>
                                                     {% endif %}
                                                     {% if log.details.formsdbsessionid %}
                                                     <div class="detail-field">
-                                                        <span class="field-label">DB Session ID</span>
+                                                        <span class="field-label" data-en="DB Session ID" data-pl="ID sesji DB">DB Session ID</span>
                                                         <span class="field-value code">{{ log.details.formsdbsessionid }}</span>
                                                     </div>
                                                     {% endif %}
@@ -126,11 +126,11 @@
                                             <div class="detail-section">
                                                 <div class="section-header">
                                                     <i class="fas fa-file-alt"></i>
-                                                    Form Details
+                                                    <span data-en="Form Details" data-pl="Szczegóły formularza">Form Details</span>
                                                 </div>
                                                 <div class="section-content">
                                                     <div class="detail-field">
-                                                        <span class="field-label">Form Name</span>
+                                                        <span class="field-label" data-en="Form Name" data-pl="Nazwa formularza">Form Name</span>
                                                         <span class="field-value">{{ log.details.formsformname }}</span>
                                                     </div>
                                                 </div>
@@ -142,18 +142,18 @@
                                             <div class="detail-section">
                                                 <div class="section-header">
                                                     <i class="fas fa-code"></i>
-                                                    Technical Details
+                                                    <span data-en="Technical Details" data-pl="Szczegóły techniczne">Technical Details</span>
                                                 </div>
                                                 <div class="section-content">
                                                     {% if log.details.thread %}
                                                     <div class="detail-field">
-                                                        <span class="field-label">Thread ID</span>
+                                                        <span class="field-label" data-en="Thread ID" data-pl="ID wątku">Thread ID</span>
                                                         <span class="field-value code">{{ log.details.thread }}</span>
                                                     </div>
                                                     {% endif %}
                                                     {% if log.details.callsite %}
                                                     <div class="detail-field">
-                                                        <span class="field-label">Call Site</span>
+                                                        <span class="field-label" data-en="Call Site" data-pl="Miejsce wywołania">Call Site</span>
                                                         <span class="field-value code">{{ log.details.callsite }}</span>
                                                     </div>
                                                     {% endif %}
@@ -167,7 +167,7 @@
                                                 <div class="message-box {{ log.severity }}">
                                                     <div class="message-header">
                                                         <i class="fas fa-comment-alt"></i>
-                                                        <span class="message-type">Error Message</span>
+                                                        <span class="message-type" data-en="Error Message" data-pl="Treść błędu">Error Message</span>
                                                         <span class="message-time">
                                                             <i class="fas fa-clock"></i>
                                                             {{ log.timestamp }}
@@ -192,6 +192,60 @@
 </div>
 
 <script>
+// Translations for dynamic messages
+const TRANSLATIONS = {
+    'en': {
+        'last_minutes': 'Last {} minutes',
+        'showing_entries': 'Last {} minutes • Showing {} of {} entries',
+        'session_details': 'Session Details',
+        'session_name': 'Session Name',
+        'db_session_id': 'DB Session ID',
+        'form_details': 'Form Details',
+        'form_name': 'Form Name',
+        'technical_details': 'Technical Details',
+        'thread_id': 'Thread ID',
+        'call_site': 'Call Site',
+        'error_message': 'Error Message',
+        'unknown': 'Unknown',
+        'loading': 'Loading...',
+        'error_loading': 'Error loading data',
+        'refresh_complete': 'Refresh complete',
+        'no_data_found': 'No log entries found'
+    },
+    'pl': {
+        'last_minutes': 'Ostatnie {} minut',
+        'showing_entries': 'Ostatnie {} minut • Wyświetlanie {} z {} wpisów',
+        'session_details': 'Szczegóły sesji',
+        'session_name': 'Nazwa sesji',
+        'db_session_id': 'ID sesji DB',
+        'form_details': 'Szczegóły formularza',
+        'form_name': 'Nazwa formularza',
+        'technical_details': 'Szczegóły techniczne',
+        'thread_id': 'ID wątku',
+        'call_site': 'Miejsce wywołania',
+        'error_message': 'Treść błędu',
+        'unknown': 'Nieznany',
+        'loading': 'Ładowanie...',
+        'error_loading': 'Błąd podczas ładowania danych',
+        'refresh_complete': 'Odświeżanie zakończone',
+        'no_data_found': 'Nie znaleziono wpisów dziennika'
+    }
+};
+
+// Get translation for a key based on current language
+function __(key, ...args) {
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    let message = TRANSLATIONS[language][key] || TRANSLATIONS['en'][key] || key;
+    
+    if (args.length) {
+        args.forEach((arg, i) => {
+            message = message.replace(`{}`, arg);
+        });
+    }
+    
+    return message;
+}
+
 function toggleCategory(header) {
     const content = header.nextElementSibling;
     const icon = header.querySelector('.fa-chevron-down');
@@ -213,13 +267,14 @@ function updateLogStats(stats) {
 
 function updateLogContent(logs) {
     const categories = {
-        'System Error': {'icon': 'fas fa-exclamation-circle', 'class': 'error'},
-        'Security Alert': {'icon': 'fas fa-shield-alt', 'class': 'security'},
-        'Performance Issue': {'icon': 'fas fa-tachometer-alt', 'class': 'performance'},
-        'Service Status': {'icon': 'fas fa-server', 'class': 'service'},
-        'General Warning': {'icon': 'fas fa-exclamation-triangle', 'class': 'warning'}
+        'System Error': {'icon': 'fas fa-exclamation-circle', 'class': 'error', 'pl': 'Błędy systemowe'},
+        'Security Alert': {'icon': 'fas fa-shield-alt', 'class': 'security', 'pl': 'Alerty bezpieczeństwa'},
+        'Performance Issue': {'icon': 'fas fa-tachometer-alt', 'class': 'performance', 'pl': 'Problemy wydajnościowe'},
+        'Service Status': {'icon': 'fas fa-server', 'class': 'service', 'pl': 'Status usług'},
+        'General Warning': {'icon': 'fas fa-exclamation-triangle', 'class': 'warning', 'pl': 'Ogólne ostrzeżenia'}
     };
 
+    const language = document.documentElement.getAttribute('data-language') || 'en';
     const logsCategories = document.querySelector('.logs-categories');
     logsCategories.innerHTML = '';
 
@@ -236,11 +291,12 @@ function updateLogContent(logs) {
     Object.entries(categories).forEach(([categoryName, meta]) => {
         const categoryLogs = logsByCategory[categoryName] || [];
         if (categoryLogs.length) {
+            const displayName = language === 'pl' ? meta.pl : categoryName;
             const categoryHTML = `
                 <div class="log-category ${meta.class}">
                     <div class="category-header" onclick="toggleCategory(this)">
                         <i class="${meta.icon}"></i>
-                        <span>${categoryName}</span>
+                        <span data-en="${categoryName}" data-pl="${meta.pl}">${displayName}</span>
                         <span class="count">${categoryLogs.length}</span>
                         <i class="fas fa-chevron-down"></i>
                     </div>
@@ -255,7 +311,7 @@ function updateLogContent(logs) {
                                         </span>
                                         <span class="source">
                                             <i class="fas fa-user"></i>
-                                            ${log.details.formsusername || 'Unknown'}
+                                            ${log.details.formsusername || __('unknown')}
                                         </span>
                                     </div>
                                     <span class="severity-badge ${log.severity}">
@@ -267,18 +323,18 @@ function updateLogContent(logs) {
                                         <div class="detail-section">
                                             <div class="section-header">
                                                 <i class="fas fa-id-card"></i>
-                                                Session Details
+                                                <span data-en="Session Details" data-pl="Szczegóły sesji">${__('session_details')}</span>
                                             </div>
                                             <div class="section-content">
                                                 ${log.details.formssessionname ? `
                                                     <div class="detail-field">
-                                                        <span class="field-label">Session Name</span>
+                                                        <span class="field-label" data-en="Session Name" data-pl="Nazwa sesji">${__('session_name')}</span>
                                                         <span class="field-value code">${log.details.formssessionname}</span>
                                                     </div>
                                                 ` : ''}
                                                 ${log.details.formsdbsessionid ? `
                                                     <div class="detail-field">
-                                                        <span class="field-label">DB Session ID</span>
+                                                        <span class="field-label" data-en="DB Session ID" data-pl="ID sesji DB">${__('db_session_id')}</span>
                                                         <span class="field-value code">${log.details.formsdbsessionid}</span>
                                                     </div>
                                                 ` : ''}
@@ -290,7 +346,7 @@ function updateLogContent(logs) {
                                             <div class="message-box ${log.severity}">
                                                 <div class="message-header">
                                                     <i class="fas fa-comment-alt"></i>
-                                                    <span class="message-type">Error Message</span>
+                                                    <span class="message-type" data-en="Error Message" data-pl="Treść błędu">${__('error_message')}</span>
                                                     <span class="message-time">
                                                         <i class="fas fa-clock"></i>
                                                         ${log.timestamp}
@@ -311,6 +367,13 @@ function updateLogContent(logs) {
             logsCategories.insertAdjacentHTML('beforeend', categoryHTML);
         }
     });
+    
+    // Apply translations after inserting the content
+    applyTranslations();
+    
+    if (Object.keys(logsByCategory).length === 0) {
+        logsCategories.innerHTML = `<div class="no-logs-message">${__('no_data_found')}</div>`;
+    }
 }
 
 // Funkcja do ustawiania aktywnego przycisku limitu
@@ -324,8 +387,12 @@ function setActiveLimit(limit) {
 function refreshLogs() {
     const button = document.querySelector('.refresh-button');
     const icon = button.querySelector('i');
+    const buttonText = button.querySelector('span');
+    const originalText = buttonText.textContent;
+    
     button.disabled = true;
     icon.classList.add('fa-spin');
+    buttonText.textContent = __('loading');
     
     // Pobierz aktualny limit
     const currentLimit = sessionStorage.getItem('graylog_limit') || 
@@ -342,18 +409,40 @@ function refreshLogs() {
             document.querySelector('.time-range').textContent = data.time_range;
             
             return fetch(`/api/graylog/messages?limit=${currentLimit}`);
+        } else {
+            throw new Error(__('error_loading'));
         }
     })
     .then(response => response.json())
     .then(data => {
         updateLogContent(data.logs);
+        buttonText.textContent = __('refresh_complete');
+        setTimeout(() => {
+            buttonText.textContent = originalText;
+        }, 1500);
     })
     .catch(error => {
         console.error('Error:', error);
+        buttonText.textContent = __('error_loading');
+        setTimeout(() => {
+            buttonText.textContent = originalText;
+        }, 1500);
     })
     .finally(() => {
         button.disabled = false;
         icon.classList.remove('fa-spin');
+    });
+}
+
+// Apply translations based on current language
+function applyTranslations() {
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    document.querySelectorAll('[data-en]').forEach(element => {
+        if (language === 'pl' && element.hasAttribute('data-pl')) {
+            element.textContent = element.getAttribute('data-pl');
+        } else {
+            element.textContent = element.getAttribute('data-en');
+        }
     });
 }
 
@@ -369,6 +458,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Ustaw aktywny przycisk
     setActiveLimit(limit);
     
+    // Apply initial translations
+    applyTranslations();
+    
+    // Display loading message
+    document.querySelector('.logs-categories').innerHTML = `<div class="loading-message">${__('loading')}</div>`;
+    
     // Od razu pobierz dane z właściwym limitem
     fetch(`/api/graylog/messages?limit=${limit}`)
         .then(response => response.json())
@@ -376,8 +471,17 @@ document.addEventListener('DOMContentLoaded', function() {
             updateLogStats(data.stats);
             updateLogContent(data.logs);
             document.querySelector('.time-range').textContent = 
-                `Last 5 minutes • Showing ${limit} of ${data.total_results} entries`;
+                __('showing_entries', 5, limit, data.total_results);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.querySelector('.logs-categories').innerHTML = `<div class="error-message">${__('error_loading')}</div>`;
         });
+        
+    // Listen for language changes
+    document.addEventListener('languageChanged', function(e) {
+        applyTranslations();
+    });
 });
 
 // Zmodyfikowane nasłuchiwanie kliknięć przycisków limitu
@@ -391,6 +495,9 @@ document.querySelectorAll('.limit-btn').forEach(button => {
         // Aktualizuj aktywny przycisk
         setActiveLimit(limit);
         
+        // Display loading message
+        document.querySelector('.logs-categories').innerHTML = `<div class="loading-message">${__('loading')}</div>`;
+        
         // Pobierz dane dla nowego limitu
         fetch(`/api/graylog/messages?limit=${limit}`)
             .then(response => response.json())
@@ -398,35 +505,22 @@ document.querySelectorAll('.limit-btn').forEach(button => {
                 updateLogStats(data.stats);
                 updateLogContent(data.logs);
                 document.querySelector('.time-range').textContent = 
-                    `Last 5 minutes • Showing ${limit} of ${data.total_results} entries`;
+                    __('showing_entries', 5, limit, data.total_results);
                 
                 // Zaktualizuj URL bez przeładowania strony
                 const newUrl = new URL(window.location);
                 newUrl.searchParams.set('limit', limit);
                 window.history.pushState({}, '', newUrl);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.querySelector('.logs-categories').innerHTML = `<div class="error-message">${__('error_loading')}</div>`;
             });
     });
 });
 
 // Odświeżaj co 30 sekund
 setInterval(refreshLogs, 30000);
-
-function changeLogsLimit(limit) {
-    const button = document.querySelector('.refresh-button');
-    const icon = button.querySelector('i');
-    button.disabled = true;
-    icon.classList.add('fa-spin');
-    
-    // Przekieruj na tę samą stronę z nowym parametrem limit
-    window.location.href = `/graylog/logs?limit=${limit}`;
-}
-
-// Ustaw domyślną wartość selecta na podstawie parametru URL
-document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const limit = urlParams.get('limit') || '300';
-    document.getElementById('logsLimit').value = limit;
-});
 
 </script>
 {% endblock %}

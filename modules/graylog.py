@@ -7,6 +7,30 @@ import time
 from config import GRAYLOG_URL, GRAYLOG_USERNAME, GRAYLOG_PASSWORD
 from modules.database import log_system_event
 
+# Dictionary for message translations
+MESSAGES = {
+    'en': {
+        'fetched_batch': "Fetched batch {}, total messages: {}",
+        'request_error': "Request error: {}",
+        'error_fetching': "Error fetching logs: {}",
+        'parsing_error': "Error parsing message: {}"
+    },
+    'pl': {
+        'fetched_batch': "Pobrano partię {}, łączna liczba wiadomości: {}",
+        'request_error': "Błąd zapytania: {}",
+        'error_fetching': "Błąd podczas pobierania logów: {}",
+        'parsing_error': "Błąd podczas przetwarzania wiadomości: {}"
+    }
+}
+
+# Get translation based on language code
+def get_message(key, lang='pl', *args):
+    """Get translated message with format arguments"""
+    message = MESSAGES.get(lang, MESSAGES['en']).get(key, MESSAGES['en'].get(key, ''))
+    if args:
+        return message.format(*args)
+    return message
+
 def extract_nested_json(message_str: str) -> dict:
     """
     Extract and parse nested JSON from message string.
@@ -70,7 +94,9 @@ def parse_log_message(raw_message) -> dict:
         return {'message': inner_message}
         
     except (json.JSONDecodeError, AttributeError) as e:
-        print(f"Error parsing message: {e}")
+        from flask import session, g
+        lang = getattr(g, 'language', session.get('language', 'pl'))
+        print(get_message('parsing_error', lang, str(e)))
         return {'message': str(raw_message)}
 
 class GraylogBuffer:
@@ -130,7 +156,7 @@ class GraylogBuffer:
 # Utworzenie globalnego bufora
 graylog_buffer = GraylogBuffer()
 
-def get_logs(time_range_minutes: int = 5, force_refresh: bool = False) -> dict:
+def get_logs(time_range_minutes: int = 5, force_refresh: bool = False, lang: str = 'pl') -> dict:
     """
     Fetch and process logs from Graylog with smart caching
     """
@@ -237,7 +263,7 @@ def get_logs(time_range_minutes: int = 5, force_refresh: bool = False) -> dict:
                 })
 
             all_messages.extend(processed_batch)
-            print(f"Fetched batch {page + 1}, total messages: {len(all_messages)}")
+            print(get_message('fetched_batch', lang, page + 1, len(all_messages)))
             
             page += 1
             if len(messages) < page_size:  # Jeśli otrzymaliśmy mniej wiadomości niż rozmiar strony
@@ -253,12 +279,19 @@ def get_logs(time_range_minutes: int = 5, force_refresh: bool = False) -> dict:
             "info_count": sum(1 for msg in all_messages if msg["severity"] == "low"),
         }
 
+        # Translations for time range
+        time_range_msg = {
+            'en': f"Last {time_range_minutes} minutes",
+            'pl': f"Ostatnie {time_range_minutes} minut"
+        }
+
         result = {
             "logs": all_messages,
             "total_results": len(all_messages),
-            "time_range": f"Last {time_range_minutes} minutes",
+            "time_range": time_range_msg.get(lang, time_range_msg['en']),
             "query_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            "stats": stats
+            "stats": stats,
+            "language": lang
         }
         
         # Store messages in database
@@ -269,6 +302,7 @@ def get_logs(time_range_minutes: int = 5, force_refresh: bool = False) -> dict:
         return result
 
     except requests.exceptions.RequestException as e:
-        print(f"Request error: {e}")
-        log_system_event('graylog', 'error', 'system', f"Error fetching logs: {str(e)}")
+        error_msg = get_message('request_error', lang, str(e))
+        print(error_msg)
+        log_system_event('graylog', 'error', 'system', get_message('error_fetching', lang, str(e)))
         return {"error": str(e)}

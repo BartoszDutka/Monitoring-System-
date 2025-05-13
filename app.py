@@ -677,10 +677,16 @@ def graylog_loading():
     target_page = request.args.get('target', '/graylog/logs')
     query_string = request.args.get('query_string', '')
     
+    # Pobierz bieżący język użytkownika
+    current_language = session.get('language', 'pl')  # Domyślnie polski
+    
     if (query_string):
         target_page = f"{target_page}?{query_string}"
     
-    return render_template('loading.html', target_page=target_page)  # zmiana ścieżki szablonu
+    # Przekazujemy informację o języku do szablonu
+    return render_template('loading.html', 
+                         target_page=target_page,
+                         current_language=current_language)  # dodajemy informację o języku
 
 @app.route('/graylog/logs')
 @login_required

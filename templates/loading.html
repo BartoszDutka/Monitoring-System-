@@ -107,7 +107,12 @@
 </div>
 
 <script>
-    const language = document.documentElement.getAttribute('data-language') || 'en';
+    // Używamy języka przekazanego bezpośrednio z kontrolera
+    const language = '{{ current_language }}' || 
+                    document.documentElement.getAttribute('data-language') || 
+                    (document.body.classList.contains('lang-pl') ? 'pl' : 'en');
+    
+    console.log("Current language detected:", language); // Logowanie wykrytego języka
     
     // Translate messages based on language
     const messages = {
@@ -117,7 +122,8 @@
             'Processing log entries...',
             'Analyzing log patterns...',
             'Preparing data visualization...',
-            'Almost done...'
+            'Almost done...',
+            'Redirecting...'
         ],
         pl: [
             'Łączenie z serwerem Graylog...',
@@ -125,25 +131,62 @@
             'Przetwarzanie wpisów logów...',
             'Analizowanie wzorców logów...',
             'Przygotowanie wizualizacji danych...',
-            'Prawie gotowe...'
+            'Prawie gotowe...',
+            'Przekierowywanie...'
         ]
     };
 
-    // Translate all elements with data-en and data-pl attributes
-    document.querySelectorAll('[data-en][data-pl]').forEach(el => {
-        el.textContent = el.getAttribute(`data-${language}`) || el.getAttribute('data-en');
+    // Funkcja do tłumaczenia elementu
+    function translateElement(element) {
+        if (element && element.hasAttribute('data-pl') && language === 'pl') {
+            element.textContent = element.getAttribute('data-pl');
+        } else if (element && element.hasAttribute('data-en')) {
+            element.textContent = element.getAttribute('data-en');
+        }
+    }
+
+    // Funkcja inicjalizująca tłumaczenia na stronie
+    function initTranslations() {
+        console.log("Initializing translations for language:", language);
+        
+        // Tłumaczenie wszystkich elementów statycznych
+        document.querySelectorAll('[data-en][data-pl]').forEach(translateElement);
+        
+        // Ustawienie początkowego komunikatu w loadingDetails
+        const loadingDetails = document.getElementById('loadingDetails');
+        if (loadingDetails) {
+            if (language === 'pl') {
+                loadingDetails.textContent = 'Inicjalizacja...';
+            } else {
+                loadingDetails.textContent = 'Initializing...';
+            }
+            console.log("Set initial loading message:", loadingDetails.textContent);
+        }
+    }
+
+    // Uruchom tłumaczenia natychmiast
+    document.addEventListener('DOMContentLoaded', function() {
+        initTranslations();
     });
+    
+    // Ale na wszelki wypadek uruchom również teraz
+    initTranslations();
 
     const progressBar = document.getElementById('progressBar');
     const loadingDetails = document.getElementById('loadingDetails');
     let currentProgress = 0;
     let messageIndex = 0;
     
-    // Use the translated messages
-    const currentMessages = messages[language] || messages['en'];
+    // Use the translated messages - z zabezpieczeniem przed błędami
+    const languageToUse = messages[language] ? language : 'en';
+    const currentMessages = messages[languageToUse];
+    
+    console.log("Using messages in language:", languageToUse); // Debug
 
     async function fetchLogs() {
         try {
+            loadingDetails.textContent = currentMessages[0]; // Zapewnij, że pierwszy komunikat jest przetłumaczony
+            
             const response = await fetch('/fetch_logs', {
                 method: 'POST',
                 headers: {
@@ -161,7 +204,10 @@
             return await response.json();
         } catch (error) {
             console.error('Error fetching logs:', error);
-            loadingDetails.textContent = language === 'pl' ? 'Błąd ładowania danych. Ponawiam próbę...' : 'Error loading data. Retrying...';
+            // Użyj odpowiednich komunikatów błędu w zależności od języka
+            loadingDetails.textContent = language === 'pl' ? 
+                'Błąd ładowania danych. Ponawiam próbę...' : 
+                'Error loading data. Retrying...';
             return null;
         }
     }
@@ -169,7 +215,6 @@
     async function updateProgress() {
         if (currentProgress < 100) {
             if (currentProgress === 0) {
-                loadingDetails.textContent = currentMessages[0];
                 const logsData = await fetchLogs();
                 
                 if (!logsData) {
@@ -182,15 +227,21 @@
             currentProgress = Math.min(currentProgress + increment, 100);
             progressBar.style.width = `${currentProgress}%`;
 
-            if (currentProgress > messageIndex * 20 && messageIndex < currentMessages.length) {
+            // Aktualizacja komunikatu w zależności od postępu
+            let newMessageIndex = Math.min(Math.floor(currentProgress / 20), currentMessages.length - 2);
+            if (newMessageIndex > messageIndex) {
+                messageIndex = newMessageIndex;
                 loadingDetails.textContent = currentMessages[messageIndex];
-                messageIndex++;
+                console.log("Setting message to:", currentMessages[messageIndex]); // Debug
             }
 
             if (currentProgress < 100) {
                 setTimeout(updateProgress, 500);
             } else {
-                loadingDetails.textContent = language === 'pl' ? 'Przekierowywanie...' : 'Redirecting...';
+                // Używamy komunikatu "Przekierowywanie..." w odpowiednim języku
+                loadingDetails.textContent = currentMessages[currentMessages.length - 1];
+                console.log("Final message:", currentMessages[currentMessages.length - 1]); // Debug
+                
                 setTimeout(() => {
                     window.location.href = '{{ target_page }}';
                 }, 500);
@@ -198,7 +249,10 @@
         }
     }
 
-    // Start the progress animation
-    updateProgress();
+    // Uruchamiamy po małym opóźnieniu, aby upewnić się, że DOM jest w pełni załadowany i tłumaczenia zastosowane
+    setTimeout(() => {
+        // Start the progress animation
+        updateProgress();
+    }, 200);
 </script>
 {% endblock %}
