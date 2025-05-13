@@ -77,7 +77,9 @@
                 <span class="status-badge {{ task.status }}">{{ task.status|replace('_', ' ')|title }}</span>
             </div>
             <div class="task-priority">
-                <span class="priority-badge {{ task.priority }}">{{ task.priority|title }}</span>
+                <span class="priority-badge {{ task.priority }}">
+                    <span data-en="{{ task.priority|title }}" data-pl="{% if task.priority == 'low' %}Niski{% elif task.priority == 'medium' %}Średni{% elif task.priority == 'high' %}Wysoki{% elif task.priority == 'critical' %}Krytyczny{% else %}{{ task.priority|title }}{% endif %}">{{ task.priority|title }}</span>
+                </span>
             </div>
             <div class="task-due-date">
                 {{ task.due_date|default('Not set', true) }}
