@@ -128,7 +128,7 @@ function updateChart() {
     button.disabled = true;
     icon.classList.add('fa-spin');
     
-    fetch(`/api/graylog/timeline?range=${rangeValue}&range_type=${rangeUnit}&interval=${interval}`)
+    fetch(`/api/graylog/timeline?range=${rangeValue}&range_type=${rangeUnit}&interval=${interval}&language=${language}`)
         .then(response => response.json())
         .then(data => {
             if (timelineChart) {
@@ -144,6 +144,11 @@ function updateChart() {
                     if (dataset.label === 'Errors') dataset.label = 'Błędy';
                     if (dataset.label === 'Warnings') dataset.label = 'Ostrzeżenia';
                     if (dataset.label === 'Info') dataset.label = 'Informacje';
+                    
+                    // Dodajemy również tłumaczenie dla etykiet priorytetów, jeśli są jeszcze w języku angielskim
+                    if (dataset.label === 'High Priority') dataset.label = 'Wysoki';
+                    if (dataset.label === 'Medium Priority') dataset.label = 'Średni';
+                    if (dataset.label === 'Low Priority') dataset.label = 'Niski';
                 });
             }
             
@@ -221,8 +226,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Nasłuchuj zmian języka
     document.addEventListener('languageChanged', function(e) {
-        // Update selector options and chart
+        // Update selector options
         updateTimeOptions();
+        
+        // Wymuś odświeżenie wykresu po zmianie języka, aby zaktualizować etykiety
+        updateChart();
     });
     
     // Nasłuchuj zmian zakresu czasu

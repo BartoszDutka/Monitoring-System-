@@ -798,6 +798,9 @@ def get_graylog_timeline():
         range_type = request.args.get('range_type', 'minutes')
         interval = request.args.get('interval', '5 minutes')
         
+        # Pobierz język z parametru URL albo z sesji, z domyślną wartością 'en'
+        language = request.args.get('language') or session.get('language', 'en')
+        
         # Ustaw koniec na aktualną datę
         end_time = datetime.now()
 
@@ -822,33 +825,63 @@ def get_graylog_timeline():
         # Pobierz dane z bazy
         timeline_data = get_messages_timeline(start_time, end_time, interval)
         
-        # Format danych dla wykresu
-        formatted_data = {
-            'labels': [],
-            'datasets': [
-                {
-                    'label': 'High Priority',
-                    'data': [],
-                    'backgroundColor': 'rgba(220,53,69,0.5)',
-                    'borderColor': '#dc3545',
-                    'borderWidth': 1
-                },
-                {
-                    'label': 'Medium Priority',
-                    'data': [],
-                    'backgroundColor': 'rgba(255,193,7,0.5)',
-                    'borderColor': '#ffc107',
-                    'borderWidth': 1
-                },
-                {
-                    'label': 'Low Priority',
-                    'data': [],
-                    'backgroundColor': 'rgba(13,202,240,0.5)',
-                    'borderColor': '#0dcaf0',
-                    'borderWidth': 1
-                }
-            ]
-        }
+        # Format danych dla wykresu - dostosuj etykiety do języka
+        if language == 'pl':
+            # Polskie etykiety priorytetów
+            formatted_data = {
+                'labels': [],
+                'datasets': [
+                    {
+                        'label': 'Wysoki',
+                        'data': [],
+                        'backgroundColor': 'rgba(220,53,69,0.5)',
+                        'borderColor': '#dc3545',
+                        'borderWidth': 1
+                    },
+                    {
+                        'label': 'Średni',
+                        'data': [],
+                        'backgroundColor': 'rgba(255,193,7,0.5)',
+                        'borderColor': '#ffc107',
+                        'borderWidth': 1
+                    },
+                    {
+                        'label': 'Niski',
+                        'data': [],
+                        'backgroundColor': 'rgba(13,202,240,0.5)',
+                        'borderColor': '#0dcaf0',
+                        'borderWidth': 1
+                    }
+                ]
+            }
+        else:
+            # Angielskie etykiety priorytetów (domyślne)
+            formatted_data = {
+                'labels': [],
+                'datasets': [
+                    {
+                        'label': 'High Priority',
+                        'data': [],
+                        'backgroundColor': 'rgba(220,53,69,0.5)',
+                        'borderColor': '#dc3545',
+                        'borderWidth': 1
+                    },
+                    {
+                        'label': 'Medium Priority',
+                        'data': [],
+                        'backgroundColor': 'rgba(255,193,7,0.5)',
+                        'borderColor': '#ffc107',
+                        'borderWidth': 1
+                    },
+                    {
+                        'label': 'Low Priority',
+                        'data': [],
+                        'backgroundColor': 'rgba(13,202,240,0.5)',
+                        'borderColor': '#0dcaf0',
+                        'borderWidth': 1
+                    }
+                ]
+            }
         
         # Wypełnij dane wykresu
         for row in timeline_data:
