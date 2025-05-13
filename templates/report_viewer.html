@@ -73,7 +73,13 @@
             <div class="report-meta">
                 <div class="meta-item">
                     <span class="meta-label" data-en="Type" data-pl="Typ">Type</span>
-                    <span class="meta-value">{{ report.type }}</span>
+                    <span class="meta-value report-type" data-type="{{ report.type|lower }}">
+                        <span data-en="Messages" data-pl="Wiadomości" {% if report.type|lower != 'messages' %}style="display:none"{% endif %}>Messages</span>
+                        <span data-en="Errors" data-pl="Błędy" {% if report.type|lower != 'errors' %}style="display:none"{% endif %}>Errors</span>
+                        <span data-en="Performance" data-pl="Wydajność" {% if report.type|lower != 'performance' %}style="display:none"{% endif %}>Performance</span>
+                        <span data-en="Summary" data-pl="Podsumowanie" {% if report.type|lower != 'summary' %}style="display:none"{% endif %}>Summary</span>
+                        <span {% if report.type|lower in ['messages', 'errors', 'performance', 'summary'] %}style="display:none"{% endif %}>{{ report.type }}</span>
+                    </span>
                 </div>
                 <div class="meta-item">
                     <span class="meta-label" data-en="Date" data-pl="Data">Date</span>
@@ -145,6 +151,16 @@
                 }
             });
         }
+
+        // Obsługa aktualizacji tekstów przy zmianie języka
+        document.addEventListener('languageChanged', function(e) {
+            const language = e.detail.language;
+            
+            // Aktualizujemy teksty w widoku raportu zgodnie z wybranym językiem
+            document.querySelectorAll('[data-en][data-pl]').forEach(el => {
+                el.textContent = el.getAttribute(`data-${language}`);
+            });
+        });
     });
 </script>
 {% endblock %}

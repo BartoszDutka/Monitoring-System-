@@ -1112,11 +1112,15 @@ def reports_page():
         
         # Format dates and add necessary fields
         formatted_reports = []
+        
         for report in reports:
+            # Przygotuj typ raportu - zostanie przetłumaczony przez JS na podstawie atrybutów data-
+            report_type = report['type'].lower()
+            
             formatted_report = {
                 'id': report['id'],
                 'name': report['name'],
-                'type': report['type'].capitalize(),
+                'type': report_type,  # Przekazujemy niżmieniony typ, tłumaczenia obsłużymy w szablonie
                 'date': report['generated_at'].strftime('%Y-%m-%d %H:%M:%S') if isinstance(report['generated_at'], datetime) else report['generated_at'],
                 'records': report['record_count']
             }

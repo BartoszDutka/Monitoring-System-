@@ -83,7 +83,13 @@
                             {% for report in reports %}
                             <tr>
                                 <td>{{ report.name }}</td>
-                                <td>{{ report.type }}</td>
+                                <td class="report-type" data-type="{{ report.type }}">
+                                    <span data-en="Messages" data-pl="Wiadomości" {% if report.type != 'messages' %}style="display:none"{% endif %}>Messages</span>
+                                    <span data-en="Errors" data-pl="Błędy" {% if report.type != 'errors' %}style="display:none"{% endif %}>Errors</span>
+                                    <span data-en="Performance" data-pl="Wydajność" {% if report.type != 'performance' %}style="display:none"{% endif %}>Performance</span>
+                                    <span data-en="Summary" data-pl="Podsumowanie" {% if report.type != 'summary' %}style="display:none"{% endif %}>Summary</span>
+                                    <span {% if report.type in ['messages', 'errors', 'performance', 'summary'] %}style="display:none"{% endif %}>{{ report.type|capitalize }}</span>
+                                </td>
                                 <td>{{ report.date }}</td>
                                 <td>{{ report.records }}</td>
                                 <td class="actions">
@@ -367,6 +373,21 @@
                 console.error('Error:', error);
                 formActions.innerHTML = originalContent;
                 alert(errorMessages[language].error + error.message);
+            });
+        });
+
+        // Obsługa aktualizacji tekstów przy zmianie języka
+        document.addEventListener('languageChanged', function(e) {
+            const language = e.detail.language;
+            
+            // Aktualizujemy teksty w tabeli raportów zgodnie z wybranym językiem
+            document.querySelectorAll('[data-en][data-pl]').forEach(el => {
+                el.textContent = el.getAttribute(`data-${language}`);
+            });
+
+            // Aktualizujemy tytuły przycisków
+            document.querySelectorAll('[data-en-title][data-pl-title]').forEach(el => {
+                el.title = el.getAttribute(`data-${language}-title`);
             });
         });
     });
