@@ -20,11 +20,11 @@ def view_inventory():
         cursor.execute('''
             SELECT 
                 d.name,
-                d.description,
+                d.description_en,
                 COUNT(DISTINCT e.id) as equipment_count
             FROM departments d
             LEFT JOIN equipment e ON e.assigned_to_department = d.name
-            GROUP BY d.name, d.description
+            GROUP BY d.name, d.description_en
             ORDER BY d.name
         ''')
         departments = cursor.fetchall()
@@ -55,7 +55,7 @@ def get_department_equipment(department):
     with get_db_cursor() as cursor:
         # Get department info
         cursor.execute('''
-            SELECT name, description, location
+            SELECT name, description_en as description, location
             FROM departments
             WHERE name = %s
         ''', (department,))
