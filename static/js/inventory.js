@@ -21,6 +21,18 @@ document.addEventListener('DOMContentLoaded', function() {
             Object.keys(sections).forEach(key => {
                 sections[key].style.display = key === method ? 'block' : 'none';
             });
+            
+            // Perform translations again when changing sections
+            translateUIElements();
+            
+            // If equipment section is selected, immediately translate its content
+            if (method === 'equipment') {
+                const departmentSelect = document.getElementById('departmentSelect');
+                if (departmentSelect && departmentSelect.value) {
+                    // Reload equipment data to ensure translations are applied
+                    loadDepartmentEquipment(departmentSelect.value);
+                }
+            }
         });
     });
 
@@ -400,28 +412,110 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle form submissions for manual form
     const manualForm = document.getElementById('itemForm');
-    manualForm?.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
+    
+    if (manualForm) {
+        // Remove existing event listener if any
+        const newManualForm = manualForm.cloneNode(true);
+        manualForm.parentNode.replaceChild(newManualForm, manualForm);
         
-        fetch('/api/equipment/add', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Item added successfully!');
-                manualForm.reset();
+        newManualForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            // Check if we're editing or adding new
+            const isEditing = this.dataset.mode === 'edit';
+            const equipmentId = this.dataset.equipmentId;
+            
+            if (isEditing && equipmentId) {
+                // Add equipment ID to form data
+                formData.append('equipment_id', equipmentId);
+                
+                fetch('/api/equipment/update', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Get current language
+                        const language = document.documentElement.getAttribute('data-language') || 'en';
+                        const successMessage = language === 'pl' ? 
+                            'Sprzęt został pomyślnie zaktualizowany!' : 
+                            'Equipment updated successfully!';
+                        alert(successMessage);
+                        
+                        // Reset form state
+                        newManualForm.reset();
+                        delete newManualForm.dataset.mode;
+                        delete newManualForm.dataset.equipmentId;
+                        
+                        // Update save button text
+                        const saveButton = document.getElementById('saveItemBtn');
+                        if (saveButton) {
+                            if (language === 'pl') {
+                                saveButton.textContent = 'Zapisz element';
+                                saveButton.dataset.pl = 'Zapisz element';
+                            } else {
+                                saveButton.textContent = 'Save Item';
+                                saveButton.dataset.en = 'Save Item';
+                            }
+                        }
+                        
+                        // Refresh equipment list if we're viewing the correct department
+                        const departmentSelect = document.getElementById('departmentSelect');
+                        if (departmentSelect && departmentSelect.value) {
+                            loadDepartmentEquipment(departmentSelect.value);
+                        }
+                    } else {
+                        const language = document.documentElement.getAttribute('data-language') || 'en';
+                        const errorMessage = language === 'pl' ? 
+                            'Błąd: ' + (data.error || 'Nieznany błąd') : 
+                            'Error: ' + (data.error || 'Unknown error');
+                        alert(errorMessage);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const language = document.documentElement.getAttribute('data-language') || 'en';
+                    const errorMessage = language === 'pl' ? 
+                        'Nie udało się zaktualizować elementu. Spróbuj ponownie.' : 
+                        'Failed to update item. Please try again.';
+                    alert(errorMessage);
+                });
             } else {
-                alert('Error: ' + (data.error || 'Unknown error'));
+                // Original code for adding new items
+                fetch('/api/equipment/add', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const language = document.documentElement.getAttribute('data-language') || 'en';
+                        const successMessage = language === 'pl' ? 
+                            'Element dodany pomyślnie!' : 
+                            'Item added successfully!';
+                        alert(successMessage);
+                        newManualForm.reset();
+                    } else {
+                        const language = document.documentElement.getAttribute('data-language') || 'en';
+                        const errorMessage = language === 'pl' ? 
+                            'Błąd: ' + (data.error || 'Nieznany błąd') : 
+                            'Error: ' + (data.error || 'Unknown error');
+                        alert(errorMessage);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const language = document.documentElement.getAttribute('data-language') || 'en';
+                    const errorMessage = language === 'pl' ? 
+                        'Nie udało się dodać elementu. Spróbuj ponownie.' : 
+                        'Failed to add item. Please try again.';
+                    alert(errorMessage);
+                });
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to add item. Please try again.');
         });
-    });
+    }
 
     // Add active class to first button by default
     window.addEventListener('DOMContentLoaded', function() {
@@ -457,6 +551,11 @@ function translateUIElements() {
         if (option.text.includes(' items)')) {
             option.text = option.text.replace(' items)', ' elementów)');
         }
+        
+        // Handle "Choose a department..." text
+        if (option.text === 'Choose a department...') {
+            option.text = 'Wybierz dział...';
+        }
     });
     
     // Tłumaczenie wartości w komórkach tabeli
@@ -468,6 +567,22 @@ function translateUIElements() {
             cell.textContent = 'urz. sieciowe';
         } else if (text === 'N/A') {
             cell.textContent = 'Brak danych';
+        }
+    });
+    
+    // Translate buttons and headings if needed
+    document.querySelectorAll('[data-en][data-pl]').forEach(el => {
+        const translation = el.getAttribute('data-pl');
+        if (translation) {
+            el.textContent = translation;
+        }
+    });
+    
+    // Translate button titles
+    document.querySelectorAll('[data-en-title][data-pl-title]').forEach(el => {
+        const translation = el.getAttribute('data-pl-title');
+        if (translation) {
+            el.title = translation;
         }
     });
 }
@@ -678,13 +793,21 @@ function loadUserEquipment(userId) {
             equipmentList.style.display = 'block';
             
             tbody.innerHTML = data.equipment.map(item => {
-                // Translate type value if it's "hardware" for Polish language
+                // Translate type value correctly for Polish language
                 let typeValue = item.type || noDataText;
                 if (language === 'pl') {
                     if (typeValue.toLowerCase() === 'hardware') {
                         typeValue = 'sprzęt';
                     } else if (typeValue.toLowerCase() === 'network') {
                         typeValue = 'urz. sieciowe';
+                    } else if (typeValue.toLowerCase() === 'software') {
+                        typeValue = 'oprogramowanie';  
+                    } else if (typeValue.toLowerCase() === 'accessories') {
+                        typeValue = 'akcesoria';
+                    } else if (typeValue.toLowerCase() === 'furniture') {
+                        typeValue = 'meble';
+                    } else if (typeValue.toLowerCase() === 'other') {
+                        typeValue = 'inne';
                     }
                 }
                 
@@ -704,8 +827,19 @@ function loadUserEquipment(userId) {
                 }
                 
                 let status = item.status || noDataText;
-                if (language === 'pl' && (status === 'N/A' || !item.status)) {
-                    status = noDataText;
+                if (language === 'pl') {
+                    // Translate status values
+                    if (status.toLowerCase() === 'available') {
+                        status = 'dostępny';
+                    } else if (status.toLowerCase() === 'in-use') {
+                        status = 'w użyciu';
+                    } else if (status.toLowerCase() === 'maintenance') {
+                        status = 'konserwacja';
+                    } else if (status.toLowerCase() === 'disposed') {
+                        status = 'zutylizowany';
+                    } else if (status === 'N/A') {
+                        status = noDataText;
+                    }
                 }
                 
                 return `
@@ -724,7 +858,7 @@ function loadUserEquipment(userId) {
                 </tr>
             `}).join('') || `<tr><td colspan="7">${language === 'pl' ? 'Brak przypisanego sprzętu' : 'No equipment assigned'}</td></tr>`;
             
-            // Po załadowaniu sprzętu przetłumacz elementy
+            // Apply translations after loading
             if (language === 'pl') {
                 translateUIElements();
             }
@@ -757,11 +891,14 @@ function loadDepartmentEquipment(departmentName) {
     
     const loadingSpinner = document.createElement('div');
     loadingSpinner.className = 'loading-spinner';
-    loadingSpinner.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    
+    // Get current language for translation
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    loadingSpinner.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + 
+                              (language === 'pl' ? 'Ładowanie...' : 'Loading...');
     equipmentList.appendChild(loadingSpinner);
 
     // Get current language
-    const language = document.documentElement.getAttribute('data-language') || 'en';
     const noDataText = language === 'pl' ? 'Brak danych' : 'N/A';
 
     fetch(`/api/department_equipment/${encodeURIComponent(departmentName)}`)
@@ -778,6 +915,14 @@ function loadDepartmentEquipment(departmentName) {
                             typeValue = 'sprzęt';
                         } else if (typeValue.toLowerCase() === 'network') {
                             typeValue = 'urz. sieciowe';
+                        } else if (typeValue.toLowerCase() === 'software') {
+                            typeValue = 'oprogramowanie';  
+                        } else if (typeValue.toLowerCase() === 'accessories') {
+                            typeValue = 'akcesoria';
+                        } else if (typeValue.toLowerCase() === 'furniture') {
+                            typeValue = 'meble';
+                        } else if (typeValue.toLowerCase() === 'other') {
+                            typeValue = 'inne';
                         }
                     }
 
@@ -791,8 +936,27 @@ function loadDepartmentEquipment(departmentName) {
                         serialNumber = serialNumber || noDataText;
                     }
                     
-                    const assignedDate = item.assigned_date || noDataText;
-                    const status = item.status || noDataText;
+                    // Format dates and other fields
+                    let assignedDate = item.assigned_date || noDataText;
+                    if (language === 'pl' && (assignedDate === 'N/A' || !item.assigned_date)) {
+                        assignedDate = noDataText;
+                    }
+                    
+                    let status = item.status || noDataText;
+                    if (language === 'pl') {
+                        // Translate status values
+                        if (status.toLowerCase() === 'available') {
+                            status = 'dostępny';
+                        } else if (status.toLowerCase() === 'in-use') {
+                            status = 'w użyciu';
+                        } else if (status.toLowerCase() === 'maintenance') {
+                            status = 'konserwacja';
+                        } else if (status.toLowerCase() === 'disposed') {
+                            status = 'zutylizowany';
+                        } else if (status === 'N/A') {
+                            status = noDataText;
+                        }
+                    }
 
                     return `
                     <tr>
@@ -815,7 +979,7 @@ function loadDepartmentEquipment(departmentName) {
                     `;
                 }).join('');
                 
-                // Po załadowaniu sprzętu przetłumacz elementy
+                // Apply translations after loading equipment
                 if (language === 'pl') {
                     translateUIElements();
                 }
@@ -830,6 +994,128 @@ function loadDepartmentEquipment(departmentName) {
             console.error('Error:', error);
             const errorText = language === 'pl' ? 'Nie udało się załadować danych sprzętu' : 'Failed to load equipment data';
             equipmentList.innerHTML = `<div class="error-message">${errorText}</div>`;
+        });
+}
+
+// Add function to unassign equipment from department
+function unassignFromDepartment(equipmentId) {
+    // Get current language for confirmation message
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    const confirmMessage = language === 'pl' ? 
+        'Czy na pewno chcesz cofnąć przypisanie tego sprzętu do działu?' : 
+        'Are you sure you want to unassign this equipment from the department?';
+    
+    if (confirm(confirmMessage)) {
+        fetch('/api/equipment/unassign', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ equipment_id: equipmentId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload equipment list to reflect changes
+                const departmentSelect = document.getElementById('departmentSelect');
+                if (departmentSelect && departmentSelect.value) {
+                    loadDepartmentEquipment(departmentSelect.value);
+                }
+            } else {
+                const errorMessage = language === 'pl' ? 
+                    'Wystąpił błąd przy cofaniu przypisania: ' + (data.error || 'Nieznany błąd') : 
+                    'Error unassigning equipment: ' + (data.error || 'Unknown error');
+                alert(errorMessage);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const errorMessage = language === 'pl' ? 
+                'Nie udało się cofnąć przypisania sprzętu. Spróbuj ponownie.' : 
+                'Failed to unassign equipment. Please try again.';
+            alert(errorMessage);
+        });
+    }
+}
+
+// Add function to edit equipment
+function editEquipment(equipmentId) {
+    // Get current language
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    
+    // First get equipment details
+    fetch(`/api/equipment/${equipmentId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Switch to manual input tab
+            document.querySelector('.method-btn[data-method="manual"]').click();
+            
+            // Populate form with equipment data
+            const form = document.getElementById('itemForm');
+            if (form && data.equipment) {
+                // Store equipment ID in hidden field or as a data attribute on the form
+                form.dataset.equipmentId = equipmentId;
+                
+                // Update form action to indicate editing mode
+                form.dataset.mode = 'edit';
+                
+                // Populate form fields
+                document.getElementById('itemName').value = data.equipment.name || '';
+                document.getElementById('itemCategory').value = data.equipment.type || 'hardware';
+                document.getElementById('itemStatus').value = data.equipment.status || 'available';
+                document.getElementById('itemQuantity').value = data.equipment.quantity || 1;
+                document.getElementById('assignTo').value = data.equipment.assigned_to_department || '';
+                
+                // Additional fields if available
+                if (document.getElementById('itemSerial')) {
+                    document.getElementById('itemSerial').value = data.equipment.serial_number || '';
+                }
+                if (document.getElementById('itemValue')) {
+                    document.getElementById('itemValue').value = data.equipment.value || '';
+                }
+                if (document.getElementById('itemDescription')) {
+                    document.getElementById('itemDescription').value = data.equipment.description || '';
+                }
+                if (document.getElementById('itemManufacturer')) {
+                    document.getElementById('itemManufacturer').value = data.equipment.manufacturer || '';
+                }
+                if (document.getElementById('itemModel')) {
+                    document.getElementById('itemModel').value = data.equipment.model || '';
+                }
+                if (document.getElementById('itemNotes')) {
+                    document.getElementById('itemNotes').value = data.equipment.notes || '';
+                }
+                if (document.getElementById('acquisitionDate')) {
+                    document.getElementById('acquisitionDate').value = data.equipment.acquisition_date || '';
+                }
+                
+                // Update save button text to reflect editing mode
+                const saveButton = document.getElementById('saveItemBtn');
+                if (saveButton) {
+                    if (language === 'pl') {
+                        saveButton.textContent = 'Aktualizuj element';
+                        saveButton.dataset.pl = 'Aktualizuj element';
+                    } else {
+                        saveButton.textContent = 'Update Item';
+                        saveButton.dataset.en = 'Update Item';
+                    }
+                }
+                
+                // Scroll to the form
+                form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const errorMessage = language === 'pl' ? 
+                'Nie udało się pobrać danych sprzętu do edycji.' : 
+                'Failed to retrieve equipment data for editing.';
+            alert(errorMessage);
         });
 }
 

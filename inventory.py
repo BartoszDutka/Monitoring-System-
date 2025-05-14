@@ -199,6 +199,86 @@ def unassign_equipment():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
+@inventory.route('/api/equipment/<int:equipment_id>')
+def get_equipment_details(equipment_id):
+    """Get details for a specific piece of equipment"""
+    if not session.get('logged_in'):
+        return jsonify({'error': 'Not authenticated'}), 401
+        
+    with get_db_cursor() as cursor:
+        cursor.execute('''
+            SELECT 
+                id,
+                name,
+                type,
+                serial_number,
+                status,
+                quantity,
+                acquisition_date,
+                assigned_to_department,
+                assigned_date,
+                value,
+                description,
+                manufacturer,
+                model,
+                notes
+            FROM equipment 
+            WHERE id = %s
+        ''', (equipment_id,))
+        equipment = cursor.fetchone()
+        
+    if not equipment:
+        return jsonify({'error': 'Equipment not found'}), 404
+        
+    return jsonify({'equipment': dict(equipment)})
+
+@inventory.route('/api/equipment/update', methods=['POST'])
+def update_equipment():
+    """Update equipment details"""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+        
+    data = request.form
+    equipment_id = data.get('equipment_id')
+    
+    if not equipment_id:
+        return jsonify({'error': 'Equipment ID is required'}), 400
+        
+    try:
+        with get_db_cursor() as cursor:
+            cursor.execute('''
+                UPDATE equipment 
+                SET 
+                    name = %s,
+                    type = %s,
+                    serial_number = %s,
+                    status = %s,
+                    quantity = %s,
+                    value = %s,
+                    description = %s,
+                    manufacturer = %s,
+                    model = %s,
+                    notes = %s,
+                    assigned_to_department = %s
+                WHERE id = %s
+            ''', (
+                data.get('itemName'),
+                data.get('itemCategory'),
+                data.get('itemSerial'),
+                data.get('itemStatus'),
+                data.get('itemQuantity', 1),
+                data.get('itemValue'),
+                data.get('itemDescription'),
+                data.get('itemManufacturer'),
+                data.get('itemModel'),
+                data.get('itemNotes'),
+                data.get('assignTo'),
+                equipment_id
+            ))
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
 @inventory.route('/api/invoice/process', methods=['POST'])
 def process_invoice():
     """Process PDF invoice and extract data"""

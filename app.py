@@ -1344,6 +1344,47 @@ def delete_report_route(report_id):
     else:
         return jsonify({'success': False, 'error': 'Failed to delete report'}), 404
 
+@app.route('/inventory')
+def inventory():
+    # Get the current language from session or default to English
+    current_language = session.get('language', 'en')
+    
+    # Fetch departments and equipment counts
+    departments = []
+    try:
+        conn = connect_to_database()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT name, (SELECT COUNT(*) FROM equipment WHERE department = d.name) as equipment_count FROM departments d")
+        departments = cursor.fetchall()
+        
+        # Get current department from user's session if available
+        current_user = session.get('username')
+        cursor.execute("SELECT department FROM users WHERE username = %s", (current_user,))
+        user_dept = cursor.fetchone()
+        current_department = user_dept['department'] if user_dept else None
+        
+        # Get all people for equipment assignment
+        cursor.execute("SELECT id, name, department FROM users ORDER BY name")
+        people = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        logging.error(f"Error fetching departments: {e}")
+        departments = []
+        current_department = None
+        people = []
+    
+    # Set Polish title if Polish language is selected
+    page_title = "Zarządzanie inwentarzem" if current_language == 'pl' else "Inventory Management"
+    
+    return render_template('inventory.html', 
+                          departments=departments, 
+                          current_department=current_department,
+                          people=people,
+                          lang=current_language,
+                          title=page_title)
+
 if __name__ == '__main__':
     # Import required modules
     from modules.database import setup_departments_table, ensure_default_departments
