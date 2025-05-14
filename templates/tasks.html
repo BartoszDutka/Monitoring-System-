@@ -280,6 +280,18 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Apply language to all placeholders based on selected language
+    const currentLanguage = document.documentElement.getAttribute('data-language') || 'en';
+    
+    // Find all elements with language-specific placeholders and set them
+    document.querySelectorAll('[data-pl-placeholder]').forEach(function(element) {
+        if (currentLanguage === 'pl') {
+            element.setAttribute('placeholder', element.getAttribute('data-pl-placeholder'));
+        } else {
+            element.setAttribute('placeholder', element.getAttribute('data-en-placeholder'));
+        }
+    });
+    
     // Task creation modal
     const createTaskModal = document.getElementById('create-task-modal');
     const createTaskBtn = document.getElementById('create-task-btn');
