@@ -126,6 +126,20 @@ function updateLanguageWithoutRefresh(lang) {
     
     // Update department translations
     translateDepartments(lang);
+    
+    // Dodatkowe ustawienie fokusa dla stabilizacji interfejsu
+    // przy przełączaniu języków w inwentarzu
+    setTimeout(() => {
+        try {
+            const activeElement = document.activeElement;
+            // Jeśli focus jest na liście rozwijanej, przywróć go na inny element
+            if (activeElement && activeElement.id === 'departmentSelect') {
+                activeElement.blur();
+            }
+        } catch (e) {
+            console.error('Błąd przy stabilizacji fokusa po zmianie języka:', e);
+        }
+    }, 100);
 }
 
 // Tłumaczenie strony / Translate page content
@@ -206,6 +220,34 @@ function translateDepartments(lang) {
             'Software Development': 'Rozwój Oprogramowania'
         }
     };
+    
+    // Bezpośrednie tłumaczenie nazw departamentów w opcjach wyboru - nowy format z nawiasami
+    const departmentSelect = document.getElementById('departmentSelect');
+    if (departmentSelect && lang === 'pl') {
+        Array.from(departmentSelect.options).forEach(option => {
+            if (!option.value) return; // Pomijamy opcję "Wybierz dział..."
+            
+            // Sprawdź czy nazwa departamentu jest kluczem w słowniku tłumaczeń
+            const deptName = option.value;
+            // Pobierz liczbę elementów z data-attribute lub parsuj tekst
+            const count = option.dataset.count || 
+                         (option.textContent.match(/\((\d+) (?:items|elementów)\)/) || [null, '0'])[1];
+            const itemsText = lang === 'pl' ? 'elementów' : 'items';
+            
+            // Format dokładnie taki jak w profilu:
+            // "Development (Rozwój Oprogramowania)" + liczba elementów
+            if (departmentTranslations.en[deptName]) {
+                if (lang === 'pl') {
+                    option.textContent = `${deptName} (${departmentTranslations[lang][deptName]}) (${count} ${itemsText})`;
+                } else {
+                    option.textContent = `${deptName} (${count} ${itemsText})`;
+                }
+            } else {
+                // W przypadku nieznanego działu zachowaj tekstową reprezentację z liczbą elementów
+                option.textContent = `${deptName} (${count} ${itemsText})`;
+            }
+        });
+    }
     
     // Replace department descriptions in text nodes
     document.querySelectorAll('span, td, div, option').forEach(el => {

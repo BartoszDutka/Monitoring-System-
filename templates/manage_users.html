@@ -36,17 +36,14 @@
                                 <option value="viewer" {% if user.role == 'viewer' %}selected{% endif %} data-en="Viewer" data-pl="Przeglądający">Viewer</option>
                             </select>
                         </form>
-                    </td>
-                    <td>
+                    </td>                    <td>
                         <span class="editable-field" id="department-{{ user.user_id }}">{{ user.department }}</span>
                         <select class="edit-input d-none department-select" id="department-select-{{ user.user_id }}">
                             <option value="" data-en="Select Department" data-pl="Wybierz dział">Select Department</option>
                             {% for dept in departments %}
                             <option value="{{ dept.name }}" 
-                                    {% if dept.name == user.department %}selected{% endif %}
-                                    data-desc-en="{{ dept.description_en }}"
-                                    data-desc-pl="{{ dept.description_pl }}">
-                                {{ dept.name }} (<span class="dept-description">{{ dept.description_en if lang == 'en' else dept.description_pl }}</span>)
+                                    {% if dept.name == user.department %}selected{% endif %}>
+                                {{ dept.name }} ({{ dept.description_en }} / {{ dept.description_pl }})
                             </option>
                             {% endfor %}
                         </select>
@@ -129,10 +126,16 @@ function saveChanges(userId) {
             const departmentField = document.getElementById(`department-${userId}`);
             emailField.textContent = email;
             
-            // If department dropdown used, get selected option text
+            // If department dropdown used, display department value and description
             if (departmentSelect) {
                 const selectedOption = departmentSelect.options[departmentSelect.selectedIndex];
-                departmentField.textContent = department;
+                // Display department name in the visible field
+                if (selectedOption && department) {
+                    // For displaying the department name only (without description)
+                    departmentField.textContent = department;
+                } else {
+                    departmentField.textContent = '';
+                }
             } else {
                 departmentField.textContent = department;
             }
@@ -174,30 +177,16 @@ function deleteUser(userId) {
     }
 }
 
-// Function to update department descriptions based on language
+// Function to update department descriptions (not needed with the new format)
 function updateDepartmentDescriptions() {
-    const language = document.documentElement.getAttribute('data-language') || 'en';
-    
-    document.querySelectorAll('.department-select option').forEach(option => {
-        if (option.value && option.querySelector('.dept-description')) {
-            const descSpan = option.querySelector('.dept-description');
-            if (language === 'pl' && option.hasAttribute('data-desc-pl')) {
-                descSpan.textContent = option.getAttribute('data-desc-pl');
-            } else if (option.hasAttribute('data-desc-en')) {
-                descSpan.textContent = option.getAttribute('data-desc-en');
-            }
-        }
-    });
+    // We now display both English and Polish descriptions at the same time
+    // Format is: Department Name (English Description / Polish Description)
+    // No need to update based on language changes
 }
 
-// Apply translations when page loads
+// No need to apply translations when page loads with new format
 document.addEventListener('DOMContentLoaded', function() {
-    updateDepartmentDescriptions();
-    
-    // Also listen for language changes
-    document.addEventListener('languageChanged', function(e) {
-        updateDepartmentDescriptions();
-    });
+    // Department descriptions are now shown in both languages
 });
 </script>
 {% endblock %}

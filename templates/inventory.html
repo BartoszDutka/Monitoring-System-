@@ -5,9 +5,14 @@
 {% block head %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/inventory.css') }}">
-<!-- Najpierw wczytaj moduł językowy -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/inventory-fixes.css') }}">
+<!-- Skrypt naprawiający format działów - musi być wczytany jako pierwszy -->
+<script src="{{ url_for('static', filename='js/dept-fix.js') }}"></script>
+<!-- Następnie moduł językowy -->
 <script src="{{ url_for('static', filename='js/localization/language.js') }}"></script>
-<!-- Następnie skrypt inventory_fixed z defer - naprawiona wersja -->
+<!-- Niestandardowy select, który rozwiązuje problem z przeskakiwaniem kursora -->
+<script src="{{ url_for('static', filename='js/custom-select.js') }}"></script>
+<!-- Na końcu skrypt inventory_fixed z defer - naprawiona wersja -->
 <script src="{{ url_for('static', filename='js/inventory_fixed.js') }}" defer></script>
 <script>
     // Create people options variable that will be used in the JavaScript file
@@ -290,11 +295,10 @@
                 View and manage equipment assigned to departments.
             </p>
             <div class="department-select">
-                <label for="departmentSelect" data-en="Select Department:" data-pl="Wybierz dział:">Select Department:</label>
-                <select id="departmentSelect" class="form-control">
+                <label for="departmentSelect" data-en="Select Department:" data-pl="Wybierz dział:">Select Department:</label>                <select id="departmentSelect" class="form-control">
                     <option value="" data-en="Choose a department..." data-pl="Wybierz dział...">Choose a department...</option>
                     {% for dept in departments %}
-                    <option value="{{ dept.name }}" {% if dept.name == current_department %}selected{% endif %}>
+                    <option value="{{ dept.name }}" {% if dept.name == current_department %}selected{% endif %} data-count="{{ dept.equipment_count or 0 }}">
                         {{ dept.name }} ({{ dept.equipment_count or 0 }} {% if lang == 'pl' %}elementów{% else %}items{% endif %})
                     </option>
                     {% endfor %}

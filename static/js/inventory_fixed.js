@@ -13,8 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (err) {
         console.error('Błąd podczas początkowego tłumaczenia:', err);
     }
-    
-    // Konfiguracja obserwerów
+      // Konfiguracja obserwerów
     setupMutationObserver();
     
     const methodBtns = document.querySelectorAll('.method-btn');
@@ -98,23 +97,21 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (err) {
             console.error('Błąd podczas inicjalizacji pierwszego przycisku:', err);
         }
-    });
-
-    const departmentSelect = document.getElementById('departmentSelect');
+    });    const departmentSelect = document.getElementById('departmentSelect');
     if (departmentSelect) {
+        // Uproszczona obsługa zmiany departamentu - teraz niestandardowa kontrolka select
+        // zajmuje się samą interakcją użytkownika, więc możemy skupić się tylko na obsłudze zmiany
+        
         departmentSelect.addEventListener('change', function() {
-            try {
-                const department = this.value;
-                if (department) {
-                    loadDepartmentEquipment(department);
-                } else {
-                    const equipmentList = document.getElementById('departmentEquipmentList');
-                    if (equipmentList) {
-                        equipmentList.style.display = 'none';
-                    }
+            const department = this.value;
+            if (department) {
+                // Wczytaj dane departamentu tylko jeśli wartość nie jest pusta
+                loadDepartmentEquipment(department);
+            } else {
+                const equipmentList = document.getElementById('departmentEquipmentList');
+                if (equipmentList) {
+                    equipmentList.style.display = 'none';
                 }
-            } catch (err) {
-                console.error('Błąd podczas zmiany departamentu:', err);
             }
         });
 
@@ -137,7 +134,6 @@ function translateUIElements() {
         
         // Ograniczamy zakres zapytań do konkretnych kontenerów zamiast całego dokumentu
         const containers = [
-            document.getElementById('departmentSelect')?.parentNode,
             document.getElementById('equipmentTableBody')?.parentNode,
             document.querySelector('.inventory-container')
         ].filter(el => el); // Filtrujemy puste elementy
@@ -145,10 +141,40 @@ function translateUIElements() {
         // Jeśli nie ma żadnych kontenerów, przerywamy
         if (containers.length === 0) return;
         
+        // Osobna obsługa elementu select dla departamentów 
+        // Tylko tłumaczenie opcji, kontrolka wizualna jest obsługiwana przez custom-select.js
+        const departmentSelect = document.getElementById('departmentSelect');
+        if (departmentSelect) {
+            try {
+                Array.from(departmentSelect.options).forEach(option => {
+                    try {
+                        if (option.text?.includes(' items)')) {
+                            option.text = option.text.replace(' items)', ' elementów)');
+                        }
+                        
+                        // Handle "Choose a department..." text
+                        if (option.text === 'Choose a department...') {
+                            option.text = 'Wybierz dział...';
+                        }
+                    } catch (err) {
+                        console.error('Błąd przy tłumaczeniu opcji select:', err);
+                    }
+                });
+                
+                // Po zmianie tłumaczeń w oryginalnym selekcie, 
+                // zaktualizuj również niestandardową kontrolkę
+                if (typeof updateCustomSelectLabels === 'function') {
+                    updateCustomSelectLabels();
+                }
+            } catch (err) {
+                console.error('Błąd przy tłumaczeniu departmentSelect:', err);
+            }
+        }
+        
         // Tłumaczenie "items" w opcjach wyboru departamentu - ograniczone do kontenerów
         containers.forEach(container => {
             try {
-                container.querySelectorAll('select option').forEach(option => {
+                container.querySelectorAll('select:not(#departmentSelect) option').forEach(option => {
                     try {
                         if (option.text?.includes(' items)')) {
                             option.text = option.text.replace(' items)', ' elementów)');
@@ -248,10 +274,20 @@ function setupMutationObserver() {
     }
 }
 
+// Zmienna do kontrolowania czy jest w toku ładowanie
+let isLoadingEquipment = false;
+
 // Główna funkcja ładująca wyposażenie działu
 function loadDepartmentEquipment(departmentName) {
+    // Zabezpieczenie przed wielokrotnym wywołaniem
+    if (isLoadingEquipment) return;
+    isLoadingEquipment = true;
+    
     const equipmentList = document.getElementById('departmentEquipmentList');
-    if (!equipmentList) return;
+    if (!equipmentList) {
+        isLoadingEquipment = false;
+        return;
+    }
     
     equipmentList.style.display = 'block';
     
@@ -397,8 +433,7 @@ function loadDepartmentEquipment(departmentName) {
             if (loadingSpinner && loadingSpinner.parentNode) {
                 loadingSpinner.remove();
             }
-        })
-        .catch(error => {
+        })        .catch(error => {
             console.error('Error:', error);
             const errorText = language === 'pl' ? 'Nie udało się załadować danych sprzętu' : 'Failed to load equipment data';
             if (equipmentList) {
@@ -409,6 +444,10 @@ function loadDepartmentEquipment(departmentName) {
             if (loadingSpinner && loadingSpinner.parentNode) {
                 loadingSpinner.remove();
             }
+        })
+        .finally(() => {
+            // Zawsze resetujemy flagę po zakończeniu
+            isLoadingEquipment = false;
         });
 }
 

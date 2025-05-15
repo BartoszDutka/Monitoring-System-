@@ -1057,10 +1057,26 @@ def refresh_graylog_logs():
 @app.route('/manage_users')
 @admin_required
 def manage_users():
+    # Get all users
     with get_db_cursor() as cursor:
         cursor.execute("SELECT * FROM users ORDER BY created_at DESC")
         users = cursor.fetchall()
-    return render_template('manage_users.html', users=users)
+        
+        # Get all departments with their English and Polish descriptions
+        cursor.execute('''
+            SELECT name, description_en, description_pl
+            FROM departments
+            ORDER BY name
+        ''')
+        departments = cursor.fetchall()
+        
+    # Get current language from session
+    current_language = session.get('language', 'en')
+    
+    return render_template('manage_users.html', 
+                          users=users, 
+                          departments=departments,
+                          lang=current_language)
 
 @app.route('/update_user_role', methods=['POST'])
 @admin_required
