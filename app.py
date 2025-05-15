@@ -28,6 +28,8 @@ from werkzeug.exceptions import Forbidden  # Add this import
 from flask_caching import Cache
 import logging
 from modules.tasks import tasks, setup_tasks_tables  # Import from the modules directory
+# Import report functions outside conditional blocks to ensure they're always available
+from modules.reports import ReportGenerator, get_recent_reports, get_report_by_id, delete_report, REPORTS_DIR
 
 # Handle PDF dependency imports
 import importlib.util
@@ -37,7 +39,6 @@ PDF_STATUS_MESSAGE = ""
 # Try to import weasyprint first
 try:
     if importlib.util.find_spec('weasyprint') is not None:
-        from modules.reports import ReportGenerator, get_recent_reports, get_report_by_id, delete_report, REPORTS_DIR
         PDF_CAPABILITY = "weasyprint"
         PDF_STATUS_MESSAGE = "Using WeasyPrint for PDF generation"
         print("WeasyPrint is available for PDF generation")
@@ -52,7 +53,6 @@ except ImportError as e:
 if PDF_CAPABILITY == "none" and importlib.util.find_spec('pdfkit') is not None:
     try:
         import pdfkit
-        from modules.reports import ReportGenerator, get_recent_reports, get_report_by_id, delete_report, REPORTS_DIR
         PDF_CAPABILITY = "pdfkit"
         PDF_STATUS_MESSAGE = "Using PDFKit for PDF generation"
         print("PDFKit is available for PDF generation")
@@ -72,7 +72,6 @@ if PDF_CAPABILITY == "none" and importlib.util.find_spec('pdfkit') is not None:
 # If all else failed, use the modules with fallback modes
 if PDF_CAPABILITY == "none":
     try:
-        from modules.reports import ReportGenerator, get_recent_reports, get_report_by_id, delete_report, REPORTS_DIR
         PDF_STATUS_MESSAGE = "No PDF library available. PDF reports will be saved as text files or Excel."
         print("Warning: No PDF generation library is available.")
         print("PDF reports will be saved as text files.")
@@ -89,6 +88,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 app = Flask(__name__)
 app.secret_key = 'twoj_tajny_klucz_do_sesji'  # Poprawiony błąd składni
 app.config['SESSION_TYPE'] = 'filesystem'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # Sesja będzie ważna przez 7 dni
 
 # Register blueprints
 app.register_blueprint(inventory)
@@ -678,7 +678,7 @@ def graylog_loading():
     query_string = request.args.get('query_string', '')
     
     # Pobierz bieżący język użytkownika
-    current_language = session.get('language', 'pl')  # Domyślnie polski
+    current_language = session.get('language', 'en')  # Domyślnie angielski (spójnie z resztą aplikacji)
     
     if (query_string):
         target_page = f"{target_page}?{query_string}"
@@ -1191,8 +1191,13 @@ def generate_report():
         date_range = request.form.get('dateRange')
         start_date = request.form.get('startDate')
         end_date = request.form.get('endDate')
+        report_language = request.form.get('reportLanguage', 'current')
         
-        logger.info(f"Report parameters: type={report_type}, format={output_format}, range={date_range}")
+        # If report language is set to current, use the interface language
+        if report_language == 'current':
+            report_language = session.get('language', 'en')
+        
+        logger.info(f"Report parameters: type={report_type}, format={output_format}, range={date_range}, language={report_language}")
         logger.info(f"Custom dates: start={start_date}, end={end_date}")
         
         # Validate required inputs
@@ -1239,7 +1244,8 @@ def generate_report():
                 start_date=start_date_obj,
                 end_date=end_date_obj,
                 record_limit=500,
-                preview=False
+                preview=False,
+                language=report_language
             )
         except Exception as e:
             logger.error(f"Error initializing report generator: {str(e)}")
@@ -1384,6 +1390,29 @@ def inventory():
                           people=people,
                           lang=current_language,
                           title=page_title)
+
+@app.route('/api/set_language', methods=['POST'])
+@login_required
+def set_language():
+    """API endpoint to set user language preference in session"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"status": "error", "message": "No JSON data provided"}), 400
+            
+        language = data.get('language')
+        
+        if language and language in ['en', 'pl']:
+            session['language'] = language
+            print(f"Setting language in session to: {language}")  # Debug log
+            return jsonify({"status": "success", "language": language})
+        else:
+            return jsonify({"status": "error", "message": "Invalid language"}), 400
+    except Exception as e:
+        import traceback
+        logger.error(f"Error setting language: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
     # Import required modules

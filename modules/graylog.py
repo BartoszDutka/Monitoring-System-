@@ -78,8 +78,7 @@ def parse_log_message(raw_message) -> dict:
         inner_message = message_data.get('message', '')
         nested_data = extract_nested_json(str(inner_message))
         
-        if nested_data:
-            return {
+        if nested_data:            return {
                 'process_id': nested_data.get('process_id'),
                 'formssessionname': nested_data.get('formsSessionName'),
                 'formsformname': nested_data.get('formsFormName'),
@@ -92,10 +91,9 @@ def parse_log_message(raw_message) -> dict:
             }
         
         return {'message': inner_message}
-        
     except (json.JSONDecodeError, AttributeError) as e:
         from flask import session, g
-        lang = getattr(g, 'language', session.get('language', 'pl'))
+        lang = getattr(g, 'language', session.get('language', 'en'))
         print(get_message('parsing_error', lang, str(e)))
         return {'message': str(raw_message)}
 

@@ -20,9 +20,25 @@ function initializeLanguageSystem() {
     if (!languageToggleBtn) return;
 
     const html = document.documentElement;
+      // Sprawdź czy mamy ustawiony język na serwerze (w meta tagu)
+    const serverLanguageMeta = document.querySelector('meta[name="server-language"]');
+    const serverLanguage = serverLanguageMeta ? serverLanguageMeta.getAttribute('content') : null;
     
-    // Załaduj zapisany język lub użyj domyślnego (angielski)
-    const savedLanguage = localStorage.getItem('language') || 'en';
+    // Sprawdź język z localStorage
+    const localLanguage = localStorage.getItem('language');
+    
+    // Załaduj zapisany język: najpierw sprawdź serwer, potem localStorage, lub użyj domyślnego (angielski)
+    const savedLanguage = serverLanguage || localLanguage || 'en';
+    
+    // Zapisz do localStorage jeśli różni się od obecnego
+    if (localStorage.getItem('language') !== savedLanguage) {
+        localStorage.setItem('language', savedLanguage);
+    }
+    
+    // Jeśli język w localStorage różni się od języka serwera, synchronizuj
+    if (localLanguage && serverLanguage && localLanguage !== serverLanguage) {
+        syncLanguageWithServer(localLanguage);
+    }
     
     // Sprawdź czy to jest odświeżenie strony po zmianie języka
     const justChanged = sessionStorage.getItem('language_just_changed');
@@ -34,8 +50,7 @@ function initializeLanguageSystem() {
         // Normalne uruchomienie
         updateLanguageWithoutRefresh(savedLanguage);
     }
-    
-    // Obsługa kliknięcia przycisku zmiany języka
+      // Obsługa kliknięcia przycisku zmiany języka
     languageToggleBtn.addEventListener('click', () => {
         const currentLang = html.getAttribute('data-language') || 'en';
         const newLang = currentLang === 'en' ? 'pl' : 'en';
@@ -44,9 +59,46 @@ function initializeLanguageSystem() {
         localStorage.setItem('language', newLang);
         sessionStorage.setItem('language_just_changed', 'true');
         
-        // Po prostu odśwież stronę
-        window.location.reload();
+        // Synchronizuj język z sesją serwera i odśwież po zakończeniu
+        syncLanguageWithServer(newLang, () => {
+            // Po zakończeniu synchronizacji, odśwież stronę
+            window.location.reload();
+        });
     });
+}
+
+// Synchronizuje wybór języka z serwerem / Sync language choice with server
+function syncLanguageWithServer(lang, callback) {
+    try {
+        fetch('/api/set_language', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ language: lang }),
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Language synchronized with server:', data);
+            if (callback && typeof callback === 'function') {
+                callback();
+            }
+        })
+        .catch(error => {
+            console.error('Error syncing language with server:', error);
+            // Still call the callback even if there was an error
+            if (callback && typeof callback === 'function') {
+                callback();
+            }
+        });
+    } catch (e) {
+        console.error('Failed to sync language with server:', e);
+        // Still call the callback even if there was an error
+        if (callback && typeof callback === 'function') {
+            callback();
+        }
+    }
 }
 
 // Aktualizacja języka bez odświeżania / Update language without refresh
@@ -58,8 +110,7 @@ function updateLanguageWithoutRefresh(lang) {
     
     const html = document.documentElement;
     const languageToggleBtn = document.getElementById('language-toggle');
-    
-    // Aktualizuj atrybuty HTML
+      // Aktualizuj atrybuty HTML
     html.setAttribute('lang', lang);
     html.setAttribute('data-language', lang);
     
@@ -70,8 +121,7 @@ function updateLanguageWithoutRefresh(lang) {
             langSpan.textContent = lang.toUpperCase();
         }
     }
-    
-    // Przetłumacz wszystkie elementy
+      // Przetłumacz wszystkie elementy
     translatePage(lang);
     
     // Update department translations

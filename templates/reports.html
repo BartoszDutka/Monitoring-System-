@@ -154,6 +154,14 @@
                 </select>
                 <span class="format-hint" data-en="Note: PDF generation requires WeasyPrint or pdfkit package to be installed." data-pl="Uwaga: Generowanie PDF wymaga zainstalowanego pakietu WeasyPrint lub pdfkit.">Note: PDF generation requires WeasyPrint or pdfkit package to be installed.</span>
             </div>
+            <div class="form-group">
+                <label for="report-language" data-en="Report Language:" data-pl="Język raportu:">Report Language:</label>
+                <select id="report-language" name="reportLanguage">
+                    <option value="current" data-en="Current Interface Language" data-pl="Bieżący język interfejsu">Current Interface Language</option>
+                    <option value="en" data-en="English" data-pl="Angielski">English</option>
+                    <option value="pl" data-en="Polish" data-pl="Polski">Polish</option>
+                </select>
+            </div>
             <div class="form-actions">
                 <button type="button" id="cancel-report" class="btn secondary-btn" data-en="Cancel" data-pl="Anuluj">Cancel</button>
                 <button type="submit" class="btn accent-btn" data-en="Generate Report" data-pl="Wygeneruj raport">Generate Report</button>
@@ -183,6 +191,153 @@
                 customDateDiv.style.display = 'flex';
             } else {
                 customDateDiv.style.display = 'none';
+            }
+        });
+
+        // Obsługa filtrowania raportów
+        const filterButton = document.getElementById('filter-button');
+        const resetButton = document.getElementById('reset-button');
+        const reportTypeSelect = document.getElementById('report-type');
+        const dateRangeFilter = document.getElementById('date-range');
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+
+        // Ustawienie domyślnych dat dla zakresu niestandardowego
+        const today = new Date();
+        const lastWeek = new Date();
+        lastWeek.setDate(lastWeek.getDate() - 7);
+        
+        startDateInput.valueAsDate = lastWeek;
+        endDateInput.valueAsDate = today;
+
+        // Funkcja do filtrowania raportów
+        function filterReports() {
+            const reportType = reportTypeSelect.value;
+            const dateRange = dateRangeFilter.value;
+            const startDate = startDateInput.value ? new Date(startDateInput.value) : null;
+            const endDate = endDateInput.value ? new Date(endDateInput.value) : null;
+            
+            // Pobierz wszystkie wiersze z tabeli raportów
+            const reportRows = document.querySelectorAll('.reports-table tbody tr');
+            
+            // Przekształć w tablicę i pobierz właściwe dane
+            const reports = Array.from(reportRows).map(row => {
+                const typeCell = row.querySelector('.report-type');
+                const type = typeCell ? typeCell.getAttribute('data-type') : '';
+                const dateCell = row.querySelector('td:nth-child(3)');
+                const dateStr = dateCell ? dateCell.textContent : '';
+                const date = dateStr ? new Date(dateStr) : null;
+                
+                return {
+                    row: row,
+                    type: type,
+                    date: date
+                };
+            });
+            
+            // Zastosuj filtry
+            reports.forEach(report => {
+                let visible = true;
+                
+                // Filtr typu raportu
+                if (reportType !== 'all' && report.type !== reportType) {
+                    visible = false;
+                }
+                
+                // Filtr daty
+                if (visible && dateRange !== 'all' && report.date) {
+                    if (dateRange === 'today') {
+                        const today = new Date();
+                        visible = report.date.toDateString() === today.toDateString();
+                    } else if (dateRange === 'week') {
+                        const weekAgo = new Date();
+                        weekAgo.setDate(weekAgo.getDate() - 7);
+                        visible = report.date >= weekAgo;
+                    } else if (dateRange === 'month') {
+                        const monthAgo = new Date();
+                        monthAgo.setDate(monthAgo.getDate() - 30);
+                        visible = report.date >= monthAgo;
+                    } else if (dateRange === 'custom' && startDate && endDate) {
+                        // Dodaj 1 dzień do endDate, aby uwzględnić cały dzień
+                        const endDatePlus = new Date(endDate);
+                        endDatePlus.setDate(endDatePlus.getDate() + 1);
+                        visible = report.date >= startDate && report.date < endDatePlus;
+                    }
+                }
+                
+                // Pokaż lub ukryj wiersz na podstawie filtrów
+                report.row.style.display = visible ? '' : 'none';
+            });
+            
+            // Sprawdź czy po filtrowaniu są widoczne jakieś raporty
+            const visibleReports = reports.filter(report => report.row.style.display !== 'none');
+            
+            // Pokaż komunikat "brak raportów" jeśli nie ma widocznych raportów
+            const reportsTable = document.querySelector('.reports-table');
+            const reportsListDiv = document.querySelector('.reports-list');
+            const existingNoReports = document.querySelector('.no-reports');
+            
+            if (visibleReports.length === 0) {
+                if (!existingNoReports) {
+                    const language = document.documentElement.getAttribute('data-language') || 'en';
+                    const noReportsDiv = document.createElement('div');
+                    noReportsDiv.className = 'no-reports filtered';
+                    
+                    const noReportsIcon = document.createElement('i');
+                    noReportsIcon.className = 'fas fa-filter no-data-icon';
+                    
+                    const noReportsText = document.createElement('p');
+                    noReportsText.textContent = language === 'pl' ? 'Brak raportów spełniających kryteria' : 'No reports match your filters';
+                    
+                    const subMessage = document.createElement('p');
+                    subMessage.className = 'sub-message';
+                    subMessage.textContent = language === 'pl' ? 'Zmień filtry, aby zobaczyć więcej raportów' : 'Change your filters to see more reports';
+                    
+                    noReportsDiv.appendChild(noReportsIcon);
+                    noReportsDiv.appendChild(noReportsText);
+                    noReportsDiv.appendChild(subMessage);
+                    
+                    if (reportsTable) {
+                        reportsTable.style.display = 'none';
+                        reportsListDiv.appendChild(noReportsDiv);
+                    }
+                }
+            } else {
+                if (reportsTable) {
+                    reportsTable.style.display = '';
+                }
+                const filteredNoReports = document.querySelector('.no-reports.filtered');
+                if (filteredNoReports) {
+                    filteredNoReports.remove();
+                }
+            }
+        }
+
+        // Obsługa przycisków
+        filterButton.addEventListener('click', filterReports);
+        
+        resetButton.addEventListener('click', function() {
+            // Resetuj wszystkie filtry
+            reportTypeSelect.value = 'all';
+            dateRangeFilter.value = 'all';
+            customDateDiv.style.display = 'none';
+            
+            // Pokaż wszystkie raporty
+            const reportRows = document.querySelectorAll('.reports-table tbody tr');
+            reportRows.forEach(row => {
+                row.style.display = '';
+            });
+            
+            // Ukryj komunikat "brak raportów"
+            const filteredNoReports = document.querySelector('.no-reports.filtered');
+            if (filteredNoReports) {
+                filteredNoReports.remove();
+            }
+            
+            // Pokaż tabelę raportów
+            const reportsTable = document.querySelector('.reports-table');
+            if (reportsTable) {
+                reportsTable.style.display = '';
             }
         });
 

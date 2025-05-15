@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light" data-language="en">
+<html lang="{{ session.get('language', 'en') }}" data-theme="light" data-language="{{ session.get('language', 'en') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="server-language" content="{{ session.get('language', 'en') }}">
     <title>{% block title %}Monitoring Dashboard{% endblock %}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- Poprawione ścieżki do stylów -->
@@ -28,10 +29,9 @@
         <div class="nav-items">
             <button id="theme-toggle" class="theme-toggle" title="Toggle theme">
                 <i class="fas fa-sun"></i>
-            </button>
-            <button id="language-toggle" class="language-toggle" title="Change language">
+            </button>            <button id="language-toggle" class="language-toggle" title="Change language">
                 <i class="fas fa-language"></i>
-                <span>EN</span>
+                <span>{{ session.get('language', 'EN').upper() }}</span>
             </button>
             <a href="{{ url_for('profile') }}" class="user-info">
                 {% if session.user_info and session.user_info.avatar_path %}
