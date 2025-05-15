@@ -16,6 +16,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-dark.css') }}">
     <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
     <!-- Language support -->
+    <script>
+        // Dodajemy globalną zmienną, aby moduły miały dostęp do języka
+        window.currentLanguage = "{{ session.get('language', 'en') }}";
+    </script>
     <script src="{{ url_for('static', filename='js/localization/language.js') }}"></script>
 </head>
 <body class="with-sidebar">

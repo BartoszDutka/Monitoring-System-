@@ -543,48 +543,64 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Funkcja tłumacząca elementy interfejsu w zależności od języka
 function translateUIElements() {
-    const language = document.documentElement.getAttribute('data-language') || 'en';
-    if (language !== 'pl') return; // Tłumaczenie tylko na polski
-    
-    // Tłumaczenie "items" w opcjach wyboru departamentu
-    document.querySelectorAll('select option').forEach(option => {
-        if (option.text.includes(' items)')) {
-            option.text = option.text.replace(' items)', ' elementów)');
-        }
+    try {
+        const language = document.documentElement.getAttribute('data-language') || 'en';
+        if (language !== 'pl') return; // Tłumaczenie tylko na polski
         
-        // Handle "Choose a department..." text
-        if (option.text === 'Choose a department...') {
-            option.text = 'Wybierz dział...';
-        }
-    });
-    
-    // Tłumaczenie wartości w komórkach tabeli
-    document.querySelectorAll('td').forEach(cell => {
-        const text = cell.textContent.trim();
-        if (text.toLowerCase() === 'hardware') {
-            cell.textContent = 'sprzęt';
-        } else if (text.toLowerCase() === 'network') {
-            cell.textContent = 'urz. sieciowe';
-        } else if (text === 'N/A') {
-            cell.textContent = 'Brak danych';
-        }
-    });
-    
-    // Translate buttons and headings if needed
-    document.querySelectorAll('[data-en][data-pl]').forEach(el => {
-        const translation = el.getAttribute('data-pl');
-        if (translation) {
-            el.textContent = translation;
-        }
-    });
-    
-    // Translate button titles
-    document.querySelectorAll('[data-en-title][data-pl-title]').forEach(el => {
-        const translation = el.getAttribute('data-pl-title');
-        if (translation) {
-            el.title = translation;
-        }
-    });
+        // Ograniczamy zakres zapytań do konkretnych kontenerów zamiast całego dokumentu
+        const containers = [
+            document.getElementById('departmentSelect')?.parentNode,
+            document.getElementById('equipmentTableBody')?.parentNode,
+            document.querySelector('.inventory-container')
+        ].filter(el => el); // Filtrujemy puste elementy
+        
+        // Jeśli nie ma żadnych kontenerów, przerywamy
+        if (containers.length === 0) return;
+        
+        // Tłumaczenie "items" w opcjach wyboru departamentu - ograniczone do kontenerów
+        containers.forEach(container => {
+            container.querySelectorAll('select option').forEach(option => {
+                if (option.text.includes(' items)')) {
+                    option.text = option.text.replace(' items)', ' elementów)');
+                }
+                
+                // Handle "Choose a department..." text
+                if (option.text === 'Choose a department...') {
+                    option.text = 'Wybierz dział...';
+                }
+            });
+            
+            // Tłumaczenie wartości w komórkach tabeli - ograniczone do kontenerów
+            container.querySelectorAll('td').forEach(cell => {
+                const text = cell.textContent?.trim() || '';
+                if (text.toLowerCase() === 'hardware') {
+                    cell.textContent = 'sprzęt';
+                } else if (text.toLowerCase() === 'network') {
+                    cell.textContent = 'urz. sieciowe';
+                } else if (text === 'N/A') {
+                    cell.textContent = 'Brak danych';
+                }
+            });
+            
+            // Translate buttons and headings if needed - ograniczone do kontenerów
+            container.querySelectorAll('[data-en][data-pl]').forEach(el => {
+                const translation = el.getAttribute('data-pl');
+                if (translation) {
+                    el.textContent = translation;
+                }
+            });
+            
+            // Translate button titles - ograniczone do kontenerów
+            container.querySelectorAll('[data-en-title][data-pl-title]').forEach(el => {
+                const translation = el.getAttribute('data-pl-title');
+                if (translation) {
+                    el.title = translation;
+                }
+            });
+        });
+    } catch (error) {
+        console.error('Błąd podczas tłumaczenia interfejsu:', error);
+    }
 }
 
 // Dodanie funkcji do wywoływania przy zmianach w DOM
@@ -592,16 +608,25 @@ function setupMutationObserver() {
     const language = document.documentElement.getAttribute('data-language') || 'en';
     if (language !== 'pl') return; // Obserwacja tylko dla polskiego języka
     
+    // Dodajemy mechanizm zabezpieczający przed zbyt częstym wywoływaniem tłumaczeń
+    let translateDebounceTimer;
+    const debouncedTranslate = function() {
+        clearTimeout(translateDebounceTimer);
+        translateDebounceTimer = setTimeout(function() {
+            try {
+                translateUIElements();
+            } catch (err) {
+                console.error('Błąd podczas tłumaczenia elementów:', err);
+            }
+        }, 100); // Opóźnienie 100ms
+    };
+    
     // Obserwuj zmiany w tabeli sprzętu
     const equipmentTableBody = document.getElementById('equipmentTableBody');
     if (equipmentTableBody) {
         const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.addedNodes.length) {
-                    // Tłumaczenie nowo dodanych elementów
-                    translateUIElements();
-                }
-            });
+            // Używamy debounce zamiast wywoływać tłumaczenie dla każdej mutacji
+            debouncedTranslate();
         });
         
         observer.observe(equipmentTableBody, { childList: true, subtree: true });
@@ -610,7 +635,7 @@ function setupMutationObserver() {
     // Obserwuj też zmiany w dropdown departamentów
     const departmentSelect = document.getElementById('departmentSelect');
     if (departmentSelect) {
-        const observer = new MutationObserver(translateUIElements);
+        const observer = new MutationObserver(debouncedTranslate);
         observer.observe(departmentSelect, { childList: true, subtree: true });
     }
 }
@@ -978,17 +1003,26 @@ function loadDepartmentEquipment(departmentName) {
                     </tr>
                     `;
                 }).join('');
-                
-                // Apply translations after loading equipment
+                  // Apply translations after loading equipment in a safer way
                 if (language === 'pl') {
-                    translateUIElements();
+                    try {
+                        // Używamy setTimeout, żeby dać przeglądarce czas na renderowanie
+                        setTimeout(() => {
+                            translateUIElements();
+                        }, 10);
+                    } catch (err) {
+                        console.error('Błąd podczas tłumaczenia elementów tabeli:', err);
+                    }
                 }
             } else {
                 const noEquipmentText = language === 'pl' ? 'Brak sprzętu przypisanego do tego działu' : 'No equipment assigned to this department';
                 tbody.innerHTML = `<tr><td colspan="8">${noEquipmentText}</td></tr>`;
             }
             
-            loadingSpinner.remove();
+            // Bezpieczne usunięcie loadingSpinnera
+            if (loadingSpinner && loadingSpinner.parentNode) {
+                loadingSpinner.remove();
+            }
         })
         .catch(error => {
             console.error('Error:', error);

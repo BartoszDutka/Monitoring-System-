@@ -1392,27 +1392,21 @@ def inventory():
                           title=page_title)
 
 @app.route('/api/set_language', methods=['POST'])
-@login_required
 def set_language():
-    """API endpoint to set user language preference in session"""
     try:
         data = request.json
-        if not data:
-            return jsonify({"status": "error", "message": "No JSON data provided"}), 400
-            
         language = data.get('language')
         
-        if language and language in ['en', 'pl']:
-            session['language'] = language
-            print(f"Setting language in session to: {language}")  # Debug log
-            return jsonify({"status": "success", "language": language})
-        else:
-            return jsonify({"status": "error", "message": "Invalid language"}), 400
+        if language not in ['en', 'pl']:
+            return jsonify({'success': False, 'error': 'Unsupported language'})
+        
+        session['language'] = language
+        session.modified = True
+        
+        return jsonify({'success': True, 'language': language})
     except Exception as e:
-        import traceback
-        logger.error(f"Error setting language: {str(e)}")
-        logger.error(traceback.format_exc())
-        return jsonify({"status": "error", "message": str(e)}), 500
+        print(f"Error setting language: {e}")
+        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
     # Import required modules

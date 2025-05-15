@@ -5,6 +5,10 @@
 {% block head %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/inventory.css') }}">
+<!-- Najpierw wczytaj moduł językowy -->
+<script src="{{ url_for('static', filename='js/localization/language.js') }}"></script>
+<!-- Następnie skrypt inventory_fixed z defer - naprawiona wersja -->
+<script src="{{ url_for('static', filename='js/inventory_fixed.js') }}" defer></script>
 <script>
     // Create people options variable that will be used in the JavaScript file
     const peopleOptions = `
@@ -12,74 +16,6 @@
         <option value="{{ person.id }}">{{ person.name }} ({{ person.department }})</option>
         {% endfor %}
     `;
-</script>
-<script src="{{ url_for('static', filename='js/inventory.js') }}"></script>
-<script>
-    // Force Polish translations directly in HTML
-    document.addEventListener('DOMContentLoaded', function() {
-        // Check if language is set to Polish
-        const isPolish = document.documentElement.getAttribute('data-language') === 'pl';
-        if (isPolish) {
-            // Force translations for department selection items
-            const departmentSelect = document.getElementById('departmentSelect');
-            if (departmentSelect) {
-                Array.from(departmentSelect.options).forEach(option => {
-                    // Replace " items)" with " elementów)"
-                    if (option.text.includes(' items)')) {
-                        option.text = option.text.replace(' items)', ' elementów)');
-                    }
-                });
-            }
-            
-            // Also translate items in inventory tables
-            document.querySelectorAll('select option').forEach(option => {
-                if (option.text.includes(' items)')) {
-                    option.text = option.text.replace(' items)', ' elementów)');
-                }
-            });
-
-            // Setup observer to handle dynamically loaded equipment items
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.addedNodes.length) {
-                        // Translate any "hardware" to "sprzęt"
-                        document.querySelectorAll('td').forEach(cell => {
-                            if (cell.textContent.trim().toLowerCase() === 'hardware') {
-                                cell.textContent = 'sprzęt';
-                            }
-                            // Replace N/A with Brak danych
-                            if (cell.textContent.trim() === 'N/A') {
-                                cell.textContent = 'Brak danych';
-                            }
-                        });
-                        
-                        // Also handle any new option elements that might have been added dynamically
-                        document.querySelectorAll('select option').forEach(option => {
-                            if (option.text.includes(' items)')) {
-                                option.text = option.text.replace(' items)', ' elementów)');
-                            }
-                        });
-                    }
-                });
-            });
-
-            // Start observing the equipment table body
-            const equipmentTableBody = document.getElementById('equipmentTableBody');
-            if (equipmentTableBody) {
-                observer.observe(equipmentTableBody, { childList: true, subtree: true });
-            }
-            
-            // Initial run for any existing elements
-            document.querySelectorAll('td').forEach(cell => {
-                if (cell.textContent.trim().toLowerCase() === 'hardware') {
-                    cell.textContent = 'sprzęt';
-                }
-                if (cell.textContent.trim() === 'N/A') {
-                    cell.textContent = 'Brak danych';
-                }
-            });
-        }
-    });
 </script>
 {% endblock %}
 
