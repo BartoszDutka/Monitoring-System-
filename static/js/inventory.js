@@ -1,3 +1,24 @@
+// Zmienna do przechowywania zaznaczonych produktów
+let selectedProductsToImport = new Set();
+
+// Funkcja aktualizująca licznik zaznaczonych produktów
+function updateSelectedCounter() {
+    const counter = document.getElementById('selectedProductsCounter');
+    if (counter) {
+        const count = selectedProductsToImport.size;
+        const language = document.documentElement.getAttribute('data-language') || 'en';
+        counter.textContent = language === 'pl' 
+            ? `Wybrano: ${count}` 
+            : `Selected: ${count}`;
+        
+        // Pokaż lub ukryj przycisk importu zaznaczonych
+        const importSelectedBtn = document.getElementById('importSelectedProducts');
+        if (importSelectedBtn) {
+            importSelectedBtn.style.display = count > 0 ? 'inline-flex' : 'none';
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Inicjalne tłumaczenie
     translateUIElements();
@@ -134,6 +155,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Create a more detailed row with better spacing
                     row.innerHTML = `
+                        <td>
+                            <input type="checkbox" class="product-select-checkbox" value="${index}">
+                        </td>
                         <td data-full-text="${escapeHtml(fullProductName)}">${escapeHtml(fullProductName)}</td>
                         <td>
                             <select class="product-category-select">
@@ -162,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </select>
                         </td>
                         <td>
-                            <button class="btn-icon import-product" title="Import to inventory">
+                            <button class="btn-icon select-product" title="Select for import">
                                 <i class="fas fa-plus"></i>
                             </button>
                             <button class="btn-icon edit-product" title="Edit item">
@@ -171,38 +195,94 @@ document.addEventListener('DOMContentLoaded', function() {
                             <button class="btn-icon delete-product" title="Delete item">
                                 <i class="fas fa-trash"></i>
                             </button>
-                        </td>
-                    `;
+                        </td>`;
                     
                     productTableBody.appendChild(row);
                     
                     // Add click handler to show full product name
-                    const nameCell = row.querySelector('td:first-child');
+                    const nameCell = row.querySelector('td:nth-child(2)');
                     nameCell.addEventListener('click', function() {
                         showProductDetails(product, category);
                     });
                 });
                 
                 // Add event listeners for import buttons
-                document.querySelectorAll('.import-product').forEach((btn) => {
+                document.querySelectorAll('.select-product').forEach((btn) => {
                     btn.addEventListener('click', function() {
                         const row = this.closest('tr');
                         const productIndex = row.dataset.productIndex;
-                        const product = {...window.invoiceProducts[productIndex]};
+                        const checkbox = row.querySelector('.product-select-checkbox');
                         
-                        // Update with any user changes
-                        product.quantity = parseFloat(row.querySelector('.quantity-input').value) || 1;
-                        product.category = row.querySelector('.product-category-select').value;
-                        product.assignTo = row.querySelector('.assign-to-select').value;
+                        // Toggle selection
+                        if (row.classList.contains('selected')) {
+                            // Unselect product
+                            row.classList.remove('selected');
+                            this.innerHTML = '<i class="fas fa-plus"></i>';
+                            this.title = language === 'pl' ? 'Wybierz do importu' : 'Select for import';
+                            
+                            if (checkbox) checkbox.checked = false;
+                            selectedProductsToImport.delete(productIndex);
+                        } else {
+                            // Select product
+                            row.classList.add('selected');
+                            this.innerHTML = '<i class="fas fa-check"></i>';
+                            this.title = language === 'pl' ? 'Wybrano do importu' : 'Selected for import';
+                            
+                            if (checkbox) checkbox.checked = true;
+                            selectedProductsToImport.add(productIndex);
+                        }
                         
-                        importProductToInventory(product);
-                        
-                        // Mark as imported
-                        row.classList.add('imported');
-                        this.disabled = true;
-                        this.innerHTML = '<i class="fas fa-check"></i>';
+                        // Update the counter
+                        updateSelectedCounter();
                     });
                 });
+                
+                // Add event listeners for checkboxes
+                document.querySelectorAll('.product-select-checkbox').forEach((checkbox) => {
+                    checkbox.addEventListener('change', function() {
+                        const row = this.closest('tr');
+                        const productIndex = row.dataset.productIndex;
+                        const selectBtn = row.querySelector('.select-product');
+                        
+                        if (this.checked) {
+                            // Select product
+                            row.classList.add('selected');
+                            if (selectBtn) {
+                                selectBtn.innerHTML = '<i class="fas fa-check"></i>';
+                                selectBtn.title = language === 'pl' ? 'Wybrano do importu' : 'Selected for import';
+                            }
+                            selectedProductsToImport.add(productIndex);
+                        } else {
+                            // Unselect product
+                            row.classList.remove('selected');
+                            if (selectBtn) {
+                                selectBtn.innerHTML = '<i class="fas fa-plus"></i>';
+                                selectBtn.title = language === 'pl' ? 'Wybierz do importu' : 'Select for import';
+                            }
+                            selectedProductsToImport.delete(productIndex);
+                        }
+                        
+                        // Update the counter
+                        updateSelectedCounter();
+                    });
+                });
+                
+                // Add event listener for select all checkbox
+                const selectAllCheckbox = document.getElementById('selectAllProducts');
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.addEventListener('change', function() {
+                        const checkboxes = document.querySelectorAll('.product-select-checkbox');
+                        
+                        checkboxes.forEach(checkbox => {
+                            // Only affect visible rows (not filtered out)
+                            const row = checkbox.closest('tr');
+                            if (row.style.display !== 'none') {
+                                checkbox.checked = this.checked;
+                                checkbox.dispatchEvent(new Event('change'));
+                            }
+                        });
+                    });
+                }
                 
                 // Add event listeners for other buttons
                 document.querySelectorAll('.edit-product').forEach((btn, index) => {
@@ -308,6 +388,134 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+      // Obsługa przycisku "Dodaj brakujące pozycje"
+    document.getElementById('addMissingProduct')?.addEventListener('click', function() {
+        // Pobierz język interfejsu
+        const language = document.documentElement.getAttribute('data-language') || 'en';
+        
+        // Sprawdź, czy faktura została przetworzona
+        if (!window.invoiceProducts) {
+            const errorMsg = language === 'pl' ? 
+                'Najpierw przetwórz fakturę, aby móc dodać brakujące pozycje.' : 
+                'Please process an invoice first to add missing items.';
+            alert(errorMsg);
+            return;
+        }
+        
+        // Utwórz nowy pusty produkt
+        const newProductIndex = window.invoiceProducts.length;
+        const newProduct = {
+            name: language === 'pl' ? 'Nowa pozycja' : 'New item',
+            quantity: 1,
+            unit_price: 0,
+            total_price: 0
+        };
+        
+        // Dodaj produkt do listy
+        window.invoiceProducts.push(newProduct);
+        
+        // Dodaj nowy wiersz do tabeli
+        const productTableBody = document.getElementById('productTableBody');
+        if (productTableBody) {
+            let category = 'Other';
+            
+            const row = document.createElement('tr');
+            row.dataset.category = category.toLowerCase();
+            row.dataset.productIndex = newProductIndex;
+            
+            // Utwórz wiersz z edytowalną zawartością
+            row.innerHTML = `
+                <td>
+                    <input type="text" class="form-control" value="${newProduct.name}" placeholder="${language === 'pl' ? 'Wprowadź nazwę' : 'Enter name'}" onchange="window.invoiceProducts[${newProductIndex}].name = this.value">
+                </td>
+                <td>
+                    <select class="product-category-select">
+                        <option value="hardware">Hardware</option>
+                        <option value="software">Software</option>
+                        <option value="furniture">Furniture</option>
+                        <option value="accessories">Accessories</option>
+                        <option value="other" selected>Other</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="number" class="form-control quantity-input" value="${newProduct.quantity}" min="1" onchange="window.invoiceProducts[${newProductIndex}].quantity = this.value">
+                </td>
+                <td>
+                    <input type="number" class="form-control" value="${newProduct.unit_price}" min="0" step="0.01" onchange="window.invoiceProducts[${newProductIndex}].unit_price = parseFloat(this.value); window.invoiceProducts[${newProductIndex}].total_price = parseFloat(this.value) * window.invoiceProducts[${newProductIndex}].quantity;">
+                </td>
+                <td>
+                    <input type="number" class="form-control" value="${newProduct.total_price}" min="0" step="0.01" onchange="window.invoiceProducts[${newProductIndex}].total_price = parseFloat(this.value)">
+                </td>
+                <td>
+                    <select class="assign-to-select form-control">
+                        <option value="">${language === 'pl' ? 'Wybierz dział...' : 'Select Department'}</option>
+                        ${Array.from(document.querySelectorAll('#departmentSelect option'))
+                            .filter(opt => opt.value)
+                            .map(opt => `
+                                <option value="${opt.value}" ${opt.selected ? 'selected' : ''}>
+                                    ${opt.text}
+                                </option>
+                            `).join('')}
+                    </select>
+                </td>
+                <td>
+                    <button class="btn-icon import-product" title="${language === 'pl' ? 'Importuj do inwentarza' : 'Import to inventory'}">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="btn-icon delete-product" title="${language === 'pl' ? 'Usuń element' : 'Delete item'}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            
+            productTableBody.appendChild(row);
+            
+            // Dodaj obsługę przycisków do nowego wiersza
+            const importBtn = row.querySelector('.import-product');
+            if (importBtn) {
+                importBtn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const productIndex = row.dataset.productIndex;
+                    const product = {...window.invoiceProducts[productIndex]};
+                    
+                    // Aktualizuj z wartościami z formularza
+                    product.category = row.querySelector('.product-category-select').value;
+                    product.assignTo = row.querySelector('.assign-to-select').value;
+                    
+                    importProductToInventory(product);
+                    
+                    // Oznacz jako zaimportowany
+                    row.classList.add('imported');
+                    this.disabled = true;
+                    this.innerHTML = '<i class="fas fa-check"></i>';
+                });
+            }
+            
+            // Dodaj obsługę przycisku usuwania
+            const deleteBtn = row.querySelector('.delete-product');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const confirmMsg = language === 'pl' ? 
+                        'Czy na pewno chcesz usunąć ten element?' : 
+                        'Are you sure you want to remove this item?';
+                    
+                    if (confirm(confirmMsg)) {
+                        row.remove();
+                    }
+                });
+            }
+            
+            // Aktualizuj kategorię przy zmianie
+            const categorySelect = row.querySelector('.product-category-select');
+            if (categorySelect) {
+                categorySelect.addEventListener('change', function() {
+                    const row = this.closest('tr');
+                    row.dataset.category = this.value;
+                });
+            }
+        }
+    });
     
     // Try alternative method button
     document.getElementById('tryAlternativeMethod')?.addEventListener('click', function() {
@@ -352,8 +560,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Alternative method failed. Please try manual input.');
         });
     });
-    
-    // Import all products button
+      // Import all products button
     document.getElementById('importAllProducts')?.addEventListener('click', function() {
         const rows = document.querySelectorAll('#productTableBody tr:not(.imported)');
         let importCount = 0;
@@ -369,6 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Update with any user changes
                 product.quantity = parseFloat(row.querySelector('.quantity-input').value) || 1;
                 product.category = row.querySelector('.product-category-select').value;
+                product.assignTo = row.querySelector('.assign-to-select').value;
                 product.assignTo = row.querySelector('.assign-to-select').value;
                 
                 importProductToInventory(product, false); // Don't show individual alerts
@@ -545,61 +753,24 @@ document.addEventListener('DOMContentLoaded', function() {
 function translateUIElements() {
     try {
         const language = document.documentElement.getAttribute('data-language') || 'en';
-        if (language !== 'pl') return; // Tłumaczenie tylko na polski
+        if (language === 'en') return; // Tylko dla języka polskiego
         
-        // Ograniczamy zakres zapytań do konkretnych kontenerów zamiast całego dokumentu
-        const containers = [
-            document.getElementById('departmentSelect')?.parentNode,
-            document.getElementById('equipmentTableBody')?.parentNode,
-            document.querySelector('.inventory-container')
-        ].filter(el => el); // Filtrujemy puste elementy
+        document.querySelectorAll('[data-pl]').forEach(element => {
+            const translatedText = element.getAttribute('data-pl');
+            if (translatedText) {
+                element.innerHTML = translatedText;
+            }
+        });
         
-        // Jeśli nie ma żadnych kontenerów, przerywamy
-        if (containers.length === 0) return;
-        
-        // Tłumaczenie "items" w opcjach wyboru departamentu - ograniczone do kontenerów
-        containers.forEach(container => {
-            container.querySelectorAll('select option').forEach(option => {
-                if (option.text.includes(' items)')) {
-                    option.text = option.text.replace(' items)', ' elementów)');
-                }
-                
-                // Handle "Choose a department..." text
-                if (option.text === 'Choose a department...') {
-                    option.text = 'Wybierz dział...';
-                }
-            });
-            
-            // Tłumaczenie wartości w komórkach tabeli - ograniczone do kontenerów
-            container.querySelectorAll('td').forEach(cell => {
-                const text = cell.textContent?.trim() || '';
-                if (text.toLowerCase() === 'hardware') {
-                    cell.textContent = 'sprzęt';
-                } else if (text.toLowerCase() === 'network') {
-                    cell.textContent = 'urz. sieciowe';
-                } else if (text === 'N/A') {
-                    cell.textContent = 'Brak danych';
-                }
-            });
-            
-            // Translate buttons and headings if needed - ograniczone do kontenerów
-            container.querySelectorAll('[data-en][data-pl]').forEach(el => {
-                const translation = el.getAttribute('data-pl');
-                if (translation) {
-                    el.textContent = translation;
-                }
-            });
-            
-            // Translate button titles - ograniczone do kontenerów
-            container.querySelectorAll('[data-en-title][data-pl-title]').forEach(el => {
-                const translation = el.getAttribute('data-pl-title');
-                if (translation) {
-                    el.title = translation;
-                }
-            });
+        // Tłumaczenie placeholderów i innych atrybutów
+        document.querySelectorAll('[data-placeholder-pl]').forEach(element => {
+            const translatedPlaceholder = element.getAttribute('data-placeholder-pl');
+            if (translatedPlaceholder) {
+                element.setAttribute('placeholder', translatedPlaceholder);
+            }
         });
     } catch (error) {
-        console.error('Błąd podczas tłumaczenia interfejsu:', error);
+        console.error('Translation error:', error);
     }
 }
 
@@ -748,12 +919,15 @@ function guessProductCategory(name) {
     return 'Other';
 }
 
+// Poprawiona funkcja do importowania produktu z faktury do inwentarza
 function importProductToInventory(product, showAlert = true) {
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    
     const formData = new FormData();
     formData.append('itemName', product.name);
     formData.append('itemCategory', product.category || 'hardware');
     formData.append('itemStatus', 'available');
-    formData.append('itemQuantity', product.quantity);
+    formData.append('itemQuantity', product.quantity || 1);
     formData.append('itemValue', product.unit_price || product.price || 0);
     formData.append('assignTo', product.assignTo || ''); // Make sure department is included
 
@@ -762,16 +936,31 @@ function importProductToInventory(product, showAlert = true) {
     const invoiceDate = document.getElementById('invoiceDate')?.textContent;
     const vendor = document.getElementById('invoiceVendor')?.textContent;
 
-    if (vendor && vendor !== 'Not detected') {
+    if (vendor && vendor !== 'Not detected' && vendor !== 'Nie wykryto') {
         formData.append('itemManufacturer', vendor);
     }
 
-    formData.append('itemNotes', `Imported from invoice ${invoiceNumber} dated ${invoiceDate}`);
+    // Add notes with invoice reference
+    const notesPlaceholder = language === 'pl' ? 
+        `Zaimportowano z faktury ${invoiceNumber || 'bez numeru'} z dnia ${invoiceDate || new Date().toLocaleDateString()}` : 
+        `Imported from invoice ${invoiceNumber || 'unnumbered'} dated ${invoiceDate || new Date().toLocaleDateString()}`;
+    formData.append('itemNotes', notesPlaceholder);
     
-    if (invoiceDate && invoiceDate !== 'Not detected') {
+    // Handle acquisition date
+    if (invoiceDate && invoiceDate !== 'Not detected' && invoiceDate !== 'Nie wykryto') {
         formData.append('acquisitionDate', invoiceDate);
     } else {
         formData.append('acquisitionDate', new Date().toISOString().split('T')[0]);
+    }
+
+    // Handle serial number if available
+    if (product.serial_number) {
+        formData.append('itemSerial', product.serial_number);
+    }
+
+    // Handle model if available
+    if (product.model) {
+        formData.append('itemModel', product.model);
     }
 
     // Send request
@@ -779,11 +968,19 @@ function importProductToInventory(product, showAlert = true) {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             if (showAlert) {
-                alert(`Product "${product.name}" added successfully!`);
+                const successMsg = language === 'pl' ?
+                    `Produkt "${product.name}" dodany pomyślnie!` :
+                    `Product "${product.name}" added successfully!`;
+                alert(successMsg);
             }
             // Refresh equipment list if we're viewing the department it was assigned to
             const departmentSelect = document.getElementById('departmentSelect');
@@ -792,14 +989,21 @@ function importProductToInventory(product, showAlert = true) {
             }
         } else {
             if (showAlert) {
-                alert('Error: ' + (data.error || 'Unknown error'));
+                const errorMsg = language === 'pl' ?
+                    'Błąd: ' + (data.error || 'Nieznany błąd') :
+                    'Error: ' + (data.error || 'Unknown error');
+                alert(errorMsg);
             }
+            console.error('Error adding product:', data.error);
         }
     })
     .catch(error => {
         console.error('Error:', error);
         if (showAlert) {
-            alert('Failed to add item. Please try again.');
+            const errorMsg = language === 'pl' ?
+                'Nie udało się dodać produktu. Sprawdź szczegóły w konsoli.' :
+                'Failed to add product. Check console for details.';
+            alert(errorMsg);
         }
     });
 }
@@ -960,11 +1164,20 @@ function loadDepartmentEquipment(departmentName) {
                     } else {
                         serialNumber = serialNumber || noDataText;
                     }
-                    
-                    // Format dates and other fields
+                      // Format dates and other fields
                     let assignedDate = item.assigned_date || noDataText;
                     if (language === 'pl' && (assignedDate === 'N/A' || !item.assigned_date)) {
                         assignedDate = noDataText;
+                    } else if (assignedDate !== noDataText) {
+                        // Format date to only show YYYY-MM-DD without time
+                        try {
+                            // If there's a space in the date string, it contains time
+                            if (assignedDate.includes(' ')) {
+                                assignedDate = assignedDate.split(' ')[0];
+                            }
+                        } catch (dateErr) {
+                            console.error('Error formatting date:', dateErr);
+                        }
                     }
                     
                     let status = item.status || noDataText;
@@ -990,14 +1203,16 @@ function loadDepartmentEquipment(departmentName) {
                         <td>${serialNumber}</td>
                         <td>${item.quantity || 1}</td>
                         <td>${assignedDate}</td>
-                        <td><span class="status-badge ${item.status}">${status}</span></td>
-                        <td></td>
+                        <td><span class="status-badge ${item.status}">${status}</span></td>                    <td></td>
                         <td>
-                            <button class="btn-icon" onclick="unassignFromDepartment(${item.id})">
-                                <i class="fas fa-unlink"></i>
+                            <button class="btn-icon" onclick="changeDepartment(${item.id}, '${item.name}')" title="${language === 'pl' ? 'Przepisz do innego działu' : 'Assign to another department'}">
+                                <i class="fas fa-exchange-alt"></i>
                             </button>
                             <button class="btn-icon" onclick="editEquipment(${item.id})">
                                 <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon" onclick="deleteEquipment(${item.id})">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </td>
                     </tr>
@@ -1077,15 +1292,20 @@ function editEquipment(equipmentId) {
     // Get current language
     const language = document.documentElement.getAttribute('data-language') || 'en';
     
+    console.log(`[EDIT] Loading equipment details for ID: ${equipmentId}`);
+    
     // First get equipment details
     fetch(`/api/equipment/${equipmentId}`)
         .then(response => {
             if (!response.ok) {
+                console.error(`[EDIT ERROR] Network response error: ${response.status}`);
                 throw new Error('Network response was not ok');
             }
             return response.json();
         })
         .then(data => {
+            console.log(`[EDIT] Received data:`, data);
+            
             // Switch to manual input tab
             document.querySelector('.method-btn[data-method="manual"]').click();
             
@@ -1098,12 +1318,25 @@ function editEquipment(equipmentId) {
                 // Update form action to indicate editing mode
                 form.dataset.mode = 'edit';
                 
+                // Log all received fields to help with debugging
+                console.log('[EDIT] Available fields:', Object.keys(data.equipment));
+                
                 // Populate form fields
                 document.getElementById('itemName').value = data.equipment.name || '';
                 document.getElementById('itemCategory').value = data.equipment.type || 'hardware';
                 document.getElementById('itemStatus').value = data.equipment.status || 'available';
                 document.getElementById('itemQuantity').value = data.equipment.quantity || 1;
                 document.getElementById('assignTo').value = data.equipment.assigned_to_department || '';
+                
+                // Handle location field with extra logging
+                const locationField = document.getElementById('itemLocation');
+                if (locationField) {
+                    console.log(`[EDIT] Location value from API: "${data.equipment.location}"`);
+                    locationField.value = data.equipment.location || '';
+                    console.log(`[EDIT] Set itemLocation field to: "${locationField.value}"`);
+                } else {
+                    console.error('[EDIT ERROR] itemLocation field not found in the form');
+                }
                 
                 // Additional fields if available
                 if (document.getElementById('itemSerial')) {
@@ -1151,6 +1384,74 @@ function editEquipment(equipmentId) {
                 'Failed to retrieve equipment data for editing.';
             alert(errorMessage);
         });
+}
+
+// Function to delete equipment from inventory
+function deleteEquipment(equipmentId) {
+    // Get current language for confirmation message
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    const confirmMessage = language === 'pl' ? 
+        'Czy na pewno chcesz usunąć ten element z inwentarza?' : 
+        'Are you sure you want to delete this equipment from inventory?';
+    
+    console.log(`Próba usunięcia elementu z ID: ${equipmentId}`);
+    
+    if (confirm(confirmMessage)) {
+        console.log(`Usuwanie zatwierdzone przez użytkownika, wysyłanie żądania...`);
+        
+        // Używamy FormData zamiast JSON - bardziej niezawodne
+        const formData = new FormData();
+        formData.append('equipment_id', equipmentId);
+        formData.append('action', 'delete'); // Dodajemy akcję usunięcia
+        
+        // Dodajemy nagłówek X-Requested-With dla lepszej kompatybilności
+        fetch('/api/equipment/update', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => {
+            console.log(`Odpowiedź otrzymana, status: ${response.status}`);
+            if (!response.ok) {
+                console.error(`Błąd HTTP: ${response.status} ${response.statusText}`);
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(`Dane odpowiedzi:`, data);
+            if (data.success) {
+                // Reload equipment list to reflect changes
+                const departmentSelect = document.getElementById('departmentSelect');
+                if (departmentSelect && departmentSelect.value) {
+                    console.log(`Odświeżanie listy dla działu: ${departmentSelect.value}`);
+                    loadDepartmentEquipment(departmentSelect.value);
+                }
+                
+                // Show success message
+                const successMsg = language === 'pl' ? 
+                    'Element został pomyślnie usunięty' : 
+                    'Equipment successfully deleted';
+                alert(successMsg);
+            } else {
+                // Show error message
+                const errorMsg = language === 'pl' ? 
+                    'Błąd: ' + (data.error || 'Nieznany błąd') : 
+                    'Error: ' + (data.error || 'Unknown error');
+                console.error(`Błąd usuwania: ${data.error}`);
+                alert(errorMsg);
+            }
+        })
+        .catch(error => {
+            console.error('Error during delete operation:', error);
+            const errorMsg = language === 'pl' ? 
+                'Nie udało się usunąć elementu. Spróbuj ponownie.' : 
+                'Failed to delete equipment. Please try again.';
+            alert(errorMsg);
+        });
+    }
 }
 
 // Add this function to handle department selection
@@ -1342,7 +1643,6 @@ function showProductDetails(product, category) {
     
     // Add action buttons to modal
     const actionRow = document.createElement('div');
-    actionRow.className = 'product-detail-actions';
     actionRow.style.marginTop = '1.5rem';
     actionRow.style.display = 'flex';
     actionRow.style.gap = '0.5rem';
@@ -1377,4 +1677,138 @@ function showProductDetails(product, category) {
     
     // Show the modal
     modal.style.display = 'block';
+}
+
+// Function to change department assignment
+function changeDepartment(equipmentId, itemName) {
+    // Get current language for UI
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    
+    // Create a selection dialog
+    let modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'block';
+    modal.style.position = 'fixed';
+    modal.style.zIndex = '1000';
+    modal.style.left = '0';
+    modal.style.top = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.4)';
+    
+    // Create modal content
+    let modalContent = document.createElement('div');
+    modalContent.className = 'modal-content';
+    modalContent.style.backgroundColor = '#fff';
+    modalContent.style.margin = '10% auto';
+    modalContent.style.padding = '20px';
+    modalContent.style.border = '1px solid #888';
+    modalContent.style.width = '50%';
+    modalContent.style.borderRadius = '5px';
+    
+    // Get department options from the existing select
+    const departmentOptions = Array.from(
+        document.querySelectorAll('#departmentSelect option')
+    ).filter(option => option.value).map(option => 
+        `<option value="${option.value}">${option.text}</option>`
+    ).join('');
+    
+    // Modal header and content
+    modalContent.innerHTML = `
+        <h3>${language === 'pl' ? 'Zmień dział dla elementu' : 'Change Department Assignment'}</h3>
+        <p>${language === 'pl' ? `Element: <strong>${itemName}</strong>` : `Item: <strong>${itemName}</strong>`}</p>
+        <div class="form-group">
+            <label for="newDepartment">${language === 'pl' ? 'Wybierz nowy dział:' : 'Select new department:'}</label>
+            <select id="newDepartment" class="form-control">
+                ${departmentOptions}
+            </select>
+        </div>
+        <div class="form-actions" style="margin-top: 20px; text-align: right;">
+            <button id="cancelDeptChange" class="btn secondary">
+                ${language === 'pl' ? 'Anuluj' : 'Cancel'}
+            </button>
+            <button id="confirmDeptChange" class="btn primary">
+                ${language === 'pl' ? 'Zapisz zmiany' : 'Save Changes'}
+            </button>
+        </div>
+    `;
+    
+    // Add modal to document
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+    
+    // Handle cancel button
+    document.getElementById('cancelDeptChange').addEventListener('click', function() {
+        modal.remove();
+    });
+    
+    // Handle confirm button
+    document.getElementById('confirmDeptChange').addEventListener('click', function() {
+        const newDepartment = document.getElementById('newDepartment').value;
+        if (!newDepartment) {
+            alert(language === 'pl' ? 'Proszę wybrać dział.' : 'Please select a department.');
+            return;
+        }
+        
+        // Create form data for the request
+        const formData = new FormData();
+        formData.append('equipment_id', equipmentId);
+        formData.append('department', newDepartment);
+        
+        // Send the request to assign equipment to new department
+        fetch('/api/equipment/assign', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                equipment_id: equipmentId,
+                department: newDepartment
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Remove the modal
+                modal.remove();
+                
+                // Show success message
+                const successMsg = language === 'pl' ? 
+                    `Element został przypisany do działu ${newDepartment}` : 
+                    `Equipment has been assigned to ${newDepartment} department`;
+                alert(successMsg);
+                
+                // Refresh the equipment list
+                const departmentSelect = document.getElementById('departmentSelect');
+                if (departmentSelect) {
+                    loadDepartmentEquipment(departmentSelect.value);
+                }
+            } else {
+                // Show error message
+                const errorMsg = language === 'pl' ? 
+                    'Błąd: ' + (data.error || 'Nieznany błąd') : 
+                    'Error: ' + (data.error || 'Unknown error');
+                alert(errorMsg);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const errorMsg = language === 'pl' ? 
+                'Nie udało się przepisać elementu do nowego działu. Spróbuj ponownie.' : 
+                'Failed to assign equipment to new department. Please try again.';
+            alert(errorMsg);
+        });
+    });
+    
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.remove();
+        }
+    }
 }

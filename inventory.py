@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
+from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
 from datetime import datetime
 from modules.database import get_db_cursor
 import pdfplumber
@@ -71,8 +72,7 @@ def get_department_equipment(department):
                 e.status,
                 e.quantity,
                 e.assigned_date,
-                e.notes
-            FROM equipment e
+                e.notes            FROM equipment e
             WHERE e.assigned_to_department = %s
             ORDER BY e.type, e.name
         ''', (department,))
@@ -80,7 +80,13 @@ def get_department_equipment(department):
         
     return jsonify({
         'department': dept_info,
-        'equipment': [dict(item) for item in equipment]  # Convert row objects to dictionaries
+        'equipment': [{
+            **dict(item),
+            # Format date fields
+            'assigned_date': item['assigned_date'].strftime('%Y-%m-%d') if item['assigned_date'] and hasattr(item['assigned_date'], 'strftime') else (
+                str(item['assigned_date']).split()[0] if item['assigned_date'] else None
+            )
+        } for item in equipment]
     })
 
 # Update the assign equipment function
@@ -91,7 +97,18 @@ def assign_equipment():
         
     data = request.json
     try:
+        print(f"[ASSIGN] Reassigning equipment ID: {data['equipment_id']} to department: {data['department']}")
+        
+        # First get the current equipment state
         with get_db_cursor() as cursor:
+            cursor.execute('SELECT assigned_to_department FROM equipment WHERE id = %s', (data['equipment_id'],))
+            current = cursor.fetchone()
+            if current:
+                print(f"[ASSIGN] Current department: {current['assigned_to_department']}, New department: {data['department']}")
+            else:
+                print(f"[ASSIGN] Equipment ID {data['equipment_id']} not found")
+            
+            # Now update the equipment
             cursor.execute('''
                 UPDATE equipment 
                 SET assigned_to_department = %s, 
@@ -105,8 +122,16 @@ def assign_equipment():
                 data.get('quantity', 1),
                 data['equipment_id']
             ))
-        return jsonify({'success': True})
+            
+            # Verify the update was successful
+            cursor.execute('SELECT assigned_to_department FROM equipment WHERE id = %s', (data['equipment_id'],))
+            updated = cursor.fetchone()
+            if updated:
+                print(f"[ASSIGN] Update successful. New department: {updated['assigned_to_department']}")
+            
+        return jsonify({'success': True, 'message': 'Equipment assigned successfully'})
     except Exception as e:
+        print(f"[ASSIGN ERROR] Failed to assign equipment: {str(e)}")
         return jsonify({'error': str(e)}), 400
 
 # Update the add equipment function
@@ -125,15 +150,18 @@ def add_equipment():
                     WHERE name = %s
                 ''', (data.get('assignTo'),))
                 if not cursor.fetchone():
-                    return jsonify({'error': 'Invalid department selected'}), 400
-
+                    return jsonify({'error': 'Invalid department selected'}), 400            # Determine if we need to set the assigned_date
+            assigned_date = None
+            if data.get('assignTo'):
+                assigned_date = datetime.now().strftime('%Y-%m-%d')
+                
             cursor.execute('''
                 INSERT INTO equipment (
                     name, type, serial_number, status, 
                     acquisition_date, value, description,
                     manufacturer, model, notes, quantity,
-                    assigned_to_department
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    assigned_to_department, assigned_date
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ''', (
                     data.get('itemName'),
                     data.get('itemCategory'),
@@ -146,7 +174,8 @@ def add_equipment():
                     data.get('itemModel'),
                     data.get('itemNotes'),
                     data.get('itemQuantity', 1),
-                    data.get('assignTo')  # This is the department name
+                    data.get('assignTo'),  # This is the department name
+                    assigned_date  # Set assigned date when department is specified
                 ))
             
         return jsonify({'success': True, 'item_id': cursor.lastrowid})
@@ -171,13 +200,18 @@ def get_person_equipment(person_id):
         cursor.execute('''
             SELECT user_id as id, display_name as name, Department as department, email 
             FROM users 
-            WHERE user_id = %s
-        ''', (person_id,))
+            WHERE user_id = %s        ''', (person_id,))
         person = cursor.fetchone()
     
     return jsonify({
         'person': person,
-        'equipment': equipment
+        'equipment': [{
+            **dict(item),
+            # Format date fields
+            'assigned_date': item['assigned_date'].strftime('%Y-%m-%d') if item['assigned_date'] and hasattr(item['assigned_date'], 'strftime') else (
+                str(item['assigned_date']).split()[0] if item['assigned_date'] else None
+            )
+        } for item in equipment]
     })
 
 @inventory.route('/api/equipment/unassign', methods=['POST'])
@@ -205,6 +239,9 @@ def get_equipment_details(equipment_id):
     if not session.get('logged_in'):
         return jsonify({'error': 'Not authenticated'}), 401
         
+    # Add debug information to help troubleshooting
+    print(f"[GET EQUIPMENT] Fetching details for equipment ID: {equipment_id}")
+        
     with get_db_cursor() as cursor:
         cursor.execute('''
             SELECT 
@@ -221,16 +258,39 @@ def get_equipment_details(equipment_id):
                 description,
                 manufacturer,
                 model,
-                notes
+                notes,
+                location
             FROM equipment 
             WHERE id = %s
         ''', (equipment_id,))
         equipment = cursor.fetchone()
         
     if not equipment:
+        print(f"[GET EQUIPMENT ERROR] Equipment with ID {equipment_id} not found")
         return jsonify({'error': 'Equipment not found'}), 404
         
-    return jsonify({'equipment': dict(equipment)})
+    equipment_dict = dict(equipment)
+    print(f"[GET EQUIPMENT SUCCESS] Equipment data: {equipment_dict}")
+    
+    # Make sure location is explicitly included in the JSON response
+    if 'location' not in equipment_dict or equipment_dict['location'] is None:
+        equipment_dict['location'] = ''
+        
+    # Format date fields properly
+    for date_field in ['acquisition_date', 'assigned_date']:
+        if date_field in equipment_dict and equipment_dict[date_field] is not None:
+            if isinstance(equipment_dict[date_field], datetime):
+                equipment_dict[date_field] = equipment_dict[date_field].strftime('%Y-%m-%d')
+            elif hasattr(equipment_dict[date_field], 'strftime'):
+                equipment_dict[date_field] = equipment_dict[date_field].strftime('%Y-%m-%d')
+            else:
+                # Try to convert string representation if needed
+                try:
+                    equipment_dict[date_field] = str(equipment_dict[date_field]).split()[0]  # Take just the date part
+                except:
+                    pass  # Keep as is if conversion fails
+        
+    return jsonify({'equipment': equipment_dict})
 
 @inventory.route('/api/equipment/update', methods=['POST'])
 def update_equipment():
@@ -240,10 +300,41 @@ def update_equipment():
         
     data = request.form
     equipment_id = data.get('equipment_id')
+    action = data.get('action')
     
     if not equipment_id:
-        return jsonify({'error': 'Equipment ID is required'}), 400
-        
+        return jsonify({'error': 'Equipment ID is required'}), 400    # Obsługa usuwania sprzętu    
+    if action == 'delete':
+        try:
+            # Improved debug information
+            print(f"[DELETE] Processing delete request for equipment_id: {equipment_id}")
+            print(f"[DELETE] Request form data: {request.form}")
+            
+            with get_db_cursor() as cursor:
+                # Check if equipment exists first
+                cursor.execute('SELECT id FROM equipment WHERE id = %s', (equipment_id,))
+                result = cursor.fetchone()
+                if not result:
+                    print(f"[DELETE ERROR] Equipment with ID {equipment_id} not found")
+                    return jsonify({'error': 'Equipment not found'}), 404
+                
+                print(f"[DELETE] Equipment found with ID: {equipment_id}, proceeding with deletion")
+                
+                # Delete equipment
+                cursor.execute('DELETE FROM equipment WHERE id = %s', (equipment_id,))
+                
+                # Verify deletion
+                cursor.execute('SELECT id FROM equipment WHERE id = %s', (equipment_id,))
+                if cursor.fetchone():
+                    print(f"[DELETE ERROR] Equipment with ID {equipment_id} still exists after deletion attempt")
+                    return jsonify({'error': 'Failed to delete equipment'}), 500
+                
+                print(f"[DELETE SUCCESS] Equipment with ID {equipment_id} successfully deleted")
+            return jsonify({'success': True, 'message': 'Equipment deleted successfully'})
+        except Exception as e:
+            print(f"Błąd przy usuwaniu wyposażenia: {str(e)}")
+            return jsonify({'error': str(e)}), 500
+      # Normalna aktualizacja sprzętu        
     try:
         with get_db_cursor() as cursor:
             cursor.execute('''
@@ -259,7 +350,8 @@ def update_equipment():
                     manufacturer = %s,
                     model = %s,
                     notes = %s,
-                    assigned_to_department = %s
+                    assigned_to_department = %s,
+                    location = %s
                 WHERE id = %s
             ''', (
                 data.get('itemName'),
@@ -273,6 +365,7 @@ def update_equipment():
                 data.get('itemModel'),
                 data.get('itemNotes'),
                 data.get('assignTo'),
+                data.get('itemLocation'),
                 equipment_id
             ))
         return jsonify({'success': True})
@@ -320,6 +413,60 @@ def process_invoice():
     except Exception as e:
         print(f"Exception during invoice processing: {str(e)}")
         return jsonify({'error': 'Failed to process invoice: ' + str(e)}), 500
+
+@inventory.route('/api/equipment/delete/<int:equipment_id>', methods=['POST', 'DELETE'])
+def delete_equipment(equipment_id):
+    """Delete equipment from inventory"""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+        
+    try:
+        with get_db_cursor() as cursor:
+            # Check if equipment exists first
+            cursor.execute('SELECT id FROM equipment WHERE id = %s', (equipment_id,))
+            if not cursor.fetchone():
+                return jsonify({'error': 'Equipment not found'}), 404
+                
+            # Add debugging info
+            print(f"Usuwanie elementu z ID: {equipment_id}")
+                
+            # Delete equipment - make sure we're committing the change
+            cursor.execute('DELETE FROM equipment WHERE id = %s', (equipment_id,))
+            cursor._connection.commit()  # Force a commit
+            
+        return jsonify({'success': True, 'message': 'Equipment deleted successfully'})
+    except Exception as e:
+        print(f"Błąd przy usuwaniu wyposażenia: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@inventory.route('/api/equipment_delete', methods=['POST'])
+def delete_equipment_alt():
+    """Alternative endpoint to delete equipment from inventory"""
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    equipment_id = request.form.get('id') or request.json.get('id')
+    if not equipment_id:
+        return jsonify({'error': 'Equipment ID is required'}), 400
+    
+    try:
+        equipment_id = int(equipment_id)
+        with get_db_cursor() as cursor:
+            # Check if equipment exists first
+            cursor.execute('SELECT id FROM equipment WHERE id = %s', (equipment_id,))
+            if not cursor.fetchone():
+                return jsonify({'error': 'Equipment not found'}), 404
+                
+            # Add debugging info
+            print(f"Usuwanie elementu z ID: {equipment_id} (endpoint alternatywny)")
+                
+            # Delete equipment
+            cursor.execute('DELETE FROM equipment WHERE id = %s', (equipment_id,))
+            
+        return jsonify({'success': True, 'message': 'Equipment deleted successfully'})
+    except Exception as e:
+        print(f"Błąd przy usuwaniu wyposażenia (endpoint alternatywny): {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 def extract_invoice_data(pdf_path):
     """Extract data from invoice PDF using multiple strategies"""

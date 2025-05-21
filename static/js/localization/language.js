@@ -192,68 +192,68 @@ function translateDepartments(lang) {
             }
         }
     });
-    
-    // Find all department descriptions in dynamic content (table cells, spans, etc.)
+      // Find all department descriptions in dynamic content (table cells, spans, etc.)
     const departmentTranslations = {
         'en': {
             'Information Technology Department': 'Information Technology Department',
             'Human Resources': 'Human Resources',
             'Administration Department': 'Administration Department',
+            'Administration': 'Administration',
             'Research and Development': 'Research and Development',
             'Finance Department': 'Finance Department',
+            'Finance': 'Finance',
             'Marketing Department': 'Marketing Department',
             'Sales Department': 'Sales Department',
             'Operations Department': 'Operations Department',
             'Technical Support': 'Technical Support',
-            'Software Development': 'Software Development'
+            'Software Development': 'Software Development',
+            'Development': 'Development'
         },
         'pl': {
             'Information Technology Department': 'Dział Technologii Informacyjnej',
             'Human Resources': 'Zasoby Ludzkie',
             'Administration Department': 'Dział Administracji',
+            'Administration': 'Administracja',
             'Research and Development': 'Badania i Rozwój',
             'Finance Department': 'Dział Finansowy',
+            'Finance': 'Dział Finansowy',
             'Marketing Department': 'Dział Marketingu',
             'Sales Department': 'Dział Sprzedaży',
             'Operations Department': 'Dział Operacyjny', 
             'Technical Support': 'Wsparcie Techniczne',
-            'Software Development': 'Rozwój Oprogramowania'
+            'Software Development': 'Rozwój Oprogramowania',
+            'Development': 'Rozwój Oprogramowania'
         }
-    };
-    
-    // Bezpośrednie tłumaczenie nazw departamentów w opcjach wyboru - nowy format z nawiasami
+    };    // Bezpośrednie tłumaczenie nazw departamentów w opcjach wyboru - uproszczony format
     const departmentSelect = document.getElementById('departmentSelect');
-    if (departmentSelect && lang === 'pl') {
+    if (departmentSelect) {
         Array.from(departmentSelect.options).forEach(option => {
             if (!option.value) return; // Pomijamy opcję "Wybierz dział..."
             
             // Sprawdź czy nazwa departamentu jest kluczem w słowniku tłumaczeń
             const deptName = option.value;
-            // Pobierz liczbę elementów z data-attribute lub parsuj tekst
-            const count = option.dataset.count || 
-                         (option.textContent.match(/\((\d+) (?:items|elementów)\)/) || [null, '0'])[1];
-            const itemsText = lang === 'pl' ? 'elementów' : 'items';
             
-            // Format dokładnie taki jak w profilu:
-            // "Development (Rozwój Oprogramowania)" + liczba elementów
-            if (departmentTranslations.en[deptName]) {
-                if (lang === 'pl') {
-                    option.textContent = `${deptName} (${departmentTranslations[lang][deptName]}) (${count} ${itemsText})`;
-                } else {
-                    option.textContent = `${deptName} (${count} ${itemsText})`;
-                }
+            // W polskiej wersji pokazujemy tylko polskie nazwy, w angielskiej - angielskie
+            if (departmentTranslations.en[deptName] && lang === 'pl') {
+                // W polskiej wersji tylko polska nazwa
+                option.textContent = departmentTranslations[lang][deptName];
             } else {
-                // W przypadku nieznanego działu zachowaj tekstową reprezentację z liczbą elementów
-                option.textContent = `${deptName} (${count} ${itemsText})`;
+                // W angielskiej wersji lub dla działów bez tłumaczenia - oryginalna nazwa
+                option.textContent = deptName;
             }
         });
     }
-    
-    // Replace department descriptions in text nodes
-    document.querySelectorAll('span, td, div, option').forEach(el => {
-        if (!el.children.length && el.textContent) {
-            // Check if element contains any of the English department descriptions in ()
+      // Replace department descriptions in text nodes
+    document.querySelectorAll('span, td, div').forEach(el => {
+        if (!el.children.length && el.textContent && el.closest('table')) {
+            // Check if this element contains a department name directly
             Object.keys(departmentTranslations.en).forEach(engDesc => {
+                // Bezpośrednie dopasowanie nazwy departamentu (nie w nawiasach)
+                if (el.textContent.trim() === engDesc && lang === 'pl') {
+                    el.textContent = departmentTranslations.pl[engDesc];
+                }
+                
+                // Dopasowanie w nawiasach też obsługujemy dla zgodności z innymi częściami interfejsu
                 const pattern = new RegExp(`\\(${engDesc}\\)`, 'g');
                 if (pattern.test(el.textContent) && lang === 'pl') {
                     el.textContent = el.textContent.replace(

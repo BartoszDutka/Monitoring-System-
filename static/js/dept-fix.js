@@ -20,8 +20,10 @@ document.addEventListener('languageChanged', function(e) {
 
 function fixDepartmentFormat() {
     try {
-        // Sprawdź czy jesteśmy w polskiej wersji
+        // Sprawdź język
         const language = document.documentElement.getAttribute('data-language') || 'en';
+        
+        // W angielskiej wersji nie robimy nic - zachowujemy oryginalne nazwy
         if (language !== 'pl') return;
 
         // Pobierz wszystkie listy rozwijane z działami
@@ -32,6 +34,7 @@ function fixDepartmentFormat() {
             'Information Technology Department': 'Dział Technologii Informacyjnej',
             'Human Resources': 'Zasoby Ludzkie',
             'Administration Department': 'Dział Administracji',
+            'Administration': 'Administracja',
             'Research and Development': 'Badania i Rozwój',
             'Finance Department': 'Dział Finansowy',
             'Marketing Department': 'Dział Marketingu',
@@ -39,14 +42,14 @@ function fixDepartmentFormat() {
             'Operations Department': 'Dział Operacyjny', 
             'Technical Support': 'Wsparcie Techniczne',
             'Software Development': 'Rozwój Oprogramowania',
-            'IT': 'Dział Technologii Informacyjnej',
+            'IT': 'Dział IT',
             'Development': 'Rozwój Oprogramowania',
             'Finance': 'Dział Finansowy', 
-            'HR': 'Zasoby Ludzkie',
+            'HR': 'Dział HR',
             'Marketing': 'Dział Marketingu',
             'Sales': 'Dział Sprzedaży',
             'Operations': 'Dział Operacyjny',
-            'Research': 'Badania i Rozwój',
+            'Research': 'Dział Badań',
             'Support': 'Wsparcie Techniczne'
         };
         
@@ -57,24 +60,10 @@ function fixDepartmentFormat() {
                 if (!option.value || option.value === '') return; // Pomijamy "Wybierz dział..."
                 
                 const deptName = option.value;
-                // Sprawdź czy już ma formatowanie "(Tłumaczenie)"
-                if (!option.textContent.match(/\([^)]+\) \(\d+/)) {
-                    // Dopasuj liczbę elementów (jeśli istnieje)
-                    let itemCount = '0';
-                    let itemText = 'elementów';
-                    
-                    const countMatch = option.textContent.match(/\((\d+) (items|elementów)\)/);
-                    if (countMatch) {
-                        itemCount = countMatch[1];
-                        itemText = countMatch[2] === 'items' ? 'elementów' : countMatch[2];
-                    }
-                    
-                    // Znajdź tłumaczenie lub użyj oryginalnej nazwy
-                    const translation = departmentTranslations[deptName] || deptName;
-                    
-                    // Formatuj tekst opcji: "Development (Rozwój Oprogramowania) (5 elementów)"
-                    option.textContent = `${deptName} (${translation}) (${itemCount} ${itemText})`;
-                }
+                
+                // W polskiej wersji używamy tylko polskich nazw
+                const translation = departmentTranslations[deptName] || deptName;
+                option.textContent = translation;
             });
         });
     } catch (error) {

@@ -33,7 +33,17 @@
 .form-group > i {
   position: absolute;
   left: 0.8rem;
-  top: 2.3rem; /* Position below the label */
   color: var(--text-muted);
   z-index: 1;
+}
+
+/* Position icons in standard forms (with labels) */
+.form-group label + input + i {
+  top: 2.3rem; /* Position below the label */
+}
+
+/* Position icons in forms without labels (like login form) */
+.form-group > input + i {
+  top: 50%;
+  transform: translateY(-50%);
 }

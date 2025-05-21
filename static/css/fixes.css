@@ -1,0 +1,21 @@
+/* CSS fixes for overlapping icons */
+
+/* Fix for login form icons */
+.login-form .form-group i {
+  position: absolute;
+  left: 1rem;
+  top: 50% !important; /* Use !important to override any other CSS rules */
+  transform: translateY(-50%) !important;
+  color: #888;
+  transition: all 0.3s;
+  z-index: 1;
+}
+
+.login-form .form-group input:focus ~ i {
+  color: #7b1fa2;
+}
+
+/* Ensure proper padding for login inputs */
+.login-form .form-group input {
+  padding: 1rem 1rem 1rem 3rem !important;
+}

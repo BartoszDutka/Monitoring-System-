@@ -1,0 +1,32 @@
+/* CSS fixes for search functionality */
+
+.search-container {
+  position: relative;
+  max-width: 400px;
+  min-width: 250px;
+  flex: 1;
+  margin: 10px 0;
+}
+
+.search-container .search-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 0.9rem; 
+  pointer-events: none;
+  /* Ensure the icon is visible */
+  z-index: 10;
+}
+
+.host-search {
+  width: 100%;
+  padding: 8px 15px 8px 45px !important;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  font-size: 14px;
+  background-color: #f8f9fa;
+  color: var(--text-color);
+  transition: all 0.3s ease;
+}

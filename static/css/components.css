@@ -34,19 +34,13 @@
 
 .host-search {
   width: 100%;
-  padding: 8px 8px 8px 35px;
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  font-size: 14px;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  transition: .3s;
-  width: 100%;
-  padding: 8px 35px 8px 50px;
+  padding: 8px 15px 8px 45px; /* Adjusted padding to accommodate search icon */
   border: 1px solid var(--border-color);
   border-radius: 20px;
   font-size: 14px;
   background-color: #f8f9fa;
+  color: var(--text-color);
+  transition: .3s;
   border: 1px solid #ddd
 }
 
@@ -59,17 +53,13 @@
 }
 
 .search-icon {
-  color: var(--text-muted);
   color: #666;
-  left: 12px;
   pointer-events: none;
-  transform: translatey(-50%);
   position: absolute;
-  right: 12px;
+  left: 20px; /* Set only left position, not both left and right */
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-muted);
-  pointer-events: none
+  pointer-events: none;
 }
 
 .refresh-button {

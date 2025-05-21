@@ -6,13 +6,13 @@ from modules.glpi import get_glpi_data
 from modules.ldap_auth import authenticate_user
 from config import *  # Importujemy wszystkie zmienne konfiguracyjne
 import urllib3
-import urllib.parse  # Add this import
+import urllib.parse
 import subprocess
 import os
-import json  # Add this import
+import json
 from functools import wraps
 from werkzeug.utils import secure_filename
-import time  # Dodaj na początku pliku z innymi importami
+import time
 from modules.user_data import update_user_avatar, get_user_avatar, verify_user, get_user_info
 from modules.database import (
     get_db_cursor, 
@@ -23,6 +23,8 @@ from modules.database import (
 )
 from datetime import datetime, timedelta  # Keep this import as is
 from modules.user_data import update_user_profile
+# Import the new permissions module
+from modules.permissions import permission_required, role_required, admin_required, has_permission, get_user_permissions
 from inventory import inventory  # Import the inventory blueprint
 from werkzeug.exceptions import Forbidden  # Add this import
 from flask_caching import Cache
@@ -137,6 +139,15 @@ def isdigit_filter(s):
         return False
     return s[0].isdigit() if s else False
 
+# Add this with the other filters
+@app.template_filter('count_values')
+def count_values_filter(dictionary):
+    """Count all values in a dictionary of lists"""
+    count = 0
+    for value_list in dictionary.values():
+        count += len(value_list)
+    return count
+
 # Upewnij się, że folder istnieje
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -151,6 +162,8 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Note: These functions are now imported from modules.permissions
+# Keeping these for backward compatibility
 def role_required(required_roles):
     def decorator(f):
         @wraps(f)
@@ -164,12 +177,17 @@ def role_required(required_roles):
         return decorated_function
     return decorator
 
+# This now uses the imported admin_required but defining it for backward compatibility
 def admin_required(f):
     return role_required(['admin'])(f)
 
 @app.context_processor
 def utility_processor():
-    return dict(time=time)
+    # Make both time and permission checking available in templates
+    return dict(
+        time=time,
+        has_permission=has_permission
+    )
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -898,7 +916,7 @@ def get_graylog_timeline():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/profile', methods=['GET', 'POST'])
-@role_required(['admin', 'user'])  # Viewers can't access profile
+@permission_required('manage_profile')  # Any role with manage_profile permission can access
 def profile():
     if 'username' not in session:
         return redirect(url_for('login'))
@@ -1057,8 +1075,27 @@ def refresh_graylog_logs():
 @app.route('/manage_users')
 @admin_required
 def manage_users():
+    """View and manage system users"""
+    # Przekieruj do nowego ujednoliconego interfejsu z aktywną zakładką "users"
+    return redirect(url_for('unified_management', active_tab='users'))
+
+@app.route('/manage_roles')
+@admin_required
+def manage_roles():
+    """View and manage system roles and permissions"""
+    # Przekieruj do nowego ujednoliconego interfejsu z aktywną zakładką "role"
+    return redirect(url_for('unified_management', active_tab='roles'))
+
+@app.route('/unified_management')
+@admin_required
+def unified_management():
+    """Unified interface for managing users, roles and permissions"""
+    # Get active tab from query params
+    active_tab = request.args.get('active_tab', 'users')
+    
     # Get all users
     with get_db_cursor() as cursor:
+        # Get users data
         cursor.execute("SELECT * FROM users ORDER BY created_at DESC")
         users = cursor.fetchall()
         
@@ -1070,35 +1107,60 @@ def manage_users():
         ''')
         departments = cursor.fetchall()
         
+        # Get all roles with their descriptions and user counts
+        cursor.execute("""
+            SELECT r.role_key, r.description_en, r.description_pl,
+                   COUNT(u.user_id) as users_count,
+                   (
+                       SELECT COUNT(rp.permission_id)
+                       FROM role_permissions rp
+                       WHERE rp.role_id = r.role_id
+                   ) as permissions_count
+            FROM roles r
+            LEFT JOIN users u ON r.role_key = u.role
+            GROUP BY r.role_key, r.description_en, r.description_pl
+            ORDER BY FIELD(r.role_key, 'admin', 'manager', 'technician', 'analyst', 'operator', 'user', 'viewer')
+        """)
+        roles = cursor.fetchall()
+    
     # Get current language from session
     current_language = session.get('language', 'en')
     
-    return render_template('manage_users.html', 
-                          users=users, 
+    # Get permissions by category
+    from modules.permissions import get_permissions_by_category
+    permissions_by_category = get_permissions_by_category(current_language)
+    
+    # Remove unwanted permissions
+    if 'reporting' in permissions_by_category:
+        permissions_by_category['reporting'] = [
+            p for p in permissions_by_category['reporting'] 
+            if p['permission_key'] != 'export_reports'
+        ]
+    
+    if 'monitoring' in permissions_by_category:
+        permissions_by_category['monitoring'] = [
+            p for p in permissions_by_category['monitoring'] 
+            if p['permission_key'] != 'acknowledge_alerts'
+        ]
+    
+    if 'assets' in permissions_by_category:
+        permissions_by_category['assets'] = [
+            p for p in permissions_by_category['assets'] 
+            if p['permission_key'] != 'assign_assets'
+        ]
+    
+    # Calculate total permissions count
+    total_permissions_count = sum(len(perms) for perms in permissions_by_category.values())
+    
+    return render_template('unified_management.html',
+                          users=users,
                           departments=departments,
+                          roles=roles,
+                          permissions_by_category=permissions_by_category,
+                          total_permissions_count=total_permissions_count,
+                          active_tab=active_tab,
                           lang=current_language)
 
-@app.route('/update_user_role', methods=['POST'])
-@admin_required
-def update_user_role():
-    user_id = request.form.get('user_id')
-    new_role = request.form.get('role')
-    
-    if new_role not in ['admin', 'user', 'viewer']:
-        flash('Invalid role specified')
-        return redirect(url_for('manage_users'))
-        
-    with get_db_cursor() as cursor:
-        cursor.execute("""
-            UPDATE users 
-            SET role = %s 
-            WHERE user_id = %s
-        """, (new_role, user_id))
-        
-    flash('User role updated successfully')
-    return redirect(url_for('manage_users'))
-
-# Add error handler for 403 errors
 @app.errorhandler(403)
 def forbidden_error(error):
     return render_template('403.html'), 403
@@ -1114,7 +1176,6 @@ def delete_user():
             # Check if user exists and is not the current user
             cursor.execute("SELECT username FROM users WHERE user_id = %s", (user_id,))
             user = cursor.fetchone()
-            
             if not user or user['username'] == session['username']:
                 return jsonify({'success': False, 'message': 'Cannot delete this user'}), 400
                 
@@ -1148,7 +1209,45 @@ def update_user_info():
         print(f"Error updating user: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
+@app.route('/update_user_role', methods=['POST'])
+@admin_required
+def update_user_role():
+    try:
+        user_id = request.form.get('user_id')
+        new_role = request.form.get('role')
+        
+        # Validate input
+        if not user_id or not new_role:
+            flash('Niepoprawne dane formularza', 'danger')
+            return redirect(url_for('unified_management', active_tab='users'))
+        
+        # Update the user's role in the database
+        with get_db_cursor() as cursor:
+            # Check if user exists
+            cursor.execute("SELECT username FROM users WHERE user_id = %s", (user_id,))
+            user = cursor.fetchone()
+            
+            if not user:
+                flash('Nie znaleziono użytkownika', 'danger')
+                return redirect(url_for('unified_management', active_tab='users'))
+                
+            # Update the user's role
+            cursor.execute("""
+                UPDATE users 
+                SET role = %s
+                WHERE user_id = %s
+            """, (new_role, user_id))
+            
+        flash(f'Zaktualizowano rolę użytkownika', 'success')
+        return redirect(url_for('unified_management', active_tab='users'))
+        
+    except Exception as e:
+        print(f"Error updating user role: {e}")
+        flash(f'Błąd podczas aktualizacji roli: {str(e)}', 'danger')
+        return redirect(url_for('unified_management', active_tab='users'))
+
 @app.route('/fetch_logs', methods=['POST'])
+@login_required
 def fetch_logs():
     try:
         data = request.get_json()
@@ -1167,6 +1266,7 @@ def get_glpi_devices():
 
 @app.route('/reports')
 @login_required
+@permission_required('view_reports')  # Only users with view_reports permission can access
 def reports_page():
     """Show the reports generation interface."""
     try:
@@ -1179,7 +1279,6 @@ def reports_page():
         for report in reports:
             # Przygotuj typ raportu - zostanie przetłumaczony przez JS na podstawie atrybutów data-
             report_type = report['type'].lower()
-            
             formatted_report = {
                 'id': report['id'],
                 'name': report['name'],
@@ -1196,6 +1295,7 @@ def reports_page():
 
 @app.route('/generate-report', methods=['POST'])
 @login_required
+@permission_required('generate_reports')  # Only users with generate_reports permission can access
 def generate_report():
     """Handle report generation requests with improved error handling."""
     try:
@@ -1239,7 +1339,6 @@ def generate_report():
                     'success': False, 
                     'message': 'Start and end dates are required for custom date range'
                 }), 400
-                
             try:
                 start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
                 end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
@@ -1299,7 +1398,6 @@ def generate_report():
                 'success': False,
                 'message': result.get('error', 'Unknown error generating report')
             }), 500
-            
     except Exception as e:
         logger.error(f"Unexpected error in generate_report: {str(e)}")
         import traceback
@@ -1311,6 +1409,7 @@ def generate_report():
 
 @app.route('/view-report/<report_id>')
 @login_required
+@permission_required('view_reports')
 def view_report(report_id):
     """View a generated report."""
     try:
@@ -1326,7 +1425,7 @@ def view_report(report_id):
             with open(os.path.join(REPORTS_DIR, report['path']), 'r', encoding='utf-8') as f:
                 html_content = f.read()
             return render_template('report_viewer.html', 
-                                 report=report,
+                                 report=report, 
                                  html_content=html_content)
         else:
             # For other formats, redirect to download
@@ -1338,6 +1437,7 @@ def view_report(report_id):
 
 @app.route('/download-report/<report_id>')
 @login_required
+@permission_required('view_reports')
 def download_report(report_id):
     """Download a generated report."""
     # Get report info
@@ -1357,6 +1457,7 @@ def download_report(report_id):
 
 @app.route('/delete-report/<report_id>', methods=['DELETE'])
 @login_required
+@permission_required('delete_reports')
 def delete_report_route(report_id):
     """Delete a generated report."""
     success = delete_report(report_id)
@@ -1424,14 +1525,253 @@ def set_language():
         print(f"Error setting language: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/api/role_info', methods=['GET'])
+@login_required
+def api_role_info():
+    """API endpoint to get information about a specific role and its permissions"""
+    role_key = request.args.get('role')
+    
+    if not role_key or role_key not in ['admin', 'manager', 'technician', 'analyst', 'operator', 'user', 'viewer']:
+        return jsonify({
+            'error': 'Invalid role specified',
+            'success': False
+        }), 400
+    
+    language = session.get('language', 'en')
+    
+    with get_db_cursor() as cursor:
+        # Get role description in both languages
+        cursor.execute("""
+            SELECT description_en, description_pl
+            FROM roles 
+            WHERE role_key = %s
+        """, (role_key,))
+        
+        role_data = cursor.fetchone()
+        
+        if role_data:
+            description_en = role_data['description_en']
+            description_pl = role_data['description_pl']
+            description = role_data[f'description_{language}']
+        else:
+            description_en = ''
+            description_pl = ''
+            description = ''
+            
+        # Get role permissions and role_id
+        cursor.execute("SELECT role_id FROM roles WHERE role_key = %s", (role_key,))
+        role_result = cursor.fetchone()
+        role_id = role_result['role_id'] if role_result else None
+        
+        if not role_id:
+            return jsonify({
+                'error': 'Role not found',
+                'success': False
+            }), 404
+        
+        # Get all permissions for this role directly from role_permissions table
+        perm_field_name = f"name_{language}"
+        perm_field_desc = f"description_{language}"
+        
+        cursor.execute(f"""
+            SELECT 
+                p.permission_key, 
+                p.category, 
+                p.{perm_field_name} as name, 
+                p.{perm_field_desc} as description
+            FROM permissions p
+            JOIN role_permissions rp ON p.permission_id = rp.permission_id
+            WHERE rp.role_id = %s
+            ORDER BY p.category, p.{perm_field_name}
+        """, (role_id,))
+        
+        permissions = cursor.fetchall()
+        
+        # Convert permissions to a serializable format
+        formatted_permissions = []
+        for p in permissions:
+            formatted_permissions.append({
+                'key': p['permission_key'],  # Provides backward compatibility
+                'permission_key': p['permission_key'],  # New explicit property
+                'category': p['category'],
+                'name': p['name'],
+                'description': p['description']
+            })
+        
+        # Log the response for debugging
+        print(f"API role_info response for {role_key}: {len(formatted_permissions)} permissions found")
+        
+        return jsonify({
+            'role': role_key,
+            'description': description,
+            'description_en': description_en,
+            'description_pl': description_pl,
+            'permissions': formatted_permissions,
+            'success': True
+        })
+
+@app.route('/api/debug/role/<role_key>')
+@admin_required
+def debug_role(role_key):
+    """Debug endpoint for role permissions - ADMIN ONLY"""
+    try:
+        from modules.permissions import debug_role_permissions
+        debug_role_permissions(role_key)
+        return jsonify({
+            'message': f'Debug info for role {role_key} printed to server console',
+            'success': True
+        })
+    except Exception as e:
+        return jsonify({
+            'message': f'Error debugging role: {str(e)}',
+            'success': False
+        })
+
+@app.route('/api/debug/permission/<permission_key>')
+@admin_required
+def debug_permission(permission_key):
+    """Debug endpoint for testing a specific permission - ADMIN ONLY"""
+    try:
+        from modules.permissions import has_permission
+        # Get current user info
+        username = session.get('username')
+        user_role = session.get('user_info', {}).get('role')
+        # Check permission with debug output
+        has_perm = has_permission(permission_key, debug=True)
+        return jsonify({
+            'username': username,
+            'role': user_role,
+            'permission': permission_key,
+            'has_permission': has_perm,
+            'success': True
+        })
+    except Exception as e:
+        return jsonify({
+            'message': f'Error debugging permission: {str(e)}',
+            'success': False
+        })
+
+@app.route('/api/users')
+@login_required
+@permission_required('view_users')
+def get_users_api():
+    """API endpoint to get users list for role management"""
+    try:
+        # Check if refresh is requested
+        refresh = request.args.get('refresh', '0') == '1'
+        
+        with get_db_cursor() as cursor:
+            cursor.execute("""
+                SELECT user_id, username, name, email, department, role, avatar_path, last_login
+                FROM users
+                ORDER BY name, username
+            """)
+            users = cursor.fetchall()
+              
+            # Convert datetime objects to strings for JSON serialization
+            for user in users:
+                if user.get('last_login') and isinstance(user['last_login'], datetime):
+                    user['last_login'] = user['last_login'].strftime('%Y-%m-%d %H:%M:%S')
+            
+        return jsonify({
+            "success": True,
+            "users": users
+        })
+    except Exception as e:
+        logger.error(f"Error in get_users_api: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/update_role_permissions', methods=['POST'])
+@admin_required
+def update_role_permissions():
+    """API endpoint to update role permissions"""
+    try:
+        role_key = request.form.get('role_key')
+        description_en = request.form.get('description_en', '')
+        description_pl = request.form.get('description_pl', '')
+        permissions = request.form.getlist('permissions[]')
+        
+        # Validate the role
+        if not role_key or role_key not in ['admin', 'manager', 'technician', 'analyst', 'operator', 'user', 'viewer']:
+            return jsonify({
+                'error': 'Invalid role specified',
+                'success': False
+            }), 400
+        
+        with get_db_cursor() as cursor:
+            # Get role ID
+            cursor.execute("SELECT role_id FROM roles WHERE role_key = %s", (role_key,))
+            role_result = cursor.fetchone()
+            
+            if not role_result:
+                return jsonify({
+                    'error': 'Role not found',
+                    'success': False
+                }), 404
+                
+            role_id = role_result['role_id']
+            
+            # Update role descriptions
+            cursor.execute("""
+                UPDATE roles 
+                SET description_en = %s, description_pl = %s 
+                WHERE role_id = %s
+            """, (description_en, description_pl, role_id))
+            
+            # Delete all existing permissions for this role
+            cursor.execute("DELETE FROM role_permissions WHERE role_id = %s", (role_id,))
+              # Add all new permissions
+            if permissions:
+                # Get permission IDs for the selected permission keys
+                # Use placeholders for each item in the list
+                placeholders = ', '.join(['%s'] * len(permissions))
+                query = f"""
+                    SELECT permission_id, permission_key 
+                    FROM permissions 
+                    WHERE permission_key IN ({placeholders})
+                """
+                cursor.execute(query, permissions)
+                
+                permission_ids = cursor.fetchall()
+                
+                # Insert new permissions
+                for perm in permission_ids:
+                    cursor.execute("""
+                        INSERT INTO role_permissions (role_id, permission_id)
+                        VALUES (%s, %s)
+                    """, (role_id, perm['permission_id']))
+            
+            # Log the update
+            logger.info(f"Updated permissions for role '{role_key}'. Set {len(permissions)} permissions.")
+            
+            return jsonify({
+                'success': True,
+                'message': f"Zaktualizowano uprawnienia dla roli {role_key}",
+                'updated_permissions': len(permissions)
+            })
+            
+    except Exception as e:
+        logger.error(f"Error updating role permissions: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f"Wystąpił błąd: {str(e)}"
+        }), 500
+
 if __name__ == '__main__':
     # Import required modules
     from modules.database import setup_departments_table, ensure_default_departments
+    from modules.permissions import initialize_roles_and_permissions
     
     # Initialize database tables
     setup_departments_table()
     ensure_default_departments()
     setup_tasks_tables()  # Add this line to initialize tasks tables
+    
+    print("Initializing roles and permissions system...")
+    if initialize_roles_and_permissions():
+        print("Roles and permissions system initialized successfully")
+    else:
+        print("Warning: Failed to initialize roles and permissions system")
     
     # Run the application
     app.run(debug=True, host='0.0.0.0', port=5000)

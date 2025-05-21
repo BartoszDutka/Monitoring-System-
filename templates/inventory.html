@@ -6,14 +6,19 @@
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/inventory.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/inventory-fixes.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/file-icon-fixes.css') }}">
 <!-- Skrypt naprawiający format działów - musi być wczytany jako pierwszy -->
 <script src="{{ url_for('static', filename='js/dept-fix.js') }}"></script>
 <!-- Następnie moduł językowy -->
 <script src="{{ url_for('static', filename='js/localization/language.js') }}"></script>
 <!-- Niestandardowy select, który rozwiązuje problem z przeskakiwaniem kursora -->
 <script src="{{ url_for('static', filename='js/custom-select.js') }}"></script>
-<!-- Na końcu skrypt inventory_fixed z defer - naprawiona wersja -->
-<script src="{{ url_for('static', filename='js/inventory_fixed.js') }}" defer></script>
+<!-- Skrypt inventory.js z defer - zoptymalizowana wersja -->
+<script src="{{ url_for('static', filename='js/inventory.js') }}" defer></script>
+<!-- Debug script for the delete functionality -->
+<script src="{{ url_for('static', filename='js/debug-delete.js') }}" defer></script>
+<!-- Enhanced department change functionality -->
+<script src="{{ url_for('static', filename='js/department-change.js') }}" defer></script>
 <script>
     // Create people options variable that will be used in the JavaScript file
     const peopleOptions = `
@@ -58,9 +63,8 @@
                 <div class="form-group">
                     <label for="invoicePdf" data-en="Upload Invoice PDF" data-pl="Prześlij fakturę PDF">Upload Invoice PDF</label>
                     <div class="file-upload">
-                        <input type="file" id="invoicePdf" name="invoice_pdf" accept=".pdf">
-                        <label for="invoicePdf" class="file-upload-btn">
-                            <i class="fas fa-file-upload"></i> <span data-en="Select Invoice PDF" data-pl="Wybierz fakturę PDF">Select Invoice PDF</span>
+                        <input type="file" id="invoicePdf" name="invoice_pdf" accept=".pdf">                        <label for="invoicePdf" class="file-upload-btn">
+                           <span data-en="Select Invoice PDF" data-pl="Wybierz fakturę PDF">Select Invoice PDF</span>
                         </label>
                         <div class="selected-files" id="selectedInvoiceFile" data-en="No file selected" data-pl="Nie wybrano pliku">No file selected</div>
                     </div>
@@ -94,8 +98,7 @@
                     <div id="invoiceVendor" class="form-control"></div>
                 </div>
                 
-                <h4 data-en="Detected Items" data-pl="Wykryte produkty">Detected Items</h4>
-                <div class="product-categories">
+                <h4 data-en="Detected Items" data-pl="Wykryte produkty">Detected Items</h4>                <div class="product-categories">
                     <div class="category-toggle">
                         <label><input type="checkbox" id="toggleHardware" checked> <span data-en="Hardware" data-pl="Sprzęt">Hardware</span></label>
                         <label><input type="checkbox" id="toggleSoftware" checked> <span data-en="Software" data-pl="Oprogramowanie">Software</span></label>
@@ -103,10 +106,13 @@
                         <label><input type="checkbox" id="toggleAccessories" checked> <span data-en="Accessories" data-pl="Akcesoria">Accessories</span></label>
                         <label><input type="checkbox" id="toggleOther" checked> <span data-en="Other" data-pl="Inne">Other</span></label>
                     </div>
-                </div>
-                <table class="invoice-data-table">
+                    <div class="selected-counter">
+                        <span id="selectedProductsCounter" data-en="Selected: 0" data-pl="Wybrano: 0">Selected: 0</span>
+                    </div>
+                </div><table class="invoice-data-table">
                     <thead>
                         <tr>
+                            <th style="width: 30px;"><input type="checkbox" id="selectAllProducts"></th>
                             <th data-en="Name" data-pl="Nazwa">Name</th>
                             <th data-en="Category" data-pl="Kategoria">Category</th>
                             <th data-en="Quantity" data-pl="Ilość">Quantity</th>
@@ -151,10 +157,12 @@
                         </template>
                     </tbody>
                 </table>
-                
-                <div class="form-actions">
+                  <div class="form-actions">
+                    <button type="button" id="importSelectedProducts" class="btn primary" style="display: none;">
+                        <i class="fas fa-file-import"></i> <span data-en="Import Selected" data-pl="Importuj wybrane">Import Selected</span>
+                    </button>
                     <button type="button" id="importAllProducts" class="btn primary">
-                        <i class="fas fa-file-import"></i> <span data-en="Import Selected Items" data-pl="Importuj wybrane pozycje">Import Selected Items</span>
+                        <i class="fas fa-file-import"></i> <span data-en="Import All Items" data-pl="Importuj wszystkie">Import All Items</span>
                     </button>
                     <button type="button" id="addMissingProduct" class="btn secondary">
                         <i class="fas fa-plus"></i> <span data-en="Add Missing Item" data-pl="Dodaj brakującą pozycję">Add Missing Item</span>
@@ -295,11 +303,10 @@
                 View and manage equipment assigned to departments.
             </p>
             <div class="department-select">
-                <label for="departmentSelect" data-en="Select Department:" data-pl="Wybierz dział:">Select Department:</label>                <select id="departmentSelect" class="form-control">
-                    <option value="" data-en="Choose a department..." data-pl="Wybierz dział...">Choose a department...</option>
+                <label for="departmentSelect" data-en="Select Department:" data-pl="Wybierz dział:">Select Department:</label>                <select id="departmentSelect" class="form-control">                    <option value="" data-en="Choose a department..." data-pl="Wybierz dział...">Choose a department...</option>
                     {% for dept in departments %}
                     <option value="{{ dept.name }}" {% if dept.name == current_department %}selected{% endif %} data-count="{{ dept.equipment_count or 0 }}">
-                        {{ dept.name }} ({{ dept.equipment_count or 0 }} {% if lang == 'pl' %}elementów{% else %}items{% endif %})
+                        {{ dept.name }}
                     </option>
                     {% endfor %}
                 </select>

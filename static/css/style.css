@@ -48,6 +48,23 @@
 /* Message displays */
 @import 'messages.css';
 
+/* Reports styling */
+@import 'reports.css';
+
+/* CSS fixes */
+@import 'fixes.css';
+@import 'search-fixes.css';
+@import 'file-icon-fixes.css';
+
+/* Detail views */
+@import 'details.css';
+
+/* Charts and visualizations */
+@import 'charts.css';
+
+/* Message displays */
+@import 'messages.css';
+
 /* Timeline visualizations */
 @import 'timeline.css';
 

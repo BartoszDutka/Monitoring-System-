@@ -1,0 +1,581 @@
+{% extends "layout.html" %}
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/manage_roles_unified.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/unified_management.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/unified_management_styles.css') }}">
+<script src="{{ url_for('static', filename='js/modal_fixes.js') }}" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <h1>Zarządzanie systemem</h1>
+  <p>Zarządzaj użytkownikami, rolami i uprawnieniami w systemie.</p>
+</div>
+
+<div class="management-container">
+  <div class="management-header">
+    <h2>Panel zarządzania</h2>
+    <div class="management-search">
+      <input type="text" id="managementSearch" placeholder="Szukaj...">
+      <i class="fas fa-search"></i>
+    </div>
+  </div>
+  
+  <div class="management-tabs">
+    <ul class="tab-list" id="managementTabList">
+      <li class="tab active" data-tab="users">Użytkownicy</li>
+      <li class="tab" data-tab="roles">Role</li>
+      <li class="tab" data-tab="permissions">Uprawnienia</li>
+    </ul>
+    
+    <div class="tab-content">
+      <!-- Users Tab -->
+      <div class="tab-pane active" id="tab-users">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Nazwa użytkownika</th>
+              <th>Email</th>
+              <th>Rola</th>
+              <th>Dział</th>
+              <th>Ostatnie logowanie</th>
+              <th>Akcje</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr id="user-row-{{ user.user_id }}">
+              <td>{{ user.username }}</td>
+              <td>
+                <span class="editable-field" id="email-{{ user.user_id }}">{{ user.email }}</span>
+                <input type="email" class="edit-input d-none" value="{{ user.email }}">
+              </td>
+              <td>
+                <form action="{{ url_for('update_user_role') }}" method="POST" class="role-form">
+                  <input type="hidden" name="user_id" value="{{ user.user_id }}">
+                  <select name="role" {% if user.username == session.username %}disabled{% endif %} class="role-select">
+                    <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                    <option value="manager" {% if user.role == 'manager' %}selected{% endif %}>Manager</option>
+                    <option value="technician" {% if user.role == 'technician' %}selected{% endif %}>Technik</option>
+                    <option value="analyst" {% if user.role == 'analyst' %}selected{% endif %}>Analityk</option>
+                    <option value="operator" {% if user.role == 'operator' %}selected{% endif %}>Operator</option>
+                    <option value="user" {% if user.role == 'user' %}selected{% endif %}>Użytkownik</option>
+                    <option value="viewer" {% if user.role == 'viewer' %}selected{% endif %}>Przeglądający</option>
+                  </select>
+                  <button type="submit" class="btn-action role-update-btn" {% if user.username == session.username %}disabled{% endif %}>
+                    <i class="fas fa-save"></i>
+                  </button>
+                  <a href="#" class="role-info-btn" data-role="{{ user.role }}">
+                    <i class="fas fa-info-circle"></i>
+                  </a>
+                </form>
+              </td>
+              <td>
+                <span class="editable-field" id="department-{{ user.user_id }}">{{ user.department }}</span>
+                <select class="edit-input d-none department-select" id="department-select-{{ user.user_id }}">
+                  <option value="">Wybierz dział</option>
+                  {% for dept in departments %}
+                  <option value="{{ dept.name }}" {% if dept.name == user.department %}selected{% endif %}>
+                    {{ dept.name }} ({{ dept.description_pl or dept.description_en }})
+                  </option>
+                  {% endfor %}
+                </select>
+              </td>
+              <td>{{ user.last_login|default('Nigdy') }}</td>
+              <td>
+                {% if user.username == session.username %}
+                  <button class="btn-action btn-primary" onclick="toggleEdit({{ user.user_id }})">
+                    <i class="fas fa-edit"></i> Edytuj
+                  </button>
+                  <button class="btn-action btn-success d-none" onclick="saveChanges({{ user.user_id }})">
+                    <i class="fas fa-save"></i> Zapisz
+                  </button>
+                  <button class="btn-action btn-danger" disabled>
+                    <i class="fas fa-trash"></i> Usuń
+                  </button>
+                {% else %}
+                  <button class="btn-action btn-primary" onclick="toggleEdit({{ user.user_id }})">
+                    <i class="fas fa-edit"></i> Edytuj
+                  </button>
+                  <button class="btn-action btn-success d-none" onclick="saveChanges({{ user.user_id }})">
+                    <i class="fas fa-save"></i> Zapisz
+                  </button>
+                  <button class="btn-action btn-danger" onclick="deleteUser({{ user.user_id }})">
+                    <i class="fas fa-trash"></i> Usuń
+                  </button>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Roles Tab -->
+      <div class="tab-pane" id="tab-roles">
+        <div class="roles-grid">
+          {% for role in roles %}
+          <div class="role-card">
+            <div class="role-card-header">
+              <span class="role-icon role-{{ role.role_key }}">{{ role.role_key[0]|upper }}</span>
+              <span class="role-name">{{ role.role_key|capitalize }}</span>
+            </div>
+            <div class="role-card-body">
+              <div class="role-desc">{{ role.description_pl or role.description_en }}</div>
+              <div class="role-perms-count">Uprawnień: {{ role.permissions_count }}</div>
+            </div>
+            <div class="role-card-footer">
+              <button class="btn-action" onclick="viewRole('{{ role.role_key }}')">Podgląd</button>
+              <button class="btn-action" onclick="editRole('{{ role.role_key }}')">Edytuj</button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      
+      <!-- Permissions Tab -->
+      <div class="tab-pane" id="tab-permissions">
+        <div class="permissions-list">
+          {% for category, perms in permissions_by_category.items() %}
+          <div class="perm-category">
+            <div class="perm-category-title">{{ category }}</div>
+            <ul>
+              {% for perm in perms %}
+              <li><span class="perm-key">{{ perm.permission_key }}</span> <span class="perm-name">{{ perm.name }}</span></li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal-bg" class="modal-bg" style="display:none"></div>
+<div id="modal" class="modal" style="display:none">
+  <div id="modal-content"></div>
+  <div class="modal-footer">
+    <button id="modal-close" class="btn-action btn-primary" style="min-width:120px;">Zamknij</button>
+  </div>
+</div>
+
+<script id="roles-json" type="application/json">{{ roles|tojson }}</script>
+<script id="permissions-json" type="application/json">{{ permissions_by_category|tojson }}</script>
+
+<script>
+// Main initialization
+document.addEventListener('DOMContentLoaded', function() {
+  // Tab switching
+  const tabs = document.querySelectorAll('.tab');
+  const panes = document.querySelectorAll('.tab-pane');
+  
+  // Aktywuj odpowiednią zakładkę na podstawie parametru z URL (z app.py)
+  const urlParams = new URLSearchParams(window.location.search);
+  const activeTabParam = urlParams.get('active_tab');
+  
+  if (activeTabParam) {
+    // Dezaktywuj wszystkie zakładki i panele
+    tabs.forEach(t => t.classList.remove('active'));
+    panes.forEach(p => p.classList.remove('active'));
+    
+    // Aktywuj żądaną zakładkę
+    const selectedTab = document.querySelector(`.tab[data-tab="${activeTabParam}"]`);
+    const selectedPane = document.getElementById(`tab-${activeTabParam}`);
+    
+    if (selectedTab && selectedPane) {
+      selectedTab.classList.add('active');
+      selectedPane.classList.add('active');
+      console.log(`Aktywowano zakładkę: ${activeTabParam}`);
+    } else {
+      console.log(`Nie znaleziono zakładki: ${activeTabParam}, korzystam z domyślnych`);
+    }
+  }
+  
+  // Obsłuż kliknięcia w zakładki
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panes.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Search functionality
+  const searchInput = document.getElementById('managementSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      
+      // Filter users
+      const userRows = document.querySelectorAll('#tab-users tbody tr');
+      userRows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+      });
+      
+      // Filter roles
+      const roleCards = document.querySelectorAll('.role-card');
+      roleCards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = text.includes(searchTerm) ? '' : 'none';
+      });
+      
+      // Filter permissions
+      const permItems = document.querySelectorAll('.perm-category');
+      permItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(searchTerm) ? '' : 'none';
+      });
+    });
+  }
+  
+  // Add event listeners to role info buttons
+  document.querySelectorAll('.role-info-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const role = this.getAttribute('data-role');
+      viewRole(role);
+    });
+  });
+  
+  // Initialize role and permissions data from JSON
+  window.roleData = JSON.parse(document.getElementById('roles-json').textContent);
+  window.permissionsData = JSON.parse(document.getElementById('permissions-json').textContent);
+});
+
+// Modal handling
+const modalBg = document.getElementById('modal-bg');
+const modal = document.getElementById('modal');
+const modalContent = document.getElementById('modal-content');
+const modalCloseBtn = document.getElementById('modal-close');
+
+const closeModal = () => { 
+  if (modalBg) modalBg.style.display = 'none'; 
+  if (modal) modal.style.display = 'none';
+  console.log('Modal closed');
+};
+
+// Add event listener only if the element exists
+if (modalCloseBtn) {
+  modalCloseBtn.addEventListener('click', function(event) {
+    event.preventDefault();
+    closeModal();
+  });
+}
+
+// Add click event to background
+if (modalBg) {
+  modalBg.addEventListener('click', closeModal);
+}
+
+// Additional close button handling (backup)
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.id === 'modal-close') {
+    e.preventDefault();
+    console.log('Close button clicked via event delegation');
+    if (modalBg) modalBg.style.display = 'none';
+    if (modal) modal.style.display = 'none';
+  }
+});
+
+// Close modal with ESC key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && modal && modal.style.display !== 'none') {
+    console.log('Closing modal via ESC key');
+    if (modalBg) modalBg.style.display = 'none';
+    if (modal) modal.style.display = 'none';
+  }
+});
+
+// User management functions
+function toggleEdit(userId) {
+  const emailField = document.getElementById(`email-${userId}`);
+  const emailInput = emailField.nextElementSibling;
+  
+  const departmentField = document.getElementById(`department-${userId}`);
+  const departmentSelect = document.getElementById(`department-select-${userId}`);
+  
+  const editButton = document.querySelector(`#user-row-${userId} .btn-primary`);
+  const saveButton = document.querySelector(`#user-row-${userId} .btn-success`);
+  
+  emailField.classList.toggle('d-none');
+  emailInput.classList.toggle('d-none');
+  
+  departmentField.classList.toggle('d-none');
+  departmentSelect.classList.toggle('d-none');
+  
+  editButton.classList.toggle('d-none');
+  saveButton.classList.toggle('d-none');
+}
+
+function saveChanges(userId) {
+  const emailField = document.getElementById(`email-${userId}`);
+  const emailInput = emailField.nextElementSibling;
+  const email = emailInput.value;
+  
+  const departmentField = document.getElementById(`department-${userId}`);
+  const departmentSelect = document.getElementById(`department-select-${userId}`);
+  const department = departmentSelect.value;
+  
+  fetch('/api/update_user', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      user_id: userId,
+      email: email,
+      department: department
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      emailField.textContent = email;
+      
+      if (departmentSelect) {
+        if (departmentSelect.selectedIndex > 0 && department) {
+          departmentField.textContent = department;
+        } else {
+          departmentField.textContent = '';
+        }
+      } else {
+        departmentField.textContent = department;
+      }
+      
+      toggleEdit(userId);
+    } else {
+      alert('Nie udało się zaktualizować informacji o użytkowniku');
+    }
+  });
+}
+
+function deleteUser(userId) {
+  if (confirm('Czy na pewno chcesz usunąć tego użytkownika?')) {
+    fetch('/api/delete_user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id: userId
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById(`user-row-${userId}`).remove();
+      } else {
+        alert('Nie udało się usunąć użytkownika');
+      }
+    });
+  }
+}
+
+// Role management functions
+// Fetch role information from API
+async function fetchRoleInfo(roleKey) {
+  try {
+    console.log(`Fetching role info for: ${roleKey}`);
+    const response = await fetch(`/api/role_info?role=${roleKey}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log(`Role data received, permissions count: ${data.permissions ? data.permissions.length : 0}`);
+    return data;
+  } catch (error) {
+    console.error('Error fetching role info:', error);
+    throw error;
+  }
+}
+
+// View role details
+async function viewRole(roleKey) {
+  modalContent.innerHTML = '<div class="loading">Ładowanie danych...</div>';
+  modalBg.style.display = 'block';
+  modal.style.display = 'flex';
+  
+  try {
+    const content = await renderRoleView(roleKey);
+    modalContent.innerHTML = content;
+  } catch (error) {
+    modalContent.innerHTML = `<div class="error">Wystąpił błąd: ${error.message}</div>`;
+  }
+}
+
+// Edit role
+async function editRole(roleKey) {
+  modalContent.innerHTML = '<div class="loading">Ładowanie danych...</div>';
+  modalBg.style.display = 'block';
+  modal.style.display = 'flex';
+  
+  try {
+    const content = await renderRoleEdit(roleKey);
+    modalContent.innerHTML = content;
+    
+    // Highlight selected permissions
+    document.querySelectorAll('#editRoleForm .perm-item input[type="checkbox"]').forEach(cb => {
+      // Add change event listener to checkbox
+      cb.addEventListener('change', function() {
+        this.parentElement.classList.toggle('checked', this.checked);
+        console.log(`Permission ${this.value}: ${this.checked ? 'selected' : 'unselected'}`);
+      });
+      
+      // Also make the entire item clickable
+      const parentItem = cb.parentElement;
+      if (parentItem && parentItem.classList.contains('perm-item')) {
+        parentItem.addEventListener('click', function(e) {
+          // Prevent triggering when clicking directly on checkbox
+          if (e.target !== cb) {
+            cb.checked = !cb.checked;
+            this.classList.toggle('checked', cb.checked);
+            // Trigger change event manually
+            cb.dispatchEvent(new Event('change'));
+          }
+        });
+      }
+    });
+    
+    // Handle form submission
+    document.getElementById('editRoleForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      try {
+        const response = await fetch('/update_role_permissions', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (!response.ok) {
+          throw new Error('Błąd podczas zapisywania zmian');
+        }
+        
+        alert('Zapisano zmiany pomyślnie');
+        window.location.reload(); // Refresh to see changes
+      } catch (error) {
+        alert(`Błąd: ${error.message}`);
+      }
+    });
+  } catch (error) {
+    modalContent.innerHTML = `<div class="error">Wystąpił błąd: ${error.message}</div>`;
+  }
+}
+
+// Function to render role information
+async function renderRoleView(roleKey) {
+  try {
+    // Get role data from API
+    const roleData = await fetchRoleInfo(roleKey);
+    if (!roleData.success) {
+      throw new Error(roleData.error || 'Błąd pobierania danych roli');
+    }
+    
+    // Group permissions by category
+    const permsByCategory = {};
+    roleData.permissions.forEach(p => {
+      if (!permsByCategory[p.category]) {
+        permsByCategory[p.category] = [];
+      }
+      permsByCategory[p.category].push(p);
+    });
+    
+    let html = `<h2 style='text-align:center;margin-bottom:1.2em;color:#1a3c6e'>Podgląd roli: ${roleKey.charAt(0).toUpperCase() + roleKey.slice(1)}</h2>`;
+    html += `<div><b>Opis:</b> ${roleData.description_pl || roleData.description_en}</div>`;
+    html += `<div style='margin-top:1rem'><b>Uprawnienia (${roleData.permissions.length}):</b>`;
+    
+    if (roleData.permissions.length === 0) {
+      html += `<p>Brak przypisanych uprawnień.</p>`;
+    } else {
+      html += `<ul>`;
+      // Render permissions by category
+      for (const cat in permsByCategory) {
+        html += `<li><b>${cat}</b><ul>`;
+        permsByCategory[cat].forEach(p => {
+          html += `<li>${p.name} <span style='color:#adb5bd;font-size:0.9em'>(${p.permission_key})</span></li>`;
+        });
+        html += `</ul></li>`;
+      }
+      html += `</ul>`;
+    }
+    
+    html += `</div>`;
+    return html;
+  } catch (error) {
+    console.error('Error rendering role view:', error);
+    return `<div class="error">Wystąpił błąd podczas ładowania danych roli: ${error.message}</div>`;
+  }
+}
+
+// Function to render role edit form
+async function renderRoleEdit(roleKey) {
+  try {
+    // Get role data from API
+    const roleData = await fetchRoleInfo(roleKey);
+    if (!roleData.success) {
+      throw new Error(roleData.error || 'Błąd pobierania danych roli');
+    }
+
+    console.log(`Rendering role edit for ${roleKey}, found ${roleData.permissions.length} permissions`);
+    
+    // Convert permissions array to map for easier access
+    const permissionsMap = {};
+    roleData.permissions.forEach(p => {
+      permissionsMap[p.permission_key] = p;
+    });
+    
+    let html = `<form id='editRoleForm' class='edit-role-form'>`;
+    html += `<h2 style='text-align:center;margin-bottom:1.2em;color:#1a3c6e'>Edycja roli: ${roleKey.charAt(0).toUpperCase() + roleKey.slice(1)}</h2>`;
+    html += `<input type='hidden' name='role_key' value='${roleKey}'>`;
+    html += `<label>Nazwa roli</label><input type='text' class='form-control' value='${roleKey}' readonly>`;
+    html += `<label>Opis</label><textarea class='form-control' name='description_pl' rows='2'>${roleData.description_pl || ''}</textarea>`;
+    html += `<label>Description</label><textarea class='form-control' name='description_en' rows='2'>${roleData.description_en || ''}</textarea>`;
+    html += `<label style='margin-bottom:0.5em'>Uprawnienia</label>`;
+    
+    // Render permissions by category
+    for (const cat in window.permissionsData) {
+      // Skip the categories we want to remove
+      if (cat === 'assets') continue;
+      
+      html += `<div class='perm-category-block'><div class='perm-category-title'>${cat}</div><div class='perm-list'>`;
+      
+      window.permissionsData[cat].forEach(p => {
+        // Skip the specific permissions we want to remove
+        if (p.permission_key === 'assign_assets' || 
+            p.permission_key === 'acknowledge_alerts' || 
+            p.permission_key === 'export_reports') {
+          return;
+        }
+        
+        // Check if this permission is assigned to the role
+        const permKey = p.permission_key;
+        const isAssigned = permKey in permissionsMap;
+        const checked = isAssigned ? 'checked' : '';
+        const checkedClass = isAssigned ? 'checked' : '';
+        
+        html += `<span class='perm-item ${checkedClass}'>
+                  <input type='checkbox' id='perm_${permKey}' name='permissions[]' value='${permKey}' ${checked}>
+                  <label for='perm_${permKey}'>${p.name} <span class='perm-key'>${permKey}</span></label>
+                </span>`;
+      });
+      
+      html += `</div></div>`;
+    }
+    
+    html += `<div style='margin-top:1em;color:#666;font-size:0.9em;'>Znaleziono ${roleData.permissions.length} uprawnień dla tej roli</div>`;
+    html += `<button type='submit' class='btn-edit'>Zapisz</button></form>`;
+    return html;
+  } catch (error) {
+    console.error('Error rendering role edit:', error);
+    return `<div class="error">Wystąpił błąd podczas ładowania danych roli: ${error.message}</div>`;
+  }
+}
+</script>
+{% endblock %}

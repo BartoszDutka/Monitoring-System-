@@ -11,9 +11,11 @@
 <div class="dashboard-header">
     <h1 data-en="Reports Generator" data-pl="Generator raportów">Reports Generator</h1>
     <div class="header-actions">
+        {% if has_permission('generate_reports') %}
         <button id="generate-report" class="btn accent-btn">
             <i class="fas fa-plus"></i> <span data-en="Generate New Report" data-pl="Wygeneruj nowy raport">Generate New Report</span>
         </button>
+        {% endif %}
     </div>
 </div>
 
@@ -91,11 +93,12 @@
                                     <span {% if report.type in ['messages', 'errors', 'performance', 'summary'] %}style="display:none"{% endif %}>{{ report.type|capitalize }}</span>
                                 </td>
                                 <td>{{ report.date }}</td>
-                                <td>{{ report.records }}</td>
-                                <td class="actions">
+                                <td>{{ report.records }}</td>                                <td class="actions">
                                     <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn view-btn" title="View" data-en-title="View" data-pl-title="Podgląd"><i class="fas fa-eye"></i></a>
                                     <a href="{{ url_for('download_report', report_id=report.id) }}" class="btn download-btn" title="Download" data-en-title="Download" data-pl-title="Pobierz"><i class="fas fa-download"></i></a>
+                                    {% if has_permission('delete_reports') %}
                                     <button class="btn delete-btn" data-id="{{ report.id }}" title="Delete" data-en-title="Delete" data-pl-title="Usuń"><i class="fas fa-trash"></i></button>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}
@@ -349,13 +352,16 @@
         const modalDateRange = document.getElementById('modal-date-range');
         const modalCustomDate = document.querySelector('.modal-custom-date');
 
-        generateBtn.addEventListener('click', function() {
-            modal.style.display = 'block';
-            
-            // Set default dates for custom range
-            const today = new Date();
-            const lastWeek = new Date();
-            lastWeek.setDate(lastWeek.getDate() - 7);
+        // Only set up report generation if the button exists (user has permission)
+        if (generateBtn) {
+            generateBtn.addEventListener('click', function() {
+                modal.style.display = 'block';
+                
+                // Set default dates for custom range
+                const today = new Date();
+                const lastWeek = new Date();
+                lastWeek.setDate(lastWeek.getDate() - 7);
+        
             
             document.getElementById('modal-end-date').valueAsDate = today;
             document.getElementById('modal-start-date').valueAsDate = lastWeek;
@@ -392,10 +398,10 @@
 
         window.addEventListener('click', function(event) {
             if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-
+                modal.style.display = 'none';            }
+            });
+        } // Close the if (generateBtn) block
+        
         // Delete button functionality
         const deleteButtons = document.querySelectorAll('.delete-btn');
         deleteButtons.forEach(button => {

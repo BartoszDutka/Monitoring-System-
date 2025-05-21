@@ -130,7 +130,14 @@
             <a href="/graylog/loading?target=/graylog/messages-over-time" class="nav-link {% if request.path == '/graylog/messages-over-time' %}active{% endif %}">
                 <i class="fas fa-chart-line"></i> <span data-en="Messages Over Time" data-pl="Wiadomości w czasie">Messages Over Time</span>
             </a>
+        </div>        {% if session.get('user_info', {}).get('role') == 'admin' %}
+        <div class="nav-section">
+            <h3 data-en="Administration" data-pl="Administracja">Administration</h3>
+            <a href="/unified_management" class="nav-link {% if request.path == '/unified_management' %}active{% endif %}">
+                <i class="fas fa-users-cog"></i> <span data-en="User & Role Management" data-pl="Zarządzanie użytkownikami i rolami">User & Role Management</span>
+            </a>
         </div>
+        {% endif %}
     </nav>
 
     <!-- Main Content -->
