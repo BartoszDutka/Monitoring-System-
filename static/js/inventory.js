@@ -141,106 +141,176 @@ document.addEventListener('DOMContentLoaded', function() {
             const productTableBody = document.getElementById('productTableBody');
             productTableBody.innerHTML = '';
             
-            if (data.products && data.products.length > 0) {
-                data.products.forEach((product, index) => {
-                    // Guess product category
-                    let category = guessProductCategory(product.name);
-                    
-                    const row = document.createElement('tr');
-                    row.dataset.category = category.toLowerCase();
-                    row.dataset.productIndex = index;
-                    
-                    // Store full product name for tooltip
-                    const fullProductName = product.name;
-                    
-                    // Create a more detailed row with better spacing
-                    row.innerHTML = `
-                        <td>
-                            <input type="checkbox" class="product-select-checkbox" value="${index}">
-                        </td>
-                        <td data-full-text="${escapeHtml(fullProductName)}">${escapeHtml(fullProductName)}</td>
-                        <td>
-                            <select class="product-category-select">
-                                <option value="hardware" ${category === 'Hardware' ? 'selected' : ''}>Hardware</option>
-                                <option value="software" ${category === 'Software' ? 'selected' : ''}>Software</option>
-                                <option value="furniture" ${category === 'Furniture' ? 'selected' : ''}>Furniture</option>
-                                <option value="accessories" ${category === 'Accessories' ? 'selected' : ''}>Accessories</option>
-                                <option value="other" ${category === 'Other' ? 'selected' : ''}>Other</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" class="form-control quantity-input" value="${product.quantity || 1}" min="1">
-                        </td>
-                        <td>${product.unit_price ? product.unit_price.toFixed(2) : '0.00'} PLN</td>
-                        <td>${product.total_price ? product.total_price.toFixed(2) : '0.00'} PLN</td>
-                        <td>
-                            <select class="assign-to-select form-control">
-                                <option value="">Select Department</option>
-                                ${Array.from(document.querySelectorAll('#departmentSelect option'))
-                                    .filter(opt => opt.value)
-                                    .map(opt => `
-                                        <option value="${opt.value}" ${opt.selected ? 'selected' : ''}>
-                                            ${opt.text}
-                                        </option>
-                                    `).join('')}
-                            </select>
-                        </td>
-                        <td>
-                            <button class="btn-icon select-product" title="Select for import">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button class="btn-icon edit-product" title="Edit item">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn-icon delete-product" title="Delete item">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>`;
-                    
-                    productTableBody.appendChild(row);
-                    
-                    // Add click handler to show full product name
-                    const nameCell = row.querySelector('td:nth-child(2)');
-                    nameCell.addEventListener('click', function() {
-                        showProductDetails(product, category);
-                    });
+            // Get language for translations
+            const language = document.documentElement.getAttribute('data-language') || 'en';
+            
+            // For each product, create a table row
+            window.invoiceProducts.forEach((product, index) => {
+                // Skip products with invalid or empty names
+                if (!product.name || product.name.trim() === '') return;
+                
+                // Determine the most likely category
+                let category = guessProductCategory(product.name);
+                
+                const row = document.createElement('tr');
+                row.dataset.category = category.toLowerCase();
+                row.dataset.productIndex = index;
+                
+                // Create checkbox for selection
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.classList.add('product-selection-checkbox');
+                checkbox.addEventListener('change', function() {
+                    const productId = row.dataset.productIndex;
+                    if (this.checked) {
+                        selectedProductsToImport.add(productId);
+                    } else {
+                        selectedProductsToImport.delete(productId);
+                    }
+                    updateSelectedCounter();
                 });
                 
-                // Add event listeners for import buttons
-                document.querySelectorAll('.select-product').forEach((btn) => {
-                    btn.addEventListener('click', function() {
-                        const row = this.closest('tr');
-                        const productIndex = row.dataset.productIndex;
-                        const checkbox = row.querySelector('.product-select-checkbox');
+                // Create cells
+                const checkboxCell = document.createElement('td');
+                checkboxCell.appendChild(checkbox);
+                row.appendChild(checkboxCell);
+                
+                row.innerHTML += `
+                    <td>${escapeHtml(product.name || '')}</td>
+                    <td>
+                        <select class="product-category-select">
+                            <option value="hardware" ${category === 'Hardware' ? 'selected' : ''}>Hardware</option>
+                            <option value="software" ${category === 'Software' ? 'selected' : ''}>Software</option>
+                            <option value="furniture" ${category === 'Furniture' ? 'selected' : ''}>Furniture</option>
+                            <option value="accessories" ${category === 'Accessories' ? 'selected' : ''}>Accessories</option>
+                            <option value="other" ${category === 'Other' ? 'selected' : ''}>Other</option>
+                        </select>
+                    </td>
+                    <td><input type="number" class="quantity-input form-control" value="${product.quantity || 1}" min="1"></td>
+                    <td>${product.unit_price ? parseFloat(product.unit_price).toFixed(2) : '0.00'}</td>
+                    <td>${product.total_price ? parseFloat(product.total_price).toFixed(2) : '0.00'}</td>
+                    <td>
+                        <select class="assign-to-select form-control">
+                            <option value="">Select Department</option>
+                            ${Array.from(document.querySelectorAll('#departmentSelect option'))
+                                .filter(opt => opt.value)
+                                .map(opt => `
+                                    <option value="${opt.value}" ${opt.selected ? 'selected' : ''}>
+                                        ${opt.text}
+                                    </option>
+                                `).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn-icon select-product" title="Select for import">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="btn-icon edit-product" title="Edit item">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-icon delete-product" title="Delete item">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>`;
+                
+                productTableBody.appendChild(row);
+                
+                // Add click handler to show full product name
+                const nameCell = row.querySelector('td:nth-child(2)');
+                nameCell.addEventListener('click', function() {
+                    showProductDetails(product, category);
+                });
+            });
+            
+            // Add event listeners for import buttons
+            document.querySelectorAll('.select-product').forEach((btn) => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const productIndex = row.dataset.productIndex;
+                    const checkbox = row.querySelector('.product-select-checkbox');
+                    
+                    // Toggle selection
+                    if (row.classList.contains('selected')) {
+                        // Unselect product
+                        row.classList.remove('selected');
+                        this.innerHTML = '<i class="fas fa-plus"></i>';
+                        this.title = language === 'pl' ? 'Wybierz do importu' : 'Select for import';
                         
-                        // Toggle selection
-                        if (row.classList.contains('selected')) {
-                            // Unselect product
-                            row.classList.remove('selected');
-                            this.innerHTML = '<i class="fas fa-plus"></i>';
-                            this.title = language === 'pl' ? 'Wybierz do importu' : 'Select for import';
-                            
-                            if (checkbox) checkbox.checked = false;
-                            selectedProductsToImport.delete(productIndex);
-                        } else {
-                            // Select product
-                            row.classList.add('selected');
-                            this.innerHTML = '<i class="fas fa-check"></i>';
-                            this.title = language === 'pl' ? 'Wybrano do importu' : 'Selected for import';
-                            
-                            if (checkbox) checkbox.checked = true;
-                            selectedProductsToImport.add(productIndex);
+                        if (checkbox) checkbox.checked = false;
+                        selectedProductsToImport.delete(productIndex);
+                    } else {
+                        // Select product
+                        row.classList.add('selected');
+                        this.innerHTML = '<i class="fas fa-check"></i>';
+                        this.title = language === 'pl' ? 'Wybrano do importu' : 'Selected for import';
+                        
+                        if (checkbox) checkbox.checked = true;
+                        selectedProductsToImport.add(productIndex);
+                    }
+                    
+                    // Update the counter
+                    updateSelectedCounter();
+                });
+            });
+            
+            // Add event listeners for checkboxes
+            document.querySelectorAll('.product-select-checkbox').forEach((checkbox) => {
+                checkbox.addEventListener('change', function() {
+                    const row = this.closest('tr');
+                    const productIndex = row.dataset.productIndex;
+                    const selectBtn = row.querySelector('.select-product');
+                    
+                    if (this.checked) {
+                        // Select product
+                        row.classList.add('selected');
+                        if (selectBtn) {
+                            selectBtn.innerHTML = '<i class="fas fa-check"></i>';
+                            selectBtn.title = language === 'pl' ? 'Wybrano do importu' : 'Selected for import';
                         }
-                        
-                        // Update the counter
-                        updateSelectedCounter();
+                        selectedProductsToImport.add(productIndex);
+                    } else {
+                        // Unselect product
+                        row.classList.remove('selected');
+                        if (selectBtn) {
+                            selectBtn.innerHTML = '<i class="fas fa-plus"></i>';
+                            selectBtn.title = language === 'pl' ? 'Wybierz do importu' : 'Select for import';
+                        }
+                        selectedProductsToImport.delete(productIndex);
+                    }
+                    
+                    // Update the counter
+                    updateSelectedCounter();
+                });
+            });
+            
+            // Add event listener for select all checkbox
+            const selectAllCheckbox = document.getElementById('selectAllProducts');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('.product-select-checkbox');
+                    
+                    checkboxes.forEach(checkbox => {
+                        // Only affect visible rows (not filtered out)
+                        const row = checkbox.closest('tr');
+                        if (row.style.display !== 'none') {
+                            checkbox.checked = this.checked;
+                            checkbox.dispatchEvent(new Event('change'));
+                        }
                     });
                 });
+            }
+            
+            // Add selectAllProducts event handler
+            document.getElementById('selectAllProducts')?.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('#productTableBody .product-selection-checkbox');
+                const language = document.documentElement.getAttribute('data-language') || 'en';
                 
-                // Add event listeners for checkboxes
-                document.querySelectorAll('.product-select-checkbox').forEach((checkbox) => {
-                    checkbox.addEventListener('change', function() {
-                        const row = this.closest('tr');
+                checkboxes.forEach(checkbox => {
+                    // Only affect visible rows (not filtered out)
+                    const row = checkbox.closest('tr');
+                    if (row && row.style.display !== 'none') {
+                        checkbox.checked = this.checked;
+                        
                         const productIndex = row.dataset.productIndex;
                         const selectBtn = row.querySelector('.select-product');
                         
@@ -261,71 +331,52 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                             selectedProductsToImport.delete(productIndex);
                         }
-                        
-                        // Update the counter
-                        updateSelectedCounter();
-                    });
+                    }
                 });
                 
-                // Add event listener for select all checkbox
-                const selectAllCheckbox = document.getElementById('selectAllProducts');
-                if (selectAllCheckbox) {
-                    selectAllCheckbox.addEventListener('change', function() {
-                        const checkboxes = document.querySelectorAll('.product-select-checkbox');
-                        
-                        checkboxes.forEach(checkbox => {
-                            // Only affect visible rows (not filtered out)
-                            const row = checkbox.closest('tr');
-                            if (row.style.display !== 'none') {
-                                checkbox.checked = this.checked;
-                                checkbox.dispatchEvent(new Event('change'));
-                            }
-                        });
-                    });
-                }
-                
-                // Add event listeners for other buttons
-                document.querySelectorAll('.edit-product').forEach((btn, index) => {
-                    btn.addEventListener('click', function() {
-                        const row = this.closest('tr');
-                        const productIndex = row.dataset.productIndex;
-                        const product = window.invoiceProducts[productIndex];
-                        
-                        // Populate manual form with product data
-                        document.getElementById('itemName').value = product.name;
-                        document.getElementById('itemQuantity').value = product.quantity || 1;
-                        document.getElementById('itemValue').value = product.unit_price || 0;
-                        document.getElementById('itemCategory').value = row.querySelector('.product-category-select').value;
-                        document.getElementById('assignTo').value = row.querySelector('.assign-to-select').value;
-                        
-                        // Switch to manual input tab
-                        document.querySelector('.method-btn[data-method="manual"]').click();
-                    });
+                // Update the counter
+                updateSelectedCounter();
+            });
+            
+            // Add event listeners for other buttons
+            document.querySelectorAll('.edit-product').forEach((btn, index) => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const productIndex = row.dataset.productIndex;
+                    const product = window.invoiceProducts[productIndex];
+                    
+                    // Populate manual form with product data
+                    document.getElementById('itemName').value = product.name;
+                    document.getElementById('itemQuantity').value = product.quantity || 1;
+                    document.getElementById('itemValue').value = product.unit_price || 0;
+                    document.getElementById('itemCategory').value = row.querySelector('.product-category-select').value;
+                    document.getElementById('assignTo').value = row.querySelector('.assign-to-select').value;
+                    
+                    // Switch to manual input tab
+                    document.querySelector('.method-btn[data-method="manual"]').click();
                 });
-                
-                // Add event listeners for delete buttons
-                document.querySelectorAll('.delete-product').forEach((btn, index) => {
-                    btn.addEventListener('click', function() {
-                        const row = this.closest('tr');
-                        if (confirm('Are you sure you want to remove this item?')) {
-                            row.remove();
-                        }
-                    });
+            });
+            
+            // Add event listeners for delete buttons
+            document.querySelectorAll('.delete-product').forEach((btn, index) => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    if (confirm('Are you sure you want to remove this item?')) {
+                        row.remove();
+                    }
                 });
-                
-                // Update category visuals when select changes
-                document.querySelectorAll('.product-category-select').forEach(select => {
-                    select.addEventListener('change', function() {
-                        const row = this.closest('tr');
-                        row.dataset.category = this.value;
-                    });
+            });
+            
+            // Update category visuals when select changes
+            document.querySelectorAll('.product-category-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    const row = this.closest('tr');
+                    row.dataset.category = this.value;
                 });
-                
-                // Show import all button
-                document.getElementById('importAllProducts').style.display = 'inline-flex';
-            } else {
-                productTableBody.innerHTML = '<tr><td colspan="7">No products found in the invoice. Try the alternative method.</td></tr>';
-            }
+            });
+            
+            // Show import all button
+            document.getElementById('importAllProducts').style.display = 'inline-flex';
             
             // Show preview
             invoicePreview.style.display = 'block';
@@ -365,17 +416,25 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('toggleOther')?.addEventListener('change', function() {
         updateProductVisibility();
     });
-    
-    function updateProductVisibility() {
+      function updateProductVisibility() {
         const showHardware = document.getElementById('toggleHardware').checked;
         const showSoftware = document.getElementById('toggleSoftware').checked;
         const showFurniture = document.getElementById('toggleFurniture').checked;
         const showAccessories = document.getElementById('toggleAccessories').checked;
         const showOther = document.getElementById('toggleOther').checked;
+        const hideImported = document.getElementById('hideImportedItems')?.checked || false;
         
         document.querySelectorAll('#productTableBody tr').forEach(row => {
             const category = row.dataset.category;
+            const isImported = row.classList.contains('imported');
             
+            // First check if this is an imported item that should be hidden
+            if (isImported && hideImported) {
+                row.style.display = 'none';
+                return;
+            }
+            
+            // Then apply category filters
             if ((category === 'hardware' && showHardware) ||
                 (category === 'software' && showSoftware) ||
                 (category === 'furniture' && showFurniture) ||
@@ -423,8 +482,27 @@ document.addEventListener('DOMContentLoaded', function() {
             row.dataset.category = category.toLowerCase();
             row.dataset.productIndex = newProductIndex;
             
+            // Create checkbox for selection
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.classList.add('product-selection-checkbox');
+            checkbox.addEventListener('change', function() {
+                const productId = row.dataset.productIndex;
+                if (this.checked) {
+                    selectedProductsToImport.add(productId);
+                } else {
+                    selectedProductsToImport.delete(productId);
+                }
+                updateSelectedCounter();
+            });
+            
+            // Create cells
+            const checkboxCell = document.createElement('td');
+            checkboxCell.appendChild(checkbox);
+            row.appendChild(checkboxCell);
+            
             // Utwórz wiersz z edytowalną zawartością
-            row.innerHTML = `
+            row.innerHTML += `
                 <td>
                     <input type="text" class="form-control" value="${newProduct.name}" placeholder="${language === 'pl' ? 'Wprowadź nazwę' : 'Enter name'}" onchange="window.invoiceProducts[${newProductIndex}].name = this.value">
                 </td>
@@ -459,7 +537,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </select>
                 </td>
                 <td>
-                    <button class="btn-icon import-product" title="${language === 'pl' ? 'Importuj do inwentarza' : 'Import to inventory'}">
+                    <button class="btn-icon select-product" title="${language === 'pl' ? 'Wybierz do importu' : 'Select for import'}">
                         <i class="fas fa-plus"></i>
                     </button>
                     <button class="btn-icon delete-product" title="${language === 'pl' ? 'Usuń element' : 'Delete item'}">
@@ -471,23 +549,34 @@ document.addEventListener('DOMContentLoaded', function() {
             productTableBody.appendChild(row);
             
             // Dodaj obsługę przycisków do nowego wiersza
-            const importBtn = row.querySelector('.import-product');
-            if (importBtn) {
-                importBtn.addEventListener('click', function() {
+            const selectBtn = row.querySelector('.select-product');
+            if (selectBtn) {
+                selectBtn.addEventListener('click', function() {
                     const row = this.closest('tr');
                     const productIndex = row.dataset.productIndex;
-                    const product = {...window.invoiceProducts[productIndex]};
+                    const checkbox = row.querySelector('.product-selection-checkbox');
                     
-                    // Aktualizuj z wartościami z formularza
-                    product.category = row.querySelector('.product-category-select').value;
-                    product.assignTo = row.querySelector('.assign-to-select').value;
+                    // Toggle selection
+                    if (row.classList.contains('selected')) {
+                        // Unselect product
+                        row.classList.remove('selected');
+                        this.innerHTML = '<i class="fas fa-plus"></i>';
+                        this.title = language === 'pl' ? 'Wybierz do importu' : 'Select for import';
+                        
+                        if (checkbox) checkbox.checked = false;
+                        selectedProductsToImport.delete(productIndex);
+                    } else {
+                        // Select product
+                        row.classList.add('selected');
+                        this.innerHTML = '<i class="fas fa-check"></i>';
+                        this.title = language === 'pl' ? 'Wybrano do importu' : 'Selected for import';
+                        
+                        if (checkbox) checkbox.checked = true;
+                        selectedProductsToImport.add(productIndex);
+                    }
                     
-                    importProductToInventory(product);
-                    
-                    // Oznacz jako zaimportowany
-                    row.classList.add('imported');
-                    this.disabled = true;
-                    this.innerHTML = '<i class="fas fa-check"></i>';
+                    // Update the counter
+                    updateSelectedCounter();
                 });
             }
             
@@ -500,7 +589,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         'Czy na pewno chcesz usunąć ten element?' : 
                         'Are you sure you want to remove this item?';
                     
-                    if (confirm(confirmMsg)) {
+                    if (confirmMsg) {
                         row.remove();
                     }
                 });
@@ -560,10 +649,11 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Alternative method failed. Please try manual input.');
         });
     });
-      // Import all products button
+    // Import all products button
     document.getElementById('importAllProducts')?.addEventListener('click', function() {
         const rows = document.querySelectorAll('#productTableBody tr:not(.imported)');
         let importCount = 0;
+        let importPromises = [];
         
         rows.forEach(row => {
             // Skip hidden rows (filtered out by category)
@@ -577,9 +667,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 product.quantity = parseFloat(row.querySelector('.quantity-input').value) || 1;
                 product.category = row.querySelector('.product-category-select').value;
                 product.assignTo = row.querySelector('.assign-to-select').value;
-                product.assignTo = row.querySelector('.assign-to-select').value;
                 
-                importProductToInventory(product, false); // Don't show individual alerts
+                // Store the import promise
+                importPromises.push(importProductToInventory(product, false)); // Don't show individual alerts
                 
                 // Mark as imported
                 row.classList.add('imported');
@@ -589,15 +679,142 @@ document.addEventListener('DOMContentLoaded', function() {
                     importBtn.innerHTML = '<i class="fas fa-check"></i>';
                 }
                 
+                // Disable the checkbox if it exists
+                const checkbox = row.querySelector('.product-selection-checkbox');
+                if (checkbox) {
+                    checkbox.disabled = true;
+                    checkbox.checked = false;
+                }
+                
                 importCount++;
             }
         });
         
-        if (importCount > 0) {
-            alert(`Successfully imported ${importCount} products to inventory.`);
-        } else {
-            alert('No products selected for import.');
+        // Clear the selected products
+        if (typeof selectedProductsToImport !== 'undefined') {
+            selectedProductsToImport.clear();
+            updateSelectedCounter();
         }
+        
+        const language = document.documentElement.getAttribute('data-language') || 'en';
+        
+        // Wait for all imports to finish
+        Promise.all(importPromises)
+            .then(results => {                if (importCount > 0) {
+                    const message = language === 'pl' ? 
+                        `Pomyślnie zaimportowano ${importCount} produktów do inwentarza.` : 
+                        `Successfully imported ${importCount} products to inventory.`;
+                    alert(message);
+                    
+                    // Automatically clear the invoice form after successful import
+                    clearInvoicePreviewAndForm();
+                } else {
+                    const message = language === 'pl' ? 
+                        'Nie zaimportowano żadnych produktów.' : 
+                        'No products were imported.';
+                    alert(message);
+                }
+            })
+            .catch(error => {
+                console.error('Error during batch import:', error);
+                const errorMessage = language === 'pl' ? 
+                    'Wystąpił błąd podczas importowania produktów.' :
+                    'An error occurred while importing products.';
+                alert(errorMessage);
+            });
+    });// Import selected products button handler
+    document.getElementById('importSelectedProducts')?.addEventListener('click', function() {
+        if (selectedProductsToImport.size === 0) {
+            const language = document.documentElement.getAttribute('data-language') || 'en';
+            const message = language === 'pl' ? 
+                'Nie wybrano żadnych produktów do importu.' : 
+                'No products selected for import.';
+            alert(message);
+            return;
+        }
+        
+        let importCount = 0;
+        let importPromises = [];
+        
+        // Get all rows that have selected checkboxes
+        selectedProductsToImport.forEach(productIndex => {
+            const row = document.querySelector(`#productTableBody tr[data-product-index="${productIndex}"]`);
+            if (row && !row.classList.contains('imported') && row.style.display !== 'none') {
+                const product = JSON.parse(JSON.stringify(window.invoiceProducts[productIndex]));
+                
+                // Update with any user changes
+                product.quantity = parseFloat(row.querySelector('.quantity-input').value) || 1;
+                product.category = row.querySelector('.product-category-select').value;
+                product.assignTo = row.querySelector('.assign-to-select').value;
+                
+                // Store the import promise
+                importPromises.push(importProductToInventory(product, false)); // Don't show individual alerts
+                
+                // Mark as imported
+                row.classList.add('imported');
+                const importBtn = row.querySelector('.import-product');
+                if (importBtn) {
+                    importBtn.disabled = true;
+                    importBtn.innerHTML = '<i class="fas fa-check"></i>';
+                }
+                
+                // Also mark the checkbox as disabled
+                const checkbox = row.querySelector('.product-selection-checkbox');
+                if (checkbox) {
+                    checkbox.disabled = true;
+                    checkbox.checked = false;
+                }
+                
+                importCount++;
+            }
+        });
+        
+        // Clear the selected products set
+        selectedProductsToImport.clear();
+        updateSelectedCounter();
+        
+        const language = document.documentElement.getAttribute('data-language') || 'en';
+        
+        // Wait for all imports to finish
+        Promise.all(importPromises)
+            .then(results => {
+                if (importCount > 0) {
+                    const message = language === 'pl' ? 
+                        `Pomyślnie zaimportowano ${importCount} produktów do inwentarza.` : 
+                        `Successfully imported ${importCount} products to inventory.`;
+                    alert(message);
+                    
+                    // Hide imported items
+                    const hideImportedCheckbox = document.getElementById('hideImportedItems');
+                    if (hideImportedCheckbox && hideImportedCheckbox.checked) {
+                        document.querySelectorAll('#productTableBody tr.imported').forEach(row => {
+                            row.style.display = 'none';
+                        });
+                    }
+                    
+                    // Ask user if they want to clear the form for a new invoice
+                    const confirmClear = language === 'pl' ? 
+                        'Czy chcesz wyczyścić formularz, aby przetworzyć kolejną fakturę?' :
+                        'Do you want to clear the form to process another invoice?';
+                        
+                    if (confirm(confirmClear)) {
+                        // Clear the invoice preview and form
+                        clearInvoicePreviewAndForm();
+                    }
+                } else {
+                    const message = language === 'pl' ? 
+                        'Nie zaimportowano żadnych produktów.' : 
+                        'No products were imported.';
+                    alert(message);
+                }
+            })
+            .catch(error => {
+                console.error('Error during batch import:', error);
+                const errorMessage = language === 'pl' ? 
+                    'Wystąpił błąd podczas importowania produktów.' :
+                    'An error occurred while importing products.';
+                alert(errorMessage);
+            });
     });
 
     // Add user equipment functionality
@@ -747,6 +964,35 @@ document.addEventListener('DOMContentLoaded', function() {
             loadDepartmentEquipment(departmentSelect.value);
         }
     }
+
+    // Add event handler for hide imported items checkbox
+    document.getElementById('hideImportedItems')?.addEventListener('change', function() {
+        const importedRows = document.querySelectorAll('#productTableBody tr.imported');
+        importedRows.forEach(row => {
+            row.style.display = this.checked ? 'none' : '';
+            
+            // If the row is hidden, also update product visibility according to category filters
+            if (!this.checked) {
+                const category = row.dataset.category;
+                const showHardware = document.getElementById('toggleHardware').checked;
+                const showSoftware = document.getElementById('toggleSoftware').checked;
+                const showFurniture = document.getElementById('toggleFurniture').checked;
+                const showAccessories = document.getElementById('toggleAccessories').checked;
+                const showOther = document.getElementById('toggleOther').checked;
+                
+                if ((category === 'hardware' && showHardware) ||
+                    (category === 'software' && showSoftware) ||
+                    (category === 'furniture' && showFurniture) ||
+                    (category === 'accessories' && showAccessories) ||
+                    (category !== 'hardware' && category !== 'software' && 
+                     category !== 'furniture' && category !== 'accessories' && showOther)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    });
 });
 
 // Funkcja tłumacząca elementy interfejsu w zależności od języka

@@ -13,6 +13,8 @@
 <script src="{{ url_for('static', filename='js/localization/language.js') }}"></script>
 <!-- Niestandardowy select, który rozwiązuje problem z przeskakiwaniem kursora -->
 <script src="{{ url_for('static', filename='js/custom-select.js') }}"></script>
+<!-- Shared invoice processing functionality -->
+<script src="{{ url_for('static', filename='js/invoice_processing.js') }}"></script>
 <!-- Skrypt inventory.js z defer - zoptymalizowana wersja -->
 <script src="{{ url_for('static', filename='js/inventory.js') }}" defer></script>
 <!-- Debug script for the delete functionality -->
@@ -105,6 +107,7 @@
                         <label><input type="checkbox" id="toggleFurniture" checked> <span data-en="Furniture" data-pl="Meble">Furniture</span></label>
                         <label><input type="checkbox" id="toggleAccessories" checked> <span data-en="Accessories" data-pl="Akcesoria">Accessories</span></label>
                         <label><input type="checkbox" id="toggleOther" checked> <span data-en="Other" data-pl="Inne">Other</span></label>
+                        <label><input type="checkbox" id="hideImportedItems"> <span data-en="Hide Imported" data-pl="Ukryj zaimportowane">Hide Imported</span></label>
                     </div>
                     <div class="selected-counter">
                         <span id="selectedProductsCounter" data-en="Selected: 0" data-pl="Wybrano: 0">Selected: 0</span>
