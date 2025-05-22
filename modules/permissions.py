@@ -3,9 +3,10 @@ from flask import session, redirect, url_for, render_template, flash, request
 from modules.database import get_db_cursor
 from typing import List, Optional, Dict, Any
 
-def get_user_permissions(username: str) -> List[Dict[str, Any]]:
+def get_user_permissions(username: str, debug: bool = False) -> List[Dict[str, Any]]:
     """
     Get all permissions assigned to a user's role
+    Set debug=True to print information for troubleshooting
     """
     with get_db_cursor() as cursor:
         # First, get the user's role
@@ -15,9 +16,14 @@ def get_user_permissions(username: str) -> List[Dict[str, Any]]:
         user_result = cursor.fetchone()
         
         if not user_result:
+            if debug:
+                print(f"DEBUG get_user_permissions: User '{username}' not found")
             return []
             
         user_role = user_result['role']
+        
+        if debug:
+            print(f"DEBUG get_user_permissions: User '{username}' has role '{user_role}'")
         
         # Get the role_id from the roles table
         cursor.execute("""
@@ -26,6 +32,8 @@ def get_user_permissions(username: str) -> List[Dict[str, Any]]:
         role_result = cursor.fetchone()
         
         if not role_result:
+            if debug:
+                print(f"DEBUG get_user_permissions: Role '{user_role}' not found in roles table")
             return []
             
         role_id = role_result['role_id']
@@ -38,7 +46,13 @@ def get_user_permissions(username: str) -> List[Dict[str, Any]]:
             ORDER BY p.category, p.name_en
         """, (role_id,))
         
-        return cursor.fetchall()
+        permissions = cursor.fetchall()
+        
+        if debug:
+            perm_keys = [p['permission_key'] for p in permissions]
+            print(f"DEBUG get_user_permissions: User '{username}' has {len(permissions)} permissions: {perm_keys}")
+            
+        return permissions
 
 def has_permission(permission_key: str, debug: bool = False) -> bool:
     """
@@ -65,7 +79,7 @@ def has_permission(permission_key: str, debug: bool = False) -> bool:
         
     # Get permissions from cache if available
     if 'permissions' not in session:
-        permissions = [p['permission_key'] for p in get_user_permissions(username)]
+        permissions = [p['permission_key'] for p in get_user_permissions(username, debug=debug)]
         session['permissions'] = permissions
         if debug:
             print(f"DEBUG permission '{permission_key}': Retrieved permissions from database: {permissions}")

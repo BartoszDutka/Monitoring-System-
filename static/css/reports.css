@@ -191,11 +191,6 @@
     transform: translateY(-2px);
 }
 
-.secondary-btn {
-    background-color: #e0e0e0;
-    color: #333;
-}
-
 .secondary-btn:hover {
     background-color: #d0d0d0;
     transform: translateY(-2px);
@@ -361,7 +356,6 @@
 
 .secondary-btn {
     background-color: #f2f2f2;
-    color: #333;
 }
 
 .secondary-btn:hover {

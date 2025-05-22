@@ -8,11 +8,14 @@
 <div class="dashboard-header">
     <h1 data-en="Task Management" data-pl="Zarządzanie zadaniami">Task Management</h1>
     <div class="header-actions">
-        {% if is_admin %}
+        {% if can_create %}
         <button class="btn primary-btn" id="create-task-btn">
             <i class="fas fa-plus"></i> <span data-en="New Task" data-pl="Nowe zadanie">New Task</span>
         </button>
         {% endif %}
+        <button class="btn secondary-btn" id="refresh-permissions" title="Refresh permissions">
+            <i class="fas fa-sync"></i>
+        </button>
     </div>
 </div>
 
@@ -35,7 +38,7 @@
             <option value="critical" data-en="Critical" data-pl="Krytyczny">Critical</option>
         </select>
         
-        {% if is_admin %}
+        {% if can_manage_all %}
         <select id="assignee-filter" class="filter-select">
             <option value="all" data-en="All Assignees" data-pl="Wszyscy przypisani">All Assignees</option>
             {% for user in users %}
@@ -43,7 +46,7 @@
             {% endfor %}
         </select>
         {% endif %}
-    </div>    <div class="search-container">
+    </div><div class="search-container">
         <input type="text" id="task-search" placeholder="Search tasks..." data-en-placeholder="Search tasks..." data-pl-placeholder="Szukaj zadań...">
         <i class="fas fa-search"></i>
     </div>
@@ -82,11 +85,10 @@
             <div class="task-due-date">
                 {{ task.due_date|default('Not set', true) }}
             </div>
-            <div class="task-actions">
-                <button class="btn view-task" data-task-id="{{ task.task_id }}">
+            <div class="task-actions">                <button class="btn view-task" data-task-id="{{ task.task_id }}">
                     <i class="fas fa-eye"></i>
                 </button>
-                {% if is_admin %}
+                {% if can_create %}
                 <button class="btn delete-task" data-task-id="{{ task.task_id }}">
                     <i class="fas fa-trash"></i>
                 </button>
@@ -99,7 +101,7 @@
     <div class="no-tasks">
         <i class="fas fa-tasks"></i>
         <p data-en="No tasks found" data-pl="Nie znaleziono zadań">No tasks found</p>
-        {% if is_admin %}
+        {% if can_create %}
         <button class="btn primary-btn" id="no-tasks-create-btn" data-en="Create New Task" data-pl="Utwórz nowe zadanie">Create New Task</button>
         {% endif %}
     </div>
@@ -107,7 +109,7 @@
 </div>
 
 <!-- Task Creation Modal -->
-{% if is_admin %}
+{% if can_create %}
 <div id="create-task-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -711,13 +713,35 @@ function loadTaskDetails(taskId) {
                 } else {
                     commentsContainer.innerHTML = `<div class="no-comments">${language === 'pl' ? 'Brak komentarzy' : 'No comments yet'}</div>`;
                 }
-            }
-
-            // Show the modal
+            }            // Show the modal
             viewTaskModal.style.display = 'block';
         })
         .catch(error => console.error('Error loading task:', error));
 }
+
+// Function to refresh permissions when needed
+function refreshPermissions() {
+    fetch('/api/refresh_permissions')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Permissions refreshed successfully');
+                // Reload the page to reflect new permissions
+                window.location.reload();
+            } else {
+                console.error('Failed to refresh permissions:', data.error);
+            }
+        })
+        .catch(error => console.error('Error refreshing permissions:', error));
+}
+
+// Add event listener to refresh permissions button if it exists
+document.addEventListener('DOMContentLoaded', function() {
+    const refreshButton = document.getElementById('refresh-permissions');
+    if (refreshButton) {
+        refreshButton.addEventListener('click', refreshPermissions);
+    }
+});
 </script>
 
 {% endblock %}

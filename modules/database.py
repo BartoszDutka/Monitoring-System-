@@ -9,7 +9,7 @@ DB_CONFIG = {
     'host': '127.0.0.1',
     'port': 3306,
     'user': 'root',
-    'password': '',
+    'password': 'root',
     'database': 'monitoring_system',
     'pool_name': 'monitoring_pool',
     'pool_size': 5

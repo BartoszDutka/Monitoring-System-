@@ -1632,17 +1632,25 @@ def debug_role(role_key):
 def debug_permission(permission_key):
     """Debug endpoint for testing a specific permission - ADMIN ONLY"""
     try:
-        from modules.permissions import has_permission
+        from modules.permissions import has_permission, get_user_permissions
         # Get current user info
         username = session.get('username')
         user_role = session.get('user_info', {}).get('role')
-        # Check permission with debug output
+        
+        # Get all user permissions with debug info
+        all_permissions = get_user_permissions(username, debug=True)
+        permission_keys = [p['permission_key'] for p in all_permissions]
+        
+        # Check specific permission with debug info
         has_perm = has_permission(permission_key, debug=True)
+        
         return jsonify({
             'username': username,
             'role': user_role,
             'permission': permission_key,
             'has_permission': has_perm,
+            'all_permissions': permission_keys,
+            'permissions_count': len(permission_keys),
             'success': True
         })
     except Exception as e:
@@ -1650,6 +1658,73 @@ def debug_permission(permission_key):
             'message': f'Error debugging permission: {str(e)}',
             'success': False
         })
+        
+@app.route('/api/debug/permissions/tasks')
+@admin_required
+def debug_task_permissions():
+    """Debug endpoint to view task-related permissions - ADMIN ONLY"""
+    try:
+        with get_db_cursor() as cursor:
+            # Get all task permissions
+            cursor.execute("""
+                SELECT * FROM permissions
+                WHERE category = 'tasks' OR permission_key LIKE '%task%'
+                ORDER BY permission_key
+            """)
+            task_perms = cursor.fetchall()
+            
+            # Convert to serializable format
+            result = []
+            for perm in task_perms:
+                perm_dict = dict(perm)
+                
+                # Get roles with this permission
+                cursor.execute("""
+                    SELECT r.role_key FROM roles r
+                    JOIN role_permissions rp ON r.role_id = rp.role_id
+                    WHERE rp.permission_id = %s
+                """, (perm['permission_id'],))
+                
+                roles = [r['role_key'] for r in cursor.fetchall()]
+                perm_dict['assigned_to_roles'] = roles
+                result.append(perm_dict)
+            
+            return jsonify({
+                'success': True,
+                'permissions': result,
+                'count': len(result)
+            })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/refresh_permissions')
+@login_required
+def refresh_permissions():
+    """Force refresh of user permissions cache"""
+    try:
+        # Remove current permissions from session to force reload
+        if 'permissions' in session:
+            session.pop('permissions')
+            
+        # Get username
+        username = session.get('username')
+        if not username:
+            return jsonify({'error': 'Not logged in'}), 401
+            
+        # Reload permissions
+        from modules.permissions import get_user_permissions
+        permissions = [p['permission_key'] for p in get_user_permissions(username)]
+        session['permissions'] = permissions
+        
+        return jsonify({
+            'success': True,
+            'message': 'Permissions refreshed successfully',
+            'permissions_count': len(permissions)
+        })
+    except Exception as e:        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/users')
 @login_required
@@ -1680,6 +1755,106 @@ def get_users_api():
     except Exception as e:
         logger.error(f"Error in get_users_api: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/admin/cleanup_permissions', methods=['POST'])
+@admin_required
+def admin_cleanup_permissions():
+    """Admin endpoint to clean up duplicate permissions"""
+    try:
+        from modules.permission_cleanup import cleanup_task_view_permissions
+        
+        result = cleanup_task_view_permissions()
+        
+        if result:
+            return jsonify({
+                'success': True,
+                'message': 'Duplikaty uprawnień zostały naprawione pomyślnie.'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Nie udało się naprawić duplikatów uprawnień. Sprawdź logi serwera.'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error cleaning up permissions: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f"Wystąpił błąd: {str(e)}"
+        }), 500
+
+@app.route('/permissions_debug')
+@admin_required
+def permissions_debug():
+    """Debug endpoint to view all task-related permissions"""
+    try:
+        with get_db_cursor() as cursor:
+            # Get all task-related permissions
+            cursor.execute("""
+                SELECT permission_id, permission_key, name, category 
+                FROM permissions 
+                WHERE permission_key LIKE '%task%'
+                ORDER BY category, permission_key
+            """)
+            
+            permissions = cursor.fetchall()
+            
+            # Get role assignments for these permissions
+            permission_ids = [p['permission_id'] for p in permissions]
+            if permission_ids:
+                placeholders = ', '.join(['%s'] * len(permission_ids))
+                cursor.execute(f"""
+                    SELECT rp.role_id, r.role_key, rp.permission_id, p.permission_key
+                    FROM role_permissions rp
+                    JOIN roles r ON rp.role_id = r.role_id
+                    JOIN permissions p ON rp.permission_id = p.permission_id
+                    WHERE p.permission_id IN ({placeholders})
+                    ORDER BY r.role_key, p.permission_key
+                """, permission_ids)
+                
+                role_permissions = cursor.fetchall()
+            else:
+                role_permissions = []
+            
+            # Build a simple debug page with the information
+            html = "<html><head><title>Permissions Debug</title>"
+            html += "<style>body{font-family:Arial;margin:20px;} table{border-collapse:collapse;width:100%;} "
+            html += "th,td{border:1px solid #ddd;padding:8px;text-align:left;} "
+            html += "th{background-color:#f2f2f2;} tr:nth-child(even){background-color:#f9f9f9;} "
+            html += ".section{margin-top:30px;}</style></head><body>"
+            
+            html += "<h1>Task Permissions Debug</h1>"
+            
+            # Permissions table
+            html += "<div class='section'><h2>Task-Related Permissions</h2>"
+            if permissions:
+                html += "<table><thead><tr><th>ID</th><th>Key</th><th>Name</th><th>Category</th></tr></thead><tbody>"
+                for p in permissions:
+                    html += f"<tr><td>{p['permission_id']}</td><td>{p['permission_key']}</td>"
+                    html += f"<td>{p['name']}</td><td>{p['category']}</td></tr>"
+                html += "</tbody></table>"
+            else:
+                html += "<p>No task-related permissions found.</p>"
+            html += "</div>"
+            
+            # Role assignments table
+            html += "<div class='section'><h2>Role Assignments</h2>"
+            if role_permissions:
+                html += "<table><thead><tr><th>Role</th><th>Permission Key</th></tr></thead><tbody>"
+                for rp in role_permissions:
+                    html += f"<tr><td>{rp['role_key']}</td><td>{rp['permission_key']}</td></tr>"
+                html += "</tbody></table>"
+            else:
+                html += "<p>No role assignments for task permissions found.</p>"
+            html += "</div>"
+            
+            html += "</body></html>"
+            
+            return html
+            
+    except Exception as e:
+        logger.error(f"Error in permissions debug: {str(e)}")
+        return f"<h1>Error</h1><p>{str(e)}</p>"
 
 @app.route('/update_role_permissions', methods=['POST'])
 @admin_required
@@ -1761,6 +1936,8 @@ if __name__ == '__main__':
     # Import required modules
     from modules.database import setup_departments_table, ensure_default_departments
     from modules.permissions import initialize_roles_and_permissions
+    from modules.tasks_permissions import initialize_task_permissions
+    from modules.permission_cleanup import cleanup_task_view_permissions
     
     # Initialize database tables
     setup_departments_table()
@@ -1772,6 +1949,20 @@ if __name__ == '__main__':
         print("Roles and permissions system initialized successfully")
     else:
         print("Warning: Failed to initialize roles and permissions system")
+    
+    # Initialize task-specific permissions
+    print("Initializing task permissions...")
+    if initialize_task_permissions():
+        print("Task permissions initialized successfully")
+    else:
+        print("Warning: Failed to initialize task permissions")
+        
+    # Clean up duplicate task view permissions
+    print("Cleaning up duplicate task view permissions...")
+    if cleanup_task_view_permissions():
+        print("Permissions cleanup completed successfully")
+    else:
+        print("Warning: Failed to clean up permissions")
     
     # Run the application
     app.run(debug=True, host='0.0.0.0', port=5000)

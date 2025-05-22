@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 import os
 from werkzeug.utils import secure_filename
+from modules.permissions import permission_required, has_permission
 
 # Define a path for task attachments
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static', 'attachments')
@@ -41,15 +42,14 @@ def admin_required(f):
     return decorated_function
 
 @tasks.route('/')
-@login_required
+@permission_required('tasks_view')
 def index():
     """Show tasks page based on user role"""
-    user_role = session.get('user_info', {}).get('role', 'viewer')
     username = session.get('username')
     
     with get_db_cursor() as cursor:
-        if user_role == 'admin':
-            # Admins see all tasks
+        if has_permission('tasks_manage_all'):
+            # Users with manage_all permission see all tasks
             cursor.execute("""
                 SELECT t.*, u.display_name as assignee_name 
                 FROM tasks t
@@ -80,13 +80,14 @@ def index():
     return render_template('tasks.html', 
                           tasks=tasks_list, 
                           users=users, 
-                          is_admin=(user_role == 'admin'))
+                          can_create=has_permission('tasks_create'),
+                          can_manage_all=has_permission('tasks_manage_all'))
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @tasks.route('/create', methods=['POST'])
-@admin_required
+@permission_required('tasks_create')
 def create_task():
     """Create a new task"""
     title = request.form.get('title')
@@ -134,13 +135,12 @@ def create_task():
     return redirect(url_for('tasks.index'))
 
 @tasks.route('/update/<int:task_id>', methods=['POST'])
-@login_required
+@permission_required('tasks_update')
 def update_task(task_id):
     """Update a task status"""
     status = request.form.get('status')
     comment = request.form.get('comment', '')
     
-    user_role = session.get('user_info', {}).get('role')
     username = session.get('username')
     
     # Get current task details
@@ -154,8 +154,8 @@ def update_task(task_id):
         flash('Task not found')
         return redirect(url_for('tasks.index'))
         
-    # Only assignee or admin can update task
-    if username != task['assignee'] and user_role != 'admin':
+    # Only assignee can update task unless user has admin role
+    if username != task['assignee'] and not has_permission('tasks_manage_all'):
         flash('You cannot update this task')
         return redirect(url_for('tasks.index'))
     
@@ -181,7 +181,7 @@ def update_task(task_id):
     return redirect(url_for('tasks.index'))
 
 @tasks.route('/delete/<int:task_id>', methods=['POST'])
-@admin_required
+@permission_required('tasks_delete')
 def delete_task(task_id):
     """Delete a task"""
     with get_db_cursor() as cursor:
@@ -193,9 +193,11 @@ def delete_task(task_id):
     return redirect(url_for('tasks.index'))
 
 @tasks.route('/api/task/<int:task_id>')
-@login_required
+@permission_required('tasks_view')
 def get_task(task_id):
     """Get task details"""
+    username = session.get('username')
+    
     with get_db_cursor() as cursor:
         cursor.execute("""
             SELECT t.*, u.display_name as assignee_name 
@@ -246,13 +248,13 @@ def get_task(task_id):
     })
 
 @tasks.route('/attachments/<path:filename>')
-@login_required
+@permission_required('tasks_view')
 def get_attachment(filename):
     """Serve task attachment files"""
     return send_from_directory(UPLOAD_FOLDER, filename)
 
 @tasks.route('/add_comment/<int:task_id>', methods=['POST'])
-@login_required
+@permission_required('tasks_comment')
 def add_comment(task_id):
     """Add a comment to a task"""
     comment = request.form.get('comment')
@@ -262,6 +264,22 @@ def add_comment(task_id):
         return redirect(url_for('tasks.index'))
         
     username = session.get('username')
+    
+    # Get current task details to check if user is the assignee
+    with get_db_cursor() as cursor:
+        cursor.execute("""
+            SELECT * FROM tasks WHERE task_id = %s
+        """, (task_id,))
+        task = cursor.fetchone()
+        
+    if not task:
+        flash('Task not found')
+        return redirect(url_for('tasks.index'))
+        
+    # Only assignee can add comments unless user has admin permission
+    if username != task['assignee'] and not has_permission('tasks_manage_all'):
+        flash('You cannot add comments to this task')
+        return redirect(url_for('tasks.index'))
     
     with get_db_cursor() as cursor:
         cursor.execute("""
@@ -274,7 +292,7 @@ def add_comment(task_id):
     return redirect(url_for('tasks.index'))
 
 @tasks.route('/api/devices')
-@login_required
+@permission_required('tasks_view')
 def get_devices():
     """Get all devices from assets table for task related items"""
     try:
@@ -302,7 +320,7 @@ def get_devices():
         return jsonify([]), 500
 
 @tasks.route('/api/related_device/<int:device_id>')
-@login_required
+@permission_required('tasks_view')
 def get_related_device(device_id):
     """Get information about a related device"""
     try:

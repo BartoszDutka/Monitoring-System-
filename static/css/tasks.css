@@ -468,8 +468,7 @@ textarea {
 }
 
 .secondary-btn {
-    background-color: var(--input-bg);
-    color: var(--text-color);
+    background-color: white;
     border: 1px solid var(--border-color);
 }
 

@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/manage_roles_unified.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/unified_management.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/unified_management_styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_tools.css') }}">
 <script src="{{ url_for('static', filename='js/modal_fixes.js') }}" defer></script>
 {% endblock %}
 
@@ -16,6 +17,17 @@
 <div class="management-container">
   <div class="management-header">
     <h2>Panel zarządzania</h2>
+    <div class="management-tools">
+      <div class="dropdown admin-tools">
+        <button class="btn-dropdown">
+          Narzędzia administratora <i class="fas fa-cog"></i>
+        </button>
+        <div class="dropdown-content">
+          <a href="#" id="cleanupPermissionsBtn">Napraw duplikaty uprawnień</a>
+          <a href="/permissions_debug" target="_blank">Debug uprawnień</a>
+        </div>
+      </div>
+    </div>
     <div class="management-search">
       <input type="text" id="managementSearch" placeholder="Szukaj...">
       <i class="fas fa-search"></i>
@@ -574,8 +586,51 @@ async function renderRoleEdit(roleKey) {
     return html;
   } catch (error) {
     console.error('Error rendering role edit:', error);
-    return `<div class="error">Wystąpił błąd podczas ładowania danych roli: ${error.message}</div>`;
-  }
+    return `<div class="error">Wystąpił błąd podczas ładowania danych roli: ${error.message}</div>`;  }
 }
+</script>
+
+<script>
+// Admin tools - Permission cleanup functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const cleanupBtn = document.getElementById('cleanupPermissionsBtn');
+  if (cleanupBtn) {
+    cleanupBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      if (confirm('Czy na pewno chcesz naprawić duplikaty uprawnień? Ta operacja usunie uprawnienie "view_tasks" i zachowa "tasks_view".')) {
+        // Show loading state
+        const originalText = cleanupBtn.textContent;
+        cleanupBtn.textContent = 'Trwa naprawa...';
+        cleanupBtn.disabled = true;
+        
+        fetch('/admin/cleanup_permissions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Pomyślnie naprawiono duplikaty uprawnień. ' + data.message);
+            // Reload page to reflect changes
+            window.location.reload();
+          } else {
+            alert('Wystąpił błąd: ' + (data.message || 'Nieznany błąd'));
+            cleanupBtn.textContent = originalText;
+            cleanupBtn.disabled = false;
+          }
+        })
+        .catch(error => {
+          console.error('Error cleaning up permissions:', error);
+          alert('Wystąpił błąd podczas naprawy uprawnień.');
+          cleanupBtn.textContent = originalText;
+          cleanupBtn.disabled = false;
+        });
+      }
+    });
+  }
+});
 </script>
 {% endblock %}
