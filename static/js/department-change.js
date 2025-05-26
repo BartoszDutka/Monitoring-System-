@@ -72,21 +72,32 @@ function changeDepartment(equipmentId, itemName) {
             alert(language === 'pl' ? 'Proszę wybrać dział.' : 'Please select a department.');
             return;
         }
+          console.log(`Changing equipment ${equipmentId} from department ${currentDepartment} to ${newDepartment}`);
         
-        console.log(`Changing equipment ${equipmentId} from department ${currentDepartment} to ${newDepartment}`);
-        
-        // Send the request to assign equipment to new department
-        fetch('/api/equipment/assign', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                equipment_id: equipmentId,
-                department: newDepartment
+        // First fetch the current equipment details to get the quantity
+        fetch(`/api/equipment/${equipmentId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch equipment details');
+                }
+                return response.json();
             })
-        })
-        .then(response => {
+            .then(equipmentData => {
+                console.log(`Current quantity: ${equipmentData.equipment.quantity}`);
+                
+                // Send the request to assign equipment to new department with the current quantity
+                return fetch('/api/equipment/assign', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        equipment_id: equipmentId,
+                        department: newDepartment,
+                        quantity: equipmentData.equipment.quantity // Preserve the current quantity
+                    })
+                });
+            })        .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -183,13 +194,13 @@ function changeDepartment(equipmentId, itemName) {
                     'Error: ' + (data.error || 'Unknown error');
                 alert(errorMsg);
             }
-        })
-        .catch(error => {
+        })        .catch(error => {
             console.error('Error:', error);
             const errorMsg = language === 'pl' ? 
                 'Nie udało się przepisać elementu do nowego działu. Spróbuj ponownie.' : 
                 'Failed to assign equipment to new department. Please try again.';
             alert(errorMsg);
+            modal.remove(); // Make sure to remove the modal on error
         });
     });
     

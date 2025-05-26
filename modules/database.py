@@ -26,8 +26,11 @@ def get_db_cursor():
     try:
         yield cursor
         conn.commit()
+        # Add debug logging for successful transactions
+        print("[DB] Transaction committed successfully")
     except Exception as e:
         conn.rollback()
+        print(f"[DB ERROR] Transaction rolled back: {str(e)}")
         raise e
     finally:
         cursor.close()

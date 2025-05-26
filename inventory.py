@@ -97,14 +97,16 @@ def assign_equipment():
         
     data = request.json
     try:
-        print(f"[ASSIGN] Reassigning equipment ID: {data['equipment_id']} to department: {data['department']}")
+        quantity = data.get('quantity', 1)
+        print(f"[ASSIGN] Reassigning equipment ID: {data['equipment_id']} to department: {data['department']} with quantity: {quantity}")
         
         # First get the current equipment state
         with get_db_cursor() as cursor:
-            cursor.execute('SELECT assigned_to_department FROM equipment WHERE id = %s', (data['equipment_id'],))
+            cursor.execute('SELECT assigned_to_department, quantity FROM equipment WHERE id = %s', (data['equipment_id'],))
             current = cursor.fetchone()
             if current:
                 print(f"[ASSIGN] Current department: {current['assigned_to_department']}, New department: {data['department']}")
+                print(f"[ASSIGN] Current quantity: {current['quantity']}, Preserving quantity: {quantity}")
             else:
                 print(f"[ASSIGN] Equipment ID {data['equipment_id']} not found")
             
@@ -119,15 +121,15 @@ def assign_equipment():
             ''', (
                 data['department'],
                 datetime.now().strftime('%Y-%m-%d'),
-                data.get('quantity', 1),
+                quantity,  # Use our variable here instead of calling data.get again
                 data['equipment_id']
             ))
             
             # Verify the update was successful
-            cursor.execute('SELECT assigned_to_department FROM equipment WHERE id = %s', (data['equipment_id'],))
+            cursor.execute('SELECT assigned_to_department, quantity FROM equipment WHERE id = %s', (data['equipment_id'],))
             updated = cursor.fetchone()
             if updated:
-                print(f"[ASSIGN] Update successful. New department: {updated['assigned_to_department']}")
+                print(f"[ASSIGN] Update successful. New department: {updated['assigned_to_department']}, Quantity: {updated['quantity']}")
             
         return jsonify({'success': True, 'message': 'Equipment assigned successfully'})
     except Exception as e:
