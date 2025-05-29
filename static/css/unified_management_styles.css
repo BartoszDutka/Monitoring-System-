@@ -166,9 +166,7 @@ body { background: #f4f7fa; }
 
 .role-admin { background: linear-gradient(135deg, #ff2d55, #dc3545)!important; }
 .role-manager { background: linear-gradient(135deg, #ff9d2f, #fd7e14)!important; }
-.role-technician { background: linear-gradient(135deg, #2ecc71, #20c997)!important; }
 .role-analyst { background: linear-gradient(135deg, #3498db, #0d6efd)!important; }
-.role-operator { background: linear-gradient(135deg, #9b59b6, #6f42c1)!important; }
 .role-user { background: linear-gradient(135deg, #95a5a6, #6c757d)!important; }
 .role-viewer { background: linear-gradient(135deg, #bdc3c7, #adb5bd)!important; }
 

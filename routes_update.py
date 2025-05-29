@@ -47,11 +47,9 @@ def unified_management():
                        SELECT COUNT(rp.permission_id)
                        FROM role_permissions rp
                        WHERE rp.role_id = r.role_id
-                   ) as permissions_count
-            FROM roles r
-            LEFT JOIN users u ON r.role_key = u.role
-            GROUP BY r.role_key, r.description_en, r.description_pl
-            ORDER BY FIELD(r.role_key, 'admin', 'manager', 'technician', 'analyst', 'operator', 'user', 'viewer')
+                   ) as permissions_count        FROM roles r
+            LEFT JOIN users u ON r.role_key = u.role        GROUP BY r.role_key, r.description_en, r.description_pl
+            ORDER BY FIELD(r.role_key, 'admin', 'manager', 'user', 'viewer')
         """)
         roles = cursor.fetchall()
     

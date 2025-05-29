@@ -138,9 +138,6 @@ def admin_required(f):
 def manager_required(f):
     return role_required(['admin', 'manager'])(f)
 
-def technician_required(f):
-    return role_required(['admin', 'manager', 'technician'])(f)
-    
 def get_role_description(role_key: str, language: str = 'en') -> str:
     """
     Get the description for a specific role in the specified language
@@ -161,9 +158,8 @@ def get_all_roles():
     """
     with get_db_cursor() as cursor:
         cursor.execute("""
-            SELECT role_key, description_en, description_pl
-            FROM roles
-            ORDER BY FIELD(role_key, 'admin', 'manager', 'technician', 'analyst', 'operator', 'user', 'viewer')
+            SELECT role_key, description_en, description_pl            FROM roles
+            ORDER BY FIELD(role_key, 'admin', 'manager', 'user', 'viewer')
         """)
         return cursor.fetchall()
 

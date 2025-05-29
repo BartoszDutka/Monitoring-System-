@@ -1116,10 +1116,9 @@ def unified_management():
                        FROM role_permissions rp
                        WHERE rp.role_id = r.role_id
                    ) as permissions_count
-            FROM roles r
-            LEFT JOIN users u ON r.role_key = u.role
-            GROUP BY r.role_key, r.description_en, r.description_pl
-            ORDER BY FIELD(r.role_key, 'admin', 'manager', 'technician', 'analyst', 'operator', 'user', 'viewer')
+            FROM roles r        LEFT JOIN users u ON r.role_key = u.role
+        GROUP BY r.role_key, r.description_en, r.description_pl
+            ORDER BY FIELD(r.role_key, 'admin', 'manager', 'user', 'viewer')
         """)
         roles = cursor.fetchall()
     
@@ -1468,30 +1467,29 @@ def delete_report_route(report_id):
         return jsonify({'success': False, 'error': 'Failed to delete report'}), 404
 
 @app.route('/inventory')
-def inventory():
-    # Get the current language from session or default to English
+def inventory():    # Get the current language from session or default to English
     current_language = session.get('language', 'en')
     
     # Fetch departments and equipment counts
     departments = []
+    current_department = None
+    people = []
+    
     try:
-        conn = connect_to_database()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT name, (SELECT COUNT(*) FROM equipment WHERE department = d.name) as equipment_count FROM departments d")
-        departments = cursor.fetchall()
-        
-        # Get current department from user's session if available
-        current_user = session.get('username')
-        cursor.execute("SELECT department FROM users WHERE username = %s", (current_user,))
-        user_dept = cursor.fetchone()
-        current_department = user_dept['department'] if user_dept else None
-        
-        # Get all people for equipment assignment
-        cursor.execute("SELECT id, name, department FROM users ORDER BY name")
-        people = cursor.fetchall()
-        
-        cursor.close()
-        conn.close()
+        with get_db_cursor() as cursor:
+            cursor.execute("SELECT name, (SELECT COUNT(*) FROM equipment WHERE department = d.name) as equipment_count FROM departments d")
+            departments = cursor.fetchall()
+            
+            # Get current department from user's session if available
+            current_user = session.get('username')
+            cursor.execute("SELECT department FROM users WHERE username = %s", (current_user,))
+            user_dept = cursor.fetchone()
+            current_department = user_dept['department'] if user_dept else None
+            
+            # Get all people for equipment assignment
+            cursor.execute("SELECT id, name, department FROM users ORDER BY name")
+            people = cursor.fetchall()
+            
     except Exception as e:
         logging.error(f"Error fetching departments: {e}")
         departments = []
@@ -1531,7 +1529,7 @@ def api_role_info():
     """API endpoint to get information about a specific role and its permissions"""
     role_key = request.args.get('role')
     
-    if not role_key or role_key not in ['admin', 'manager', 'technician', 'analyst', 'operator', 'user', 'viewer']:
+    if not role_key or role_key not in ['admin', 'manager', 'user', 'viewer']:
         return jsonify({
             'error': 'Invalid role specified',
             'success': False
@@ -1864,10 +1862,8 @@ def update_role_permissions():
         role_key = request.form.get('role_key')
         description_en = request.form.get('description_en', '')
         description_pl = request.form.get('description_pl', '')
-        permissions = request.form.getlist('permissions[]')
-        
-        # Validate the role
-        if not role_key or role_key not in ['admin', 'manager', 'technician', 'analyst', 'operator', 'user', 'viewer']:
+        permissions = request.form.getlist('permissions[]')          # Validate the role
+        if not role_key or role_key not in ['admin', 'manager', 'user', 'viewer']:
             return jsonify({
                 'error': 'Invalid role specified',
                 'success': False

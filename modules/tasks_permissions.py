@@ -155,13 +155,12 @@ def initialize_task_permissions():
                     
                     if not cursor.fetchone():
                         # Assign permission to admin role
-                        cursor.execute("""
-                            INSERT INTO role_permissions (role_id, permission_id)
+                        cursor.execute("""                        INSERT INTO role_permissions (role_id, permission_id)
                             VALUES (%s, %s)
                         """, (admin_role_id, perm['permission_id']))
             
             # Assign basic task permissions to regular user roles
-            user_roles = ['manager', 'technician', 'analyst', 'operator', 'user']
+            user_roles = ['manager', 'user']
             basic_permissions = ['tasks_view', 'tasks_update', 'tasks_comment']
             
             for role_key in user_roles:

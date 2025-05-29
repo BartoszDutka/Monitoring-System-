@@ -65,13 +65,9 @@
               </td>
               <td>
                 <form action="{{ url_for('update_user_role') }}" method="POST" class="role-form">
-                  <input type="hidden" name="user_id" value="{{ user.user_id }}">
-                  <select name="role" {% if user.username == session.username %}disabled{% endif %} class="role-select">
+                  <input type="hidden" name="user_id" value="{{ user.user_id }}">                  <select name="role" {% if user.username == session.username %}disabled{% endif %} class="role-select">
                     <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
                     <option value="manager" {% if user.role == 'manager' %}selected{% endif %}>Manager</option>
-                    <option value="technician" {% if user.role == 'technician' %}selected{% endif %}>Technik</option>
-                    <option value="analyst" {% if user.role == 'analyst' %}selected{% endif %}>Analityk</option>
-                    <option value="operator" {% if user.role == 'operator' %}selected{% endif %}>Operator</option>
                     <option value="user" {% if user.role == 'user' %}selected{% endif %}>Użytkownik</option>
                     <option value="viewer" {% if user.role == 'viewer' %}selected{% endif %}>Przeglądający</option>
                   </select>
