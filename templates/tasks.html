@@ -85,11 +85,12 @@
             </div>
             <div class="task-due-date">
                 {{ task.due_date|default('Not set', true) }}
-            </div>
-            <div class="task-actions">                <button class="btn view-task" data-task-id="{{ task.task_id }}">
+            </div>            <div class="task-actions">                {% if can_view %}
+                <button class="btn view-task" data-task-id="{{ task.task_id }}">
                     <i class="fas fa-eye"></i>
                 </button>
-                {% if can_create %}
+                {% endif %}
+                {% if can_delete %}
                 <button class="btn delete-task" data-task-id="{{ task.task_id }}">
                     <i class="fas fa-trash"></i>
                 </button>
@@ -245,8 +246,8 @@
             <div id="related-item-container" style="display:none;">
                 <h4 data-en="Related Item" data-pl="Powiązany element">Related Item</h4>
                 <div id="related-item-details" class="related-details"></div>
-            </div>
-            <div class="update-status-section">
+            </div>            <div class="update-status-section">
+                {% if can_update %}
                 <form id="update-status-form" action="" method="POST">
                     <div class="form-row">
                         <div class="form-group">
@@ -262,10 +263,11 @@
                         </div>
                     </div>
                 </form>
-            </div>
-            <div class="comments-section">
+                {% endif %}
+            </div>            <div class="comments-section">
                 <h4 data-en="Comments" data-pl="Komentarze">Comments</h4>
                 <div id="task-comments" class="comments-list"></div>
+                {% if can_comment %}
                 <form id="add-comment-form" action="" method="POST">
                     <div class="form-group">
                         <textarea name="comment" placeholder="Add a comment..." data-en-placeholder="Add a comment..." data-pl-placeholder="Dodaj komentarz..." required></textarea>
@@ -274,6 +276,7 @@
                         <button type="submit" class="btn primary-btn" data-en="Add Comment" data-pl="Dodaj komentarz">Add Comment</button>
                     </div>
                 </form>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -688,12 +691,10 @@ function loadTaskDetails(taskId) {
             const updateStatusForm = document.getElementById('update-status-form');
             if (updateStatusForm) {
                 updateStatusForm.action = `/tasks/update/${taskId}`;
-            }
-
-            // Update comment form action URL
+            }            // Update comment form action URL
             const addCommentForm = document.getElementById('add-comment-form');
             if (addCommentForm) {
-                addCommentForm.action = `/tasks/add_comment/${taskId}`;
+                addCommentForm.action = `/tasks/comment/${taskId}`;
             }
 
             // Load comments

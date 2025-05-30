@@ -67,8 +67,7 @@ def index():
             """, (username,))
         
         tasks_list = cursor.fetchall()
-        
-    # Get users list for assignment
+          # Get users list for assignment
     with get_db_cursor() as cursor:
         cursor.execute("""
             SELECT username, display_name, email, department
@@ -81,7 +80,11 @@ def index():
                           tasks=tasks_list, 
                           users=users, 
                           can_create=has_permission('create_tasks'),
-                          can_manage_all=has_permission('manage_all_tasks'))
+                          can_manage_all=has_permission('manage_all_tasks'),
+                          can_update=has_permission('tasks_update'),
+                          can_comment=has_permission('tasks_comment'),
+                          can_delete=has_permission('tasks_delete'),
+                          can_view=has_permission('tasks_view'))
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
