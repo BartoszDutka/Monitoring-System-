@@ -942,26 +942,44 @@ def get_graylog_timeline():
 
 @app.route('/profile')
 @login_required
-@permission_required('manage_profile')
 def profile():
     """User profile management page"""
     username = session.get('username')
     
     try:
         with get_db_cursor() as cursor:
+            # Get user data - fix: use role column directly instead of role_id
             cursor.execute("""
-                SELECT u.*, r.role_key, r.description_en as role_description
+                SELECT u.*, u.role as role_key, u.role as role_description
                 FROM users u
-                LEFT JOIN roles r ON u.role_id = r.role_id
                 WHERE u.username = %s
             """, (username,))
             user = cursor.fetchone()
             
+            # Get departments for the dropdown
+            cursor.execute("""
+                SELECT name, description_en, description_pl
+                FROM departments
+                ORDER BY name
+            """)
+            departments_raw = cursor.fetchall()
+            
         if not user:
             flash('User not found', 'error')
             return redirect(url_for('index'))
-            
-        return render_template('profile.html', user=user)
+        
+        # Format departments for template
+        departments = []
+        for dept in departments_raw:
+            departments.append({
+                'name': dept['name'],
+                'description': {
+                    'en': dept['description_en'],
+                    'pl': dept['description_pl']
+                }
+            })
+        
+        return render_template('profile.html', user_info=user, departments=departments)
     except Exception as e:
         logger.error(f"Error loading profile: {e}")
         flash('Error loading profile', 'error')
@@ -969,7 +987,6 @@ def profile():
 
 @app.route('/update-profile', methods=['POST'])
 @login_required
-@permission_required('manage_profile')
 def update_profile():
     """Update user profile information"""
     username = session.get('username')
@@ -1018,8 +1035,7 @@ def update_profile():
                 
                 update_fields.append('password = %s')
                 update_values.append(new_password)
-            
-            # Update user data if there are changes
+              # Update user data if there are changes
             if update_fields:
                 update_values.append(username)
                 cursor.execute(f"""
@@ -1034,6 +1050,54 @@ def update_profile():
     except Exception as e:
         logger.error(f"Error updating profile: {e}")
         flash('Error updating profile', 'error')
+    
+    return redirect(url_for('profile'))
+
+def allowed_file(filename):
+    """Check if file has allowed extension"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/upload_avatar', methods=['POST'])
+@login_required
+def upload_avatar():
+    """Handle avatar upload"""
+    username = session.get('username')
+    
+    if 'avatar' not in request.files:
+        flash('No file selected', 'error')
+        return redirect(url_for('profile'))
+    
+    file = request.files['avatar']
+    
+    if file.filename == '':
+        flash('No file selected', 'error')
+        return redirect(url_for('profile'))
+    
+    if file and allowed_file(file.filename):
+        try:
+            # Generate secure filename
+            filename = f"{username}_{int(time.time())}.{file.filename.rsplit('.', 1)[1].lower()}"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            
+            # Save file
+            file.save(filepath)
+            
+            # Update database
+            update_user_avatar(username, filename)
+            
+            # Update session
+            if 'user_info' in session:
+                session['user_info']['avatar_path'] = filename
+                session.modified = True
+            
+            flash('Avatar updated successfully', 'success')
+            
+        except Exception as e:
+            logger.error(f"Error uploading avatar: {e}")
+            flash('Error uploading avatar', 'error')
+    else:
+        flash('Invalid file type. Please use PNG, JPG, JPEG or GIF.', 'error')
     
     return redirect(url_for('profile'))
 
