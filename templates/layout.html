@@ -140,9 +140,7 @@
                 <i class="fas fa-chart-line"></i> <span data-en="Messages Over Time" data-pl="Wiadomości w czasie">Messages Over Time</span>
             </a>
         </div>
-        {% endif %}
-
-        {% if session.get('user_info', {}).get('role') == 'admin' %}
+        {% endif %}        {% if has_permission('manage_users') %}
         <div class="nav-section">
             <h3 data-en="Administration" data-pl="Administracja">Administration</h3>
             <a href="/unified_management" class="nav-link {% if request.path == '/unified_management' %}active{% endif %}">

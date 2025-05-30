@@ -1169,7 +1169,7 @@ def manage_roles():
     return redirect(url_for('unified_management', active_tab='roles'))
 
 @app.route('/unified_management')
-@admin_required
+@permission_required('manage_users')
 def unified_management():
     """Unified interface for managing users, roles and permissions"""
     # Get active tab from query params
