@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
-from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
 from datetime import datetime
 from modules.database import get_db_cursor
+from modules.permissions import permission_required
 import pdfplumber
 import re
 import os
@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 inventory = Blueprint('inventory', __name__)
 
 @inventory.route('/inventory')
+@permission_required('view_inventory')  # View inventory permission
 def view_inventory():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
@@ -49,6 +50,7 @@ def view_inventory():
                          lang=lang)
 
 @inventory.route('/api/department_equipment/<department>')
+@permission_required('view_inventory')
 def get_department_equipment(department):
     if not session.get('logged_in'):
         return jsonify({'error': 'Not authenticated'}), 401
@@ -91,6 +93,7 @@ def get_department_equipment(department):
 
 # Update the assign equipment function
 @inventory.route('/api/equipment/assign', methods=['POST'])
+@permission_required('manage_inventory')
 def assign_equipment():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
@@ -138,6 +141,7 @@ def assign_equipment():
 
 # Update the add equipment function
 @inventory.route('/api/equipment/add', methods=['POST'])
+@permission_required('manage_inventory')
 def add_equipment():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
@@ -185,6 +189,7 @@ def add_equipment():
         return jsonify({'error': str(e)}), 400
 
 @inventory.route('/api/person_equipment/<int:person_id>')
+@permission_required('view_inventory')
 def get_person_equipment(person_id):
     if not session.get('logged_in'):
         return redirect(url_for('login'))
@@ -217,6 +222,7 @@ def get_person_equipment(person_id):
     })
 
 @inventory.route('/api/equipment/unassign', methods=['POST'])
+@permission_required('manage_inventory')
 def unassign_equipment():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
@@ -236,6 +242,7 @@ def unassign_equipment():
         return jsonify({'error': str(e)}), 400
 
 @inventory.route('/api/equipment/<int:equipment_id>')
+@permission_required('view_inventory')
 def get_equipment_details(equipment_id):
     """Get details for a specific piece of equipment"""
     if not session.get('logged_in'):
@@ -295,6 +302,7 @@ def get_equipment_details(equipment_id):
     return jsonify({'equipment': equipment_dict})
 
 @inventory.route('/api/equipment/update', methods=['POST'])
+@permission_required('manage_inventory')
 def update_equipment():
     """Update equipment details"""
     if not session.get('logged_in'):
@@ -375,6 +383,7 @@ def update_equipment():
         return jsonify({'error': str(e)}), 400
 
 @inventory.route('/api/invoice/process', methods=['POST'])
+@permission_required('manage_inventory')
 def process_invoice():
     """Process PDF invoice and extract data"""
     if not session.get('logged_in'):
@@ -417,6 +426,7 @@ def process_invoice():
         return jsonify({'error': 'Failed to process invoice: ' + str(e)}), 500
 
 @inventory.route('/api/equipment/delete/<int:equipment_id>', methods=['POST', 'DELETE'])
+@permission_required('manage_inventory')
 def delete_equipment(equipment_id):
     """Delete equipment from inventory"""
     if not session.get('logged_in'):
@@ -442,6 +452,7 @@ def delete_equipment(equipment_id):
         return jsonify({'error': str(e)}), 500
 
 @inventory.route('/api/equipment_delete', methods=['POST'])
+@permission_required('manage_inventory')
 def delete_equipment_alt():
     """Alternative endpoint to delete equipment from inventory"""
     if not session.get('logged_in'):

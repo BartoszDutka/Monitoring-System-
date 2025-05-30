@@ -3,10 +3,9 @@
 {% block content %}
 <div class="dashboard-header">
     <h1 data-en="Dashboard Overview" data-pl="Przegląd panelu">Dashboard Overview</h1>
-</div>
-
-<div class="dashboard-grid">
+</div>    <div class="dashboard-grid">
     <!-- Graylog Card -->
+    {% if has_permission('view_logs') %}
     <div class="dashboard-card graylog-card">
         <div class="card-header">
             <i class="fas fa-history"></i>
@@ -26,7 +25,9 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
+    {% if has_permission('view_monitoring') %}
     <div class="dashboard-card monitoring-card">
         <div class="card-header">
             <i class="fas fa-chart-line"></i>
@@ -49,6 +50,7 @@
             </nav>
         </div>
     </div>
+    {% endif %}
 
     <!-- Functions Card -->
     <div class="dashboard-card functions-card">

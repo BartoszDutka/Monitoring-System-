@@ -369,6 +369,8 @@ select.form-control {
   border-radius: var (--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
 }
 
 .equipment-list h3 {
@@ -380,18 +382,29 @@ select.form-control {
   color: var(--dark-color);
 }
 
+.equipment-list .equipment-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: auto;
+  overflow-wrap: break-word;
+}
+
 /* Table styling - modern clean design */
 .equipment-table {
-  width: 100%;
+  width: 98%;
+  max-width: 1200px;
+  margin: 0 auto;
   border-collapse: separate;
   border-spacing: 0;
 }
 
 .equipment-table th,
 .equipment-table td {
-  padding: 1rem;
+  padding: 0.75rem 0.5rem;
   text-align: left;
-  border-bottom: 1px solid var (--border-color);
+  border-bottom: 1px solid var(--border-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .equipment-table th {
@@ -401,7 +414,25 @@ select.form-control {
   position: sticky;
   top: 0;
   z-index: 10;
+  white-space: nowrap;
+  overflow: visible; /* Zapobiega ucięciu nagłówków */
 }
+
+/* Specific column widths for better fitting */
+.equipment-table th:nth-child(1), .equipment-table td:nth-child(1) { width: 25%; white-space: normal; max-width: 250px; word-wrap: break-word; } /* Item Name */
+.equipment-table th:nth-child(2), .equipment-table td:nth-child(2) { width: 12%; white-space: nowrap; } /* Type */
+.equipment-table th:nth-child(3), .equipment-table td:nth-child(3) { width: 15%; white-space: nowrap; } /* Serial Number */
+.equipment-table th:nth-child(4), .equipment-table td:nth-child(4) { width: 8%; white-space: nowrap; }  /* Quantity */
+.equipment-table th:nth-child(5), .equipment-table td:nth-child(5) { width: 12%; white-space: nowrap; } /* Assigned Date */
+.equipment-table th:nth-child(6), .equipment-table td:nth-child(6) { width: 10%; white-space: nowrap; } /* Status */
+.equipment-table th:nth-child(7), .equipment-table td:nth-child(7) { width: 10%; white-space: nowrap; }  /* Users */
+.equipment-table th:nth-child(8), .equipment-table td:nth-child(8) { width: 12%; text-align: center; white-space: nowrap; }  /* Actions */
+
+/* For users without actions column, redistribute width */
+.equipment-table.no-actions th:nth-child(1), .equipment-table.no-actions td:nth-child(1) { width: 28%; white-space: normal; max-width: 280px; word-wrap: break-word; }
+.equipment-table.no-actions th:nth-child(2), .equipment-table.no-actions td:nth-child(2) { width: 14%; white-space: nowrap; }
+.equipment-table.no-actions th:nth-child(3), .equipment-table.no-actions td:nth-child(3) { width: 18%; white-space: nowrap; }
+.equipment-table.no-actions th:nth-child(7), .equipment-table.no-actions td:nth-child(7) { width: 12%; }
 
 .equipment-table tr:last-child td {
   border-bottom: none;

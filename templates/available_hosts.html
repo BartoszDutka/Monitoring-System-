@@ -50,6 +50,10 @@
 
 <!-- Add this JavaScript block at the end of your content block -->
 <script>
+// User permissions and role for JavaScript access - use consistent path with layout.html
+window.userPermissions = [{% for permission in session.get('permissions', []) %}'{{ permission }}'{% if not loop.last %}, {% endif %}{% endfor %}];
+// Don't redefine userRole here - it's already defined in layout.html
+
 document.addEventListener('DOMContentLoaded', function() {
     // Update placeholder text when language changes
     document.addEventListener('languageChanged', function(e) {
@@ -85,8 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <i class="fas fa-circle"></i>
                 <span>${onlineText}</span>
             </div>
-            
-            <div class="device-details">
+              <div class="device-details">
                 <div class="detail-item">
                     <i class="fas fa-network-wired"></i>
                     <div class="detail-content">
@@ -95,6 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
                 
+                ${window.userRole !== 'viewer' ? `
                 <div class="detail-item">
                     <i class="fas fa-microchip"></i>
                     <div class="detail-content">
@@ -112,17 +116,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 
                 ${renderAlerts(host.alerts, lang)}
-            </div>
-            
-            <div class="device-actions">
+                ` : ''}
+            </div>            <div class="device-actions">
                 <a href="#" class="action-button">
                     <i class="fas fa-info-circle"></i>
                     <span>${detailsText}</span>
                 </a>
+                ${window.userPermissions && window.userPermissions.includes('vnc_connect') ? `
                 <a href="${host.vnc_url}" class="vnc-button">
                     <i class="fas fa-desktop"></i>
                     <span>${connectText}</span>
                 </a>
+                ` : ''}
             </div>
         </div>
         `;

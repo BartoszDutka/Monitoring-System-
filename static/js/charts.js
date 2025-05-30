@@ -122,9 +122,9 @@ function updateHostCard(host) {
         'operation_failed': { 'en': 'Operation failed', 'pl': 'Operacja zakończona niepowodzeniem' },
         // Additional translations for alerts
         'error_loading_data': { 'en': 'Error loading data', 'pl': 'Błąd ładowania danych' },
-        'no_data_available': { 'en': 'No data available', 'pl': 'Brak dostępnych danych' },
-        'session_expired': { 'en': 'Your session has expired. Please log in again.', 'pl': 'Twoja sesja wygasła. Zaloguj się ponownie.' },
-        'permission_denied': { 'en': 'Permission denied', 'pl': 'Odmowa dostępu' }
+        'no_data_available': { 'en': 'No data available', 'pl': 'Brak dostępnych danych' },        'session_expired': { 'en': 'Your session has expired. Please log in again.', 'pl': 'Twoja sesja wygasła. Zaloguj się ponownie.' },
+        'permission_denied': { 'en': 'Permission denied', 'pl': 'Odmowa dostępu' },
+        'basic_host_info_only': { 'en': 'Basic host information only available for viewer role', 'pl': 'Dla roli przegląd dostępne są tylko podstawowe informacje o hoście' }
     };
     
     function t(key) {
@@ -192,8 +192,9 @@ function updateHostCard(host) {
         translatedAvailability = t('unavailable');
     } else {
         translatedAvailability = t('unknown');
-    }
-
+    }    // Check if user is viewer (role will be passed from template)
+    const userRole = window.userRole || '';
+    
     return `
         <div class="host-card">
             <h3>${host.name}</h3>
@@ -201,37 +202,43 @@ function updateHostCard(host) {
                 ${t('status')}: ${translatedAvailability}
             </div>
             
-            <h4>${t('system_metrics')}:</h4>
-            <ul>
-                <li>${t('cpu_usage')}: ${host.metrics.cpu}</li>
-                <li>${t('memory')}: ${host.metrics.memory}</li>
-                <li>${t('disk_space')}: ${host.metrics.disk}</li>
-                <li>${t('network_traffic')}: ${host.metrics.network}</li>
-                <li>${t('ping_status')}: ${host.metrics.ping}</li>
-                <li>${t('uptime')}: ${host.metrics.uptime}</li>
-            </ul>
+            ${userRole !== 'viewer' ? `
+                <h4>${t('system_metrics')}:</h4>
+                <ul>
+                    <li>${t('cpu_usage')}: ${host.metrics.cpu}</li>
+                    <li>${t('memory')}: ${host.metrics.memory}</li>
+                    <li>${t('disk_space')}: ${host.metrics.disk}</li>
+                    <li>${t('network_traffic')}: ${host.metrics.network}</li>
+                    <li>${t('ping_status')}: ${host.metrics.ping}</li>
+                    <li>${t('uptime')}: ${host.metrics.uptime}</li>
+                </ul>
 
-            ${host.alerts ? `
-                <div class="alerts-container">
-                    ${Object.entries(alertsByStatus).map(([status, alerts]) => 
-                        alerts.length ? `
-                            <details class="alerts-details ${status.toLowerCase()}">
-                                <summary>${status} ${t('alerts')} (${alerts.length})</summary>
-                                <ul class="alerts">
-                                    ${alerts.map(alert => `
-                                        <li class="alert">
-                                            ${alert.description}
-                                            <span class="alert-count">(${alert.count}x)</span>
-                                            <br>
-                                            <span class="alert-timestamp">${t('last_occurred')}: ${alert.last_occurrence}</span>
-                                        </li>
-                                    `).join('')}
-                                </ul>
-                            </details>
-                        ` : ''
-                    ).join('')}
-                </div>
-            ` : ''}
+                ${host.alerts ? `
+                    <div class="alerts-container">
+                        ${Object.entries(alertsByStatus).map(([status, alerts]) => 
+                            alerts.length ? `
+                                <details class="alerts-details ${status.toLowerCase()}">
+                                    <summary>${status} ${t('alerts')} (${alerts.length})</summary>
+                                    <ul class="alerts">
+                                        ${alerts.map(alert => `
+                                            <li class="alert">
+                                                ${alert.description}
+                                                <span class="alert-count">(${alert.count}x)</span>
+                                                <br>
+                                                <span class="alert-timestamp">${t('last_occurred')}: ${alert.last_occurrence}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                </details>
+                            ` : ''
+                        ).join('')}
+                    </div>
+                ` : ''}
+            ` : `
+                <p style="margin: 1rem 0; color: var(--text-muted); font-style: italic;">
+                    ${t('basic_host_info_only')}
+                </p>
+            `}
         </div>
     `;
 }

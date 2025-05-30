@@ -14,11 +14,19 @@
     <!-- Theme styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-light.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-dark.css') }}">
-    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
-    <!-- Language support -->
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>    <!-- Language support -->
     <script>
         // Dodajemy globalną zmienną, aby moduły miały dostęp do języka
         window.currentLanguage = "{{ session.get('language', 'en') }}";
+        
+        // Expose user role and permissions to JavaScript
+        {% if session.logged_in %}
+        window.userRole = '{{ session.get("user_info", {}).get("role", "viewer") }}';
+        window.userPermissions = [{% for permission in session.get('permissions', []) %}'{{ permission }}'{% if not loop.last %}, {% endif %}{% endfor %}];
+        {% else %}
+        window.userRole = 'guest';
+        window.userPermissions = [];
+        {% endif %}
     </script>
     <script src="{{ url_for('static', filename='js/localization/language.js') }}"></script>
 </head>
@@ -37,6 +45,7 @@
                 <i class="fas fa-language"></i>
                 <span>{{ session.get('language', 'EN').upper() }}</span>
             </button>
+            {% if has_permission('manage_profile') %}
             <a href="{{ url_for('profile') }}" class="user-info">
                 {% if session.user_info and session.user_info.avatar_path %}
                     <img src="{{ url_for('static', filename='avatars/' + session.user_info.avatar_path) }}?v={{ time.time() }}" alt="Profile" class="nav-avatar">
@@ -47,6 +56,7 @@
                 {% endif %}
                 <span class="nav-username">{{ session.user_info.display_name if session.user_info.display_name else session.username }}</span>
             </a>
+            {% endif %}
             <a href="{{ url_for('logout') }}" class="logout-button">
                 <i class="fas fa-sign-out-alt"></i>
                 <span data-en="Logout" data-pl="Wyloguj">Logout</span>
@@ -82,13 +92,13 @@
             <a href="/reports" class="nav-link {% if request.path == '/reports' %}active{% endif %}">
                 <i class="fas fa-file-alt"></i> <span data-en="Reports" data-pl="Raporty">Reports</span>
             </a>
-        </div>
-
-        <div class="nav-section">
+        </div>        <div class="nav-section">
             <h3 data-en="Functions" data-pl="Funkcje">Functions</h3>
+            {% if session.role != 'viewer' %}
             <a href="/inventory" class="nav-link {% if request.path == '/inventory' %}active{% endif %}">
                 <i class="fas fa-boxes"></i> <span data-en="Item Inventory" data-pl="Inwentaryzacja">Item Inventory</span>
             </a>
+            {% endif %}
             <a href="/tasks" class="nav-link {% if request.path == '/tasks' %}active{% endif %}">
                 <i class="fas fa-tasks"></i> <span data-en="Task Management" data-pl="Zarządzanie zadaniami">Task Management</span>
             </a>
@@ -119,9 +129,9 @@
             </a>
             <a href="/glpi/others" class="nav-link {% if request.path == '/glpi/others' %}active{% endif %}">
                 <i class="fas fa-microchip"></i> <span data-en="Other Devices" data-pl="Inne urządzenia">Other Devices</span>
-            </a>
-        </div>
+            </a>        </div>
 
+        {% if has_permission('view_logs') %}
         <div class="nav-section">
             <h3>Graylog</h3>
             <a href="/graylog/logs?refresh=1" class="nav-link {% if request.path == '/graylog/logs' %}active{% endif %}">
@@ -130,7 +140,10 @@
             <a href="/graylog/loading?target=/graylog/messages-over-time" class="nav-link {% if request.path == '/graylog/messages-over-time' %}active{% endif %}">
                 <i class="fas fa-chart-line"></i> <span data-en="Messages Over Time" data-pl="Wiadomości w czasie">Messages Over Time</span>
             </a>
-        </div>        {% if session.get('user_info', {}).get('role') == 'admin' %}
+        </div>
+        {% endif %}
+
+        {% if session.get('user_info', {}).get('role') == 'admin' %}
         <div class="nav-section">
             <h3 data-en="Administration" data-pl="Administracja">Administration</h3>
             <a href="/unified_management" class="nav-link {% if request.path == '/unified_management' %}active{% endif %}">

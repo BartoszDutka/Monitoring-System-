@@ -25,12 +25,13 @@
                 <label data-en="Interval:" data-pl="Interwał:">Interval:</label>
                 <select id="timeInterval" onchange="updateChart()">
                     <!-- Options will be added dynamically -->
-                </select>
-            </div>
+                </select>            </div>
+            {% if has_permission('view_logs') %}
             <button class="refresh-button" onclick="refreshChart()">
                 <i class="fas fa-sync"></i>
                 <span data-en="Refresh" data-pl="Odśwież">Refresh</span>
             </button>
+            {% endif %}
         </div>
     </div>
 </div>

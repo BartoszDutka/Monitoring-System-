@@ -48,7 +48,7 @@ def index():
     username = session.get('username')
     
     with get_db_cursor() as cursor:
-        if has_permission('tasks_manage_all'):
+        if has_permission('manage_all_tasks'):
             # Users with manage_all permission see all tasks
             cursor.execute("""
                 SELECT t.*, u.display_name as assignee_name 
@@ -80,14 +80,14 @@ def index():
     return render_template('tasks.html', 
                           tasks=tasks_list, 
                           users=users, 
-                          can_create=has_permission('tasks_create'),
-                          can_manage_all=has_permission('tasks_manage_all'))
+                          can_create=has_permission('create_tasks'),
+                          can_manage_all=has_permission('manage_all_tasks'))
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @tasks.route('/create', methods=['POST'])
-@permission_required('tasks_create')
+@permission_required('create_tasks')
 def create_task():
     """Create a new task"""
     title = request.form.get('title')
@@ -153,9 +153,8 @@ def update_task(task_id):
     if not task:
         flash('Task not found')
         return redirect(url_for('tasks.index'))
-        
-    # Only assignee can update task unless user has admin role
-    if username != task['assignee'] and not has_permission('tasks_manage_all'):
+          # Only assignee can update task unless user has admin role
+    if username != task['assignee'] and not has_permission('manage_all_tasks'):
         flash('You cannot update this task')
         return redirect(url_for('tasks.index'))
     
@@ -184,7 +183,26 @@ def update_task(task_id):
 @permission_required('tasks_delete')
 def delete_task(task_id):
     """Delete a task"""
+    username = session.get('username')
+    
+    # Get task details first to check ownership
     with get_db_cursor() as cursor:
+        cursor.execute("""
+            SELECT assignee FROM tasks WHERE task_id = %s
+        """, (task_id,))
+        task = cursor.fetchone()
+        
+        if not task:
+            flash('Task not found')
+            return redirect(url_for('tasks.index'))
+        
+        # Check if user can delete this task
+        # Users can delete their own tasks, or if they have manage_all_tasks permission
+        if task['assignee'] != username and not has_permission('manage_all_tasks'):
+            flash('You cannot delete this task - you can only delete your own tasks')
+            return redirect(url_for('tasks.index'))
+        
+        # Delete the task
         cursor.execute("""
             DELETE FROM tasks WHERE task_id = %s
         """, (task_id,))
@@ -209,6 +227,11 @@ def get_task(task_id):
         
         if not task:
             return jsonify({'error': 'Task not found'}), 404
+        
+        # Check if user can view this task
+        # Users can view their own tasks, or if they have manage_all_tasks permission
+        if task['assignee'] != username and not has_permission('manage_all_tasks'):
+            return jsonify({'error': 'Access denied - you can only view your own tasks'}), 403
             
         # Get comments
         cursor.execute("""
@@ -253,41 +276,40 @@ def get_attachment(filename):
     """Serve task attachment files"""
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-@tasks.route('/add_comment/<int:task_id>', methods=['POST'])
+@tasks.route('/comment/<int:task_id>', methods=['POST'])
 @permission_required('tasks_comment')
 def add_comment(task_id):
     """Add a comment to a task"""
-    comment = request.form.get('comment')
+    comment = request.form.get('comment', '').strip()
+    username = session.get('username')
     
     if not comment:
         flash('Comment cannot be empty')
         return redirect(url_for('tasks.index'))
-        
-    username = session.get('username')
     
-    # Get current task details to check if user is the assignee
+    # Check if task exists and if user can comment on it
     with get_db_cursor() as cursor:
         cursor.execute("""
-            SELECT * FROM tasks WHERE task_id = %s
+            SELECT task_id, assignee FROM tasks WHERE task_id = %s
         """, (task_id,))
         task = cursor.fetchone()
         
-    if not task:
-        flash('Task not found')
-        return redirect(url_for('tasks.index'))
+        if not task:
+            flash('Task not found')
+            return redirect(url_for('tasks.index'))
         
-    # Only assignee can add comments unless user has admin permission
-    if username != task['assignee'] and not has_permission('tasks_manage_all'):
-        flash('You cannot add comments to this task')
-        return redirect(url_for('tasks.index'))
-    
-    with get_db_cursor() as cursor:
+        # Users can comment on their own tasks, or if they have manage_all_tasks permission
+        if task['assignee'] != username and not has_permission('manage_all_tasks'):
+            flash('You cannot comment on this task - you can only comment on your own tasks')
+            return redirect(url_for('tasks.index'))
+        
+        # Add comment
         cursor.execute("""
             INSERT INTO task_comments (
                 task_id, username, comment
             ) VALUES (%s, %s, %s)
         """, (task_id, username, comment))
-        
+    
     flash('Comment added successfully')
     return redirect(url_for('tasks.index'))
 

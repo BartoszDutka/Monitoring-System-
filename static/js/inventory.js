@@ -25,13 +25,19 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Konfiguracja obserwerów
     setupMutationObserver();
-    
-    const methodBtns = document.querySelectorAll('.method-btn');
+      const methodBtns = document.querySelectorAll('.method-btn');
     const sections = {
         manual: document.querySelector('.manual-section'),
         invoice: document.querySelector('.invoice-section'),
         equipment: document.querySelector('.equipment-section')
     };
+
+    // Remove null sections for users without permissions
+    Object.keys(sections).forEach(key => {
+        if (!sections[key]) {
+            delete sections[key];
+        }
+    });
 
     methodBtns.forEach(btn => {
         btn.addEventListener('click', function() {
@@ -40,7 +46,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const method = this.dataset.method;
             Object.keys(sections).forEach(key => {
-                sections[key].style.display = key === method ? 'block' : 'none';
+                if (sections[key]) {
+                    sections[key].style.display = key === method ? 'block' : 'none';
+                }
             });
             
             // Perform translations again when changing sections
@@ -940,12 +948,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         });
-    }
-
-    // Add active class to first button by default
+    }    // Add active class to first button by default
     window.addEventListener('DOMContentLoaded', function() {
-        // First click the manual button to show that section
-        document.querySelector('.method-btn[data-method="manual"]').click();
+        // Click first available method button to show that section
+        const firstBtn = document.querySelector('.method-btn');
+        if (firstBtn) {
+            firstBtn.click();
+        }
     });
 
     const departmentSelect = document.getElementById('departmentSelect');
@@ -1440,6 +1449,28 @@ function loadDepartmentEquipment(departmentName) {
                         } else if (status === 'N/A') {
                             status = noDataText;
                         }
+                    }                    // Check if user has manage_inventory permission or is admin
+                    const hasManagePermission = (window.userPermissions && window.userPermissions.includes('manage_inventory')) || 
+                                              (window.userRole === 'admin');
+                    console.log('Checking manage_inventory permission:', { 
+                        userPermissions: window.userPermissions,
+                        userRole: window.userRole,
+                        hasManagePermission: hasManagePermission
+                    });
+                      let actionsColumn = '';
+                    if (hasManagePermission) {
+                        actionsColumn = `
+                        <td>
+                            <button class="btn-icon" onclick="changeDepartment(${item.id}, '${item.name}')" title="${language === 'pl' ? 'Przepisz do innego działu' : 'Assign to another department'}">
+                                <i class="fas fa-exchange-alt"></i>
+                            </button>
+                            <button class="btn-icon" onclick="editEquipment(${item.id})" title="${language === 'pl' ? 'Edytuj' : 'Edit'}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon" onclick="deleteEquipment(${item.id})" title="${language === 'pl' ? 'Usuń' : 'Delete'}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>`;
                     }
 
                     return `
@@ -1449,18 +1480,9 @@ function loadDepartmentEquipment(departmentName) {
                         <td>${serialNumber}</td>
                         <td>${item.quantity || 1}</td>
                         <td>${assignedDate}</td>
-                        <td><span class="status-badge ${item.status}">${status}</span></td>                    <td></td>
-                        <td>
-                            <button class="btn-icon" onclick="changeDepartment(${item.id}, '${item.name}')" title="${language === 'pl' ? 'Przepisz do innego działu' : 'Assign to another department'}">
-                                <i class="fas fa-exchange-alt"></i>
-                            </button>
-                            <button class="btn-icon" onclick="editEquipment(${item.id})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn-icon" onclick="deleteEquipment(${item.id})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
+                        <td><span class="status-badge ${item.status}">${status}</span></td>
+                        <td></td>
+                        ${actionsColumn}
                     </tr>
                     `;
                 }).join('');
@@ -1474,10 +1496,12 @@ function loadDepartmentEquipment(departmentName) {
                     } catch (err) {
                         console.error('Błąd podczas tłumaczenia elementów tabeli:', err);
                     }
-                }
-            } else {
+                }            } else {                // Check if user has manage_inventory permission or is admin for correct colspan
+                const hasManagePermission = (window.userPermissions && window.userPermissions.includes('manage_inventory')) || 
+                                          (window.userRole === 'admin');
+                const colspan = hasManagePermission ? 8 : 7;
                 const noEquipmentText = language === 'pl' ? 'Brak sprzętu przypisanego do tego działu' : 'No equipment assigned to this department';
-                tbody.innerHTML = `<tr><td colspan="8">${noEquipmentText}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${colspan}">${noEquipmentText}</td></tr>`;
             }
             
             // Bezpieczne usunięcie loadingSpinnera

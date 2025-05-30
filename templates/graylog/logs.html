@@ -32,12 +32,13 @@
                         <div class="stat-content">
                             <i class="fas fa-info-circle"></i>
                         </div>
-                    </div>
-                </div>
+                    </div>                </div>
+                {% if has_permission('view_logs') %}
                 <button class="refresh-button" onclick="refreshLogs()">
                     <i class="fas fa-sync"></i>
                     <span data-en="Refresh" data-pl="Odśwież">Refresh</span>
                 </button>
+                {% endif %}
             </div>
         </div>
         <div class="card-content">

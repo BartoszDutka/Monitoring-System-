@@ -7,15 +7,16 @@
 {% block content %}
 <div class="dashboard-header">
     <h1 data-en="Task Management" data-pl="Zarządzanie zadaniami">Task Management</h1>
-    <div class="header-actions">
-        {% if can_create %}
+    <div class="header-actions">        {% if can_create %}
         <button class="btn primary-btn" id="create-task-btn">
             <i class="fas fa-plus"></i> <span data-en="New Task" data-pl="Nowe zadanie">New Task</span>
         </button>
         {% endif %}
+        {% if has_permission('manage_users') %}
         <button class="btn secondary-btn" id="refresh-permissions" title="Refresh permissions">
             <i class="fas fa-sync"></i>
         </button>
+        {% endif %}
     </div>
 </div>
 

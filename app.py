@@ -289,6 +289,7 @@ def logout():
 
 @app.route('/api/glpi/refresh')
 @login_required
+@permission_required('view_glpi')
 def refresh_glpi():
     """Endpoint to refresh GLPI data from API and update database"""
     try:
@@ -317,6 +318,7 @@ def refresh_glpi():
 
 @app.route('/api/glpi/refresh/<category>')
 @login_required
+@permission_required('view_glpi')
 def refresh_glpi_category(category):
     """Endpoint to refresh specific GLPI category from API or get from database"""
     try:
@@ -353,6 +355,7 @@ def refresh_glpi_category(category):
 # Update the cached GLPI data function
 @app.route('/api/glpi/data')
 @login_required
+@permission_required('view_glpi')
 def get_cached_glpi_data():
     """Get GLPI data with proper caching"""
     start_time = datetime.now()
@@ -491,6 +494,7 @@ def get_cached_zabbix_data():
 
 @app.route('/api/graylog/refresh')
 @login_required
+@permission_required('view_logs')
 def get_cached_graylog_data():
     start_time = datetime.now()
     
@@ -507,12 +511,14 @@ def get_cached_graylog_data():
 # Force cache refresh endpoints
 @app.route('/api/zabbix/force_refresh')
 @login_required
+@permission_required('view_monitoring')
 def force_refresh_zabbix():
     cache.delete('zabbix_data')
     return jsonify(get_cached_zabbix_data())
 
 @app.route('/api/glpi/force_refresh')
 @login_required
+@permission_required('view_glpi')
 def force_refresh_glpi():
     """Force refresh of GLPI data from API"""
     try:
@@ -536,27 +542,32 @@ def force_refresh_glpi():
 
 @app.route('/api/graylog/force_refresh')
 @login_required
+@permission_required('view_logs')
 def force_refresh_graylog():
     cache.delete('graylog_data')
     return jsonify(get_cached_graylog_data())
 
 @app.route('/available-hosts')
 @login_required
+@permission_required('view_monitoring')
 def available_hosts():
     return render_template('available_hosts.html', request=request)
 
 @app.route('/unavailable-hosts')
 @login_required
+@permission_required('view_monitoring')
 def unavailable_hosts():
     return render_template('unavailable_hosts.html', request=request)
 
 @app.route('/unknown-hosts')
 @login_required
+@permission_required('view_monitoring')
 def unknown_hosts():
     return render_template('unknown_hosts.html', request=request)
 
 @app.route('/api/data')
 @login_required
+@permission_required('view_monitoring')
 def get_data():
     """API endpoint zwraca dane Zabbix, Graylog i informacje o nieznanych hostach"""
     try:
@@ -579,6 +590,7 @@ def get_data():
 
 @app.route('/glpi/workstations')
 @login_required
+@permission_required('view_glpi')
 def glpi_workstations():
     global glpi_cache
     if glpi_cache is None:
@@ -590,6 +602,7 @@ def glpi_workstations():
 
 @app.route('/glpi/terminals')
 @login_required
+@permission_required('view_glpi')
 def glpi_terminals():
     global glpi_cache
     if glpi_cache is None:
@@ -601,6 +614,7 @@ def glpi_terminals():
 
 @app.route('/glpi/servers')
 @login_required
+@permission_required('view_glpi')
 def glpi_servers():
     global glpi_cache
     if glpi_cache is None:
@@ -612,6 +626,7 @@ def glpi_servers():
 
 @app.route('/glpi/network')
 @login_required
+@permission_required('view_glpi')
 def glpi_network():
     global glpi_cache
     if glpi_cache is None:
@@ -623,6 +638,7 @@ def glpi_network():
 
 @app.route('/glpi/printers')
 @login_required
+@permission_required('view_glpi')
 def glpi_printers():
     global glpi_cache
     if glpi_cache is None:
@@ -634,6 +650,7 @@ def glpi_printers():
 
 @app.route('/glpi/monitors')
 @login_required
+@permission_required('view_glpi')
 def glpi_monitors():
     global glpi_cache
     if glpi_cache is None:
@@ -645,6 +662,7 @@ def glpi_monitors():
 
 @app.route('/glpi/racks')
 @login_required
+@permission_required('view_glpi')
 def glpi_racks():
     global glpi_cache
     if glpi_cache is None:
@@ -656,6 +674,7 @@ def glpi_racks():
 
 @app.route('/glpi/others')
 @login_required
+@permission_required('view_glpi')
 def glpi_others():
     global glpi_cache
     if glpi_cache is None:
@@ -667,6 +686,7 @@ def glpi_others():
 
 @app.route('/connect_vnc', methods=['POST'])
 @login_required
+@permission_required('vnc_connect')
 def connect_vnc():
     try:
         data = request.json
@@ -691,6 +711,7 @@ def connect_vnc():
 
 @app.route('/graylog/loading')
 @login_required
+@permission_required('view_logs')
 def graylog_loading():
     target_page = request.args.get('target', '/graylog/logs')
     query_string = request.args.get('query_string', '')
@@ -708,6 +729,7 @@ def graylog_loading():
 
 @app.route('/graylog/logs')
 @login_required
+@permission_required('view_logs')
 def graylog_logs():
     # Check if we're coming from the loading page
     if not request.referrer or 'loading' not in request.referrer:
@@ -757,6 +779,7 @@ def graylog_logs():
 
 @app.route('/graylog/messages-over-time')
 @login_required
+@permission_required('view_logs')
 def graylog_messages_over_time():
     # Check if we're coming from the loading page
     if not request.referrer or 'loading' not in request.referrer:
@@ -777,6 +800,7 @@ def graylog_messages_over_time():
 
 @app.route('/api/graylog/messages')
 @login_required
+@permission_required('view_logs')
 def get_graylog_messages():
     try:
         end_time = datetime.now()
@@ -810,6 +834,7 @@ def get_graylog_messages():
 
 @app.route('/api/graylog/timeline')
 @login_required
+@permission_required('view_logs')
 def get_graylog_timeline():
     try:
         range_value = int(request.args.get('range', '30'))
@@ -915,109 +940,101 @@ def get_graylog_timeline():
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
-@app.route('/profile', methods=['GET', 'POST'])
-@permission_required('manage_profile')  # Any role with manage_profile permission can access
+@app.route('/profile')
+@login_required
+@permission_required('manage_profile')
 def profile():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-        
-    user_info = get_user_info(session['username'])
-    if not user_info:
-        return redirect(url_for('login'))
+    """User profile management page"""
+    username = session.get('username')
     
-    # Get departments list with translations
-    with get_db_cursor() as cursor:
-        cursor.execute('''
-            SELECT name, description_en, description_pl
-            FROM departments
-            ORDER BY name
-        ''')
-        departments = []
-        for dept in cursor.fetchall():
-            departments.append({
-                'name': dept['name'],
-                'description': {
-                    'en': dept['description_en'],
-                    'pl': dept['description_pl']
-                }
-            })
-        
-    session['user_info'] = user_info
-    return render_template('profile.html',
-                         username=session['username'],
-                         user_info=user_info,
-                         departments=departments)
+    try:
+        with get_db_cursor() as cursor:
+            cursor.execute("""
+                SELECT u.*, r.role_key, r.description_en as role_description
+                FROM users u
+                LEFT JOIN roles r ON u.role_id = r.role_id
+                WHERE u.username = %s
+            """, (username,))
+            user = cursor.fetchone()
+            
+        if not user:
+            flash('User not found', 'error')
+            return redirect(url_for('index'))
+            
+        return render_template('profile.html', user=user)
+    except Exception as e:
+        logger.error(f"Error loading profile: {e}")
+        flash('Error loading profile', 'error')
+        return redirect(url_for('index'))
 
-@app.route('/update_profile', methods=['POST'])
-@role_required(['admin', 'user'])
+@app.route('/update-profile', methods=['POST'])
+@login_required
+@permission_required('manage_profile')
 def update_profile():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-        
-    email = request.form.get('email')
-    department = request.form.get('department')
-    role = request.form.get('role')  # Changed from title to role
+    """Update user profile information"""
+    username = session.get('username')
+    display_name = request.form.get('display_name', '').strip()
+    email = request.form.get('email', '').strip()
+    current_password = request.form.get('current_password', '')
+    new_password = request.form.get('new_password', '')
+    confirm_password = request.form.get('confirm_password', '')
     
     try:
-        update_user_profile(
-            username=session['username'],
-            email=email,
-            department=department,
-            role=role  # Changed from title to role
-        )
-        flash('Profile updated successfully')
-        
-        # Update session info
-        user_info = get_user_info(session['username'])
-        if user_info:
-            session['user_info'] = user_info
+        with get_db_cursor() as cursor:
+            # Get current user data
+            cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+            user = cursor.fetchone()
             
-    except Exception as e:
-        print(f"Error updating profile: {e}")
-        flash('Error updating profile')
-        
-    return redirect(url_for('profile'))
-
-@app.route('/upload_avatar', methods=['POST'])
-@role_required(['admin', 'user'])  # Viewers can't upload avatars
-def upload_avatar():
-    try:
-        if 'avatar' not in request.files:
-            flash('No file selected')
-            return redirect(url_for('profile'))
+            if not user:
+                flash('User not found', 'error')
+                return redirect(url_for('profile'))
             
-        file = request.files['avatar']
-        if file.filename == '':
-            flash('No file selected')
-            return redirect(url_for('profile'))
+            # Update basic profile information
+            update_fields = []
+            update_values = []
             
-        if file and allowed_file(file.filename):
-            # Delete old avatar if exists
-            old_avatar = session.get('user_info', {}).get('avatar_path')
-            if (old_avatar):
-                old_path = os.path.join(app.config['UPLOAD_FOLDER'], old_avatar)
-                if os.path.exists(old_path):
-                    os.remove(old_path)
-                    
-            # Save new avatar
-            filename = secure_filename(f"{session['username']}_{int(time.time())}.{file.filename.rsplit('.', 1)[1].lower()}")
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
+            if display_name and display_name != user['display_name']:
+                update_fields.append('display_name = %s')
+                update_values.append(display_name)
             
-            # Update database and session
-            update_user_avatar(session['username'], filename)
+            if email and email != user['email']:
+                update_fields.append('email = %s')
+                update_values.append(email)
             
-            # Refresh user info in session
-            user_info = get_user_info(session['username'])
-            if user_info:
-                session['user_info'] = user_info
+            # Handle password change
+            if new_password:
+                if not current_password:
+                    flash('Current password is required to change password', 'error')
+                    return redirect(url_for('profile'))
                 
-            flash('Avatar updated successfully')
+                if new_password != confirm_password:
+                    flash('New passwords do not match', 'error')
+                    return redirect(url_for('profile'))
+                
+                # Verify current password (simplified - in production use proper hashing)
+                if current_password != user['password']:
+                    flash('Current password is incorrect', 'error')
+                    return redirect(url_for('profile'))
+                
+                update_fields.append('password = %s')
+                update_values.append(new_password)
             
+            # Update user data if there are changes
+            if update_fields:
+                update_values.append(username)
+                cursor.execute(f"""
+                    UPDATE users SET {', '.join(update_fields)}
+                    WHERE username = %s
+                """, update_values)
+                
+                flash('Profile updated successfully', 'success')
+            else:
+                flash('No changes made', 'info')
+                
     except Exception as e:
-        print(f"Error uploading avatar: {e}")
-        flash('Error uploading avatar')
-        
+        logger.error(f"Error updating profile: {e}")
+        flash('Error updating profile', 'error')
+    
     return redirect(url_for('profile'))
 
 @app.route('/api/history/metrics/<host_id>')
@@ -1049,6 +1066,7 @@ def get_host_history(host_id):
 
 @app.route('/api/graylog/refresh', methods=['POST'])
 @login_required
+@permission_required('view_logs')
 def refresh_graylog_logs():
     try:
         # Pobierz limit z parametrów URL
@@ -1251,6 +1269,10 @@ def fetch_logs():
     try:
         data = request.get_json()
         force_refresh = data.get('force_refresh', False)
+          # Only allow force refresh if user has view_logs permission
+        if force_refresh and not has_permission('view_logs'):
+            force_refresh = False
+            
         logs = get_logs(time_range_minutes=30, force_refresh=force_refresh)
         return jsonify(logs)
     except Exception as e:
@@ -1294,7 +1316,7 @@ def reports_page():
 
 @app.route('/generate-report', methods=['POST'])
 @login_required
-@permission_required('generate_reports')  # Only users with generate_reports permission can access
+@permission_required('create_reports')  # Only users with create_reports permission can access
 def generate_report():
     """Handle report generation requests with improved error handling."""
     try:
@@ -1726,7 +1748,7 @@ def refresh_permissions():
 
 @app.route('/api/users')
 @login_required
-@permission_required('view_users')
+@permission_required('manage_users')
 def get_users_api():
     """API endpoint to get users list for role management"""
     try:
