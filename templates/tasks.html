@@ -267,8 +267,7 @@
             </div>            <div class="comments-section">
                 <h4 data-en="Comments" data-pl="Komentarze">Comments</h4>
                 <div id="task-comments" class="comments-list"></div>
-                {% if can_comment %}
-                <form id="add-comment-form" action="" method="POST">
+                {% if can_comment %}                <form id="add-comment-form" action="" method="POST">
                     <div class="form-group">
                         <textarea name="comment" placeholder="Add a comment..." data-en-placeholder="Add a comment..." data-pl-placeholder="Dodaj komentarz..." required></textarea>
                     </div>
@@ -276,6 +275,40 @@
                         <button type="submit" class="btn primary-btn" data-en="Add Comment" data-pl="Dodaj komentarz">Add Comment</button>
                     </div>
                 </form>
+                <script>
+                    // Add event listener to the comment form
+                    document.getElementById('add-comment-form').addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        const form = this;
+                        const comment = form.querySelector('textarea[name="comment"]').value;
+                        const taskId = form.action.split('/').pop();
+                        
+                        console.log('Form action:', form.action);
+                        console.log('Task ID:', taskId);
+                        console.log('Comment:', comment);
+                        
+                        // Submit using fetch API instead
+                        fetch(`/tasks/comment/${taskId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: `comment=${encodeURIComponent(comment)}`
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.href = '/tasks'; // Redirect back to tasks page
+                            } else {
+                                console.error('Error submitting comment:', response.status);
+                                alert('Error adding comment. Please try again.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error adding comment. Please try again.');
+                        });
+                    });
+                </script>
                 {% endif %}
             </div>
         </div>
@@ -695,6 +728,7 @@ function loadTaskDetails(taskId) {
             const addCommentForm = document.getElementById('add-comment-form');
             if (addCommentForm) {
                 addCommentForm.action = `/tasks/comment/${taskId}`;
+                console.log('Set comment form action to:', addCommentForm.action);
             }
 
             // Load comments
