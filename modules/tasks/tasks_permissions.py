@@ -1,7 +1,7 @@
 """
 Functions for managing task-related permissions
 """
-from modules.database import get_db_cursor
+from ..core.database import get_db_cursor
 from flask import session
 
 def cleanup_duplicate_task_permissions():

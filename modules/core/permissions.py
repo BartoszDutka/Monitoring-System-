@@ -1,6 +1,6 @@
 import functools
 from flask import session, redirect, url_for, render_template, flash, request
-from modules.database import get_db_cursor
+from .database import get_db_cursor
 from typing import List, Optional, Dict, Any
 
 def get_user_permissions(username: str, debug: bool = False) -> List[Dict[str, Any]]:

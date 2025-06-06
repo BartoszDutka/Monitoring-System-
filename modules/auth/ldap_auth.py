@@ -1,8 +1,8 @@
 from ldap3 import Server, Connection, SIMPLE, ALL, SUBTREE, ALL_ATTRIBUTES, NTLM
 from typing import Optional, Dict, Any
 from config import *
-from modules.database import get_db_cursor
-from modules.user_data import create_user
+from ..core.database import get_db_cursor
+from ..data.user_data import create_user
 
 def authenticate_user(username: str, password: str) -> bool:
     """Authenticate user against Active Directory and sync with local database"""

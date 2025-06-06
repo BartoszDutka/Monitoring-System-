@@ -2,7 +2,7 @@ import requests
 from config import ZABBIX_URL, ZABBIX_TOKEN
 from collections import defaultdict
 from datetime import datetime
-from modules.database import log_system_event, archive_metrics, archive_host_status
+from ..core.database import log_system_event, archive_metrics, archive_host_status
 
 def get_hosts():
     headers = {

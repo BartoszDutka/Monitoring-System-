@@ -1,6 +1,6 @@
 import json
 import os
-from modules.database import get_db_cursor
+from ..core.database import get_db_cursor
 from werkzeug.security import generate_password_hash, check_password_hash
 
 USER_DATA_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'user_data.json')

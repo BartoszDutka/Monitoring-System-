@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, send_from_directory
-from modules.database import get_db_cursor
+from ..core.database import get_db_cursor
 from datetime import datetime
 import json
 import os
 from werkzeug.utils import secure_filename
-from modules.permissions import permission_required, has_permission
+from ..core.permissions import permission_required, has_permission
 
 # Define a path for task attachments
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static', 'attachments')

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
 from datetime import datetime
-from modules.database import get_db_cursor
-from modules.permissions import permission_required
+from ..core.database import get_db_cursor
+from ..core.permissions import permission_required
 import pdfplumber
 import re
 import os

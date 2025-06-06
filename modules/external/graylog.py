@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import threading
 import time
 from config import GRAYLOG_URL, GRAYLOG_USERNAME, GRAYLOG_PASSWORD
-from modules.database import log_system_event
+from ..core.database import log_system_event
 
 # Dictionary for message translations
 MESSAGES = {
@@ -291,9 +291,8 @@ def get_logs(time_range_minutes: int = 5, force_refresh: bool = False, lang: str
             "stats": stats,
             "language": lang
         }
-        
-        # Store messages in database
-        from modules.database import store_graylog_messages
+          # Store messages in database
+        from ..core.database import store_graylog_messages
         store_graylog_messages(all_messages)
         
         graylog_buffer.add_logs(time_range_minutes, result)

@@ -1,7 +1,7 @@
 """
 Function to fix duplicate 'view_tasks' and 'tasks_view' permissions issue.
 """
-from modules.database import get_db_cursor
+from ..core.database import get_db_cursor
 
 def cleanup_task_view_permissions():
     """

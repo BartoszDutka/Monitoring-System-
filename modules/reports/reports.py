@@ -29,7 +29,7 @@ except ImportError:
         PDFKIT_AVAILABLE = False
         print("No PDF generation backend available")
 
-from modules.database import get_db_cursor
+from ..core.database import get_db_cursor
 
 # Directory for storing generated reports
 REPORTS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'reports')

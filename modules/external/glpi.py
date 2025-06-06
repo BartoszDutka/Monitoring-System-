@@ -3,7 +3,7 @@ from requests.exceptions import RequestException, Timeout
 import time
 from config import GLPI_URL, GLPI_USER_TOKEN, GLPI_APP_TOKEN
 from flask import session
-from modules.database import archive_asset, get_db_cursor
+from ..core.database import archive_asset, get_db_cursor
 import json
 from datetime import datetime
 from flask_caching import Cache

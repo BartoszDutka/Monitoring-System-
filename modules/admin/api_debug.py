@@ -146,7 +146,7 @@ def debug_glpi_data_loading():
     Returns:
         dict: Diagnostic information about assets in the database
     """
-    from modules.database import get_db_cursor
+    from ..core.database import get_db_cursor
     
     try:
         with get_db_cursor() as cursor:

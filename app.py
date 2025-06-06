@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, jsonify, session, flash
 from flask import redirect, url_for, abort, send_from_directory
-from modules.zabbix import get_hosts, get_unknown_hosts
-from modules.graylog import get_logs
-from modules.glpi import get_glpi_data
-from modules.ldap_auth import authenticate_user
+from modules.external.zabbix import get_hosts, get_unknown_hosts
+from modules.external.graylog import get_logs
+from modules.external.glpi import get_glpi_data
+from modules.auth.ldap_auth import authenticate_user
 from config import *  # Importujemy wszystkie zmienne konfiguracyjne
 import urllib3
 import urllib.parse
@@ -13,8 +13,8 @@ import json
 from functools import wraps
 from werkzeug.utils import secure_filename
 import time
-from modules.user_data import update_user_avatar, get_user_avatar, verify_user, get_user_info
-from modules.database import (
+from modules.data.user_data import update_user_avatar, get_user_avatar, verify_user, get_user_info
+from modules.core.database import (
     get_db_cursor, 
     get_historical_metrics, 
     get_host_status_history,
@@ -22,16 +22,16 @@ from modules.database import (
     get_detailed_messages  # Dodaj ten import
 )
 from datetime import datetime, timedelta  # Keep this import as is
-from modules.user_data import update_user_profile
+from modules.data.user_data import update_user_profile
 # Import the new permissions module
-from modules.permissions import permission_required, role_required, admin_required, has_permission, get_user_permissions
-from inventory import inventory  # Import the inventory blueprint
+from modules.core.permissions import permission_required, role_required, admin_required, has_permission, get_user_permissions
+from modules.inventory.inventory import inventory  # Import the inventory blueprint
 from werkzeug.exceptions import Forbidden  # Add this import
 from flask_caching import Cache
 import logging
-from modules.tasks import tasks, setup_tasks_tables  # Import from the modules directory
+from modules.tasks.tasks import tasks, setup_tasks_tables  # Import from the modules directory
 # Import report functions outside conditional blocks to ensure they're always available
-from modules.reports import ReportGenerator, get_recent_reports, get_report_by_id, delete_report, REPORTS_DIR
+from modules.reports.reports import ReportGenerator, get_recent_reports, get_report_by_id, delete_report, REPORTS_DIR
 
 # Handle PDF dependency imports
 import importlib.util
@@ -129,7 +129,7 @@ cache = Cache(config={
 cache.init_app(app)
 
 # Initialize GLPI module cache
-from modules.glpi import init_cache
+from modules.external.glpi import init_cache
 init_cache(app)
 
 # Custom filter for checking if a character is a digit
@@ -1206,7 +1206,7 @@ def unified_management():
     current_language = session.get('language', 'en')
     
     # Get permissions by category
-    from modules.permissions import get_permissions_by_category
+    from modules.core.permissions import get_permissions_by_category
     permissions_by_category = get_permissions_by_category(current_language)
     
     # Remove unwanted permissions
@@ -1693,7 +1693,7 @@ def api_role_info():
 def debug_role(role_key):
     """Debug endpoint for role permissions - ADMIN ONLY"""
     try:
-        from modules.permissions import debug_role_permissions
+        from modules.core.permissions import debug_role_permissions
         debug_role_permissions(role_key)
         return jsonify({
             'message': f'Debug info for role {role_key} printed to server console',
@@ -1710,7 +1710,7 @@ def debug_role(role_key):
 def debug_permission(permission_key):
     """Debug endpoint for testing a specific permission - ADMIN ONLY"""
     try:
-        from modules.permissions import has_permission, get_user_permissions
+        from modules.core.permissions import has_permission, get_user_permissions
         # Get current user info
         username = session.get('username')
         user_role = session.get('user_info', {}).get('role')
@@ -1793,7 +1793,7 @@ def refresh_permissions():
             return jsonify({'error': 'Not logged in'}), 401
             
         # Reload permissions
-        from modules.permissions import get_user_permissions
+        from modules.core.permissions import get_user_permissions
         permissions = [p['permission_key'] for p in get_user_permissions(username)]
         session['permissions'] = permissions
         
@@ -1839,7 +1839,7 @@ def get_users_api():
 def admin_cleanup_permissions():
     """Admin endpoint to clean up duplicate permissions"""
     try:
-        from modules.permission_cleanup import cleanup_task_view_permissions
+        from modules.admin.permission_cleanup import cleanup_task_view_permissions
         
         result = cleanup_task_view_permissions()
         
@@ -2010,10 +2010,10 @@ def update_role_permissions():
 
 if __name__ == '__main__':
     # Import required modules
-    from modules.database import setup_departments_table, ensure_default_departments
-    from modules.permissions import initialize_roles_and_permissions
-    from modules.tasks_permissions import initialize_task_permissions
-    from modules.permission_cleanup import cleanup_task_view_permissions
+    from modules.core.database import setup_departments_table, ensure_default_departments
+    from modules.core.permissions import initialize_roles_and_permissions
+    from modules.tasks.tasks_permissions import initialize_task_permissions
+    from modules.admin.permission_cleanup import cleanup_task_view_permissions
     
     # Initialize database tables
     setup_departments_table()
@@ -2032,13 +2032,13 @@ if __name__ == '__main__':
         print("Task permissions initialized successfully")
     else:
         print("Warning: Failed to initialize task permissions")
-        
-    # Clean up duplicate task view permissions
+          # Clean up duplicate task view permissions
     print("Cleaning up duplicate task view permissions...")
     if cleanup_task_view_permissions():
         print("Permissions cleanup completed successfully")
     else:
         print("Warning: Failed to clean up permissions")
-    
+
+if __name__ == '__main__':
     # Run the application
     app.run(debug=True, host='0.0.0.0', port=5000)
