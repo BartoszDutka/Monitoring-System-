@@ -684,6 +684,64 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
+/* Department Change Modal */
+[data-theme="dark"] .modal-content {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .modal-content h3 {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .modal-content .form-group label {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .modal-content .form-control {
+    background: #1c1c1c;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .modal-content .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2);
+}
+
+/* Department Change Modal Buttons */
+[data-theme="dark"] .modal-content .btn {
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .modal-content .btn.primary {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+[data-theme="dark"] .modal-content .btn.primary:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+[data-theme="dark"] .modal-content .btn.secondary {
+    background: transparent;
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .modal-content .btn.secondary:hover {
+    background: var(--hover-bg);
+    border-color: var(--primary-color);
+}
+
 [data-theme="dark"] #modal .edit-role-form {
     background: var(--card-bg);
     border-color: var(--border-color);

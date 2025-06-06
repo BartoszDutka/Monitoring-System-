@@ -18,14 +18,11 @@ function changeDepartment(equipmentId, itemName) {
     modal.style.width = '100%';
     modal.style.height = '100%';
     modal.style.backgroundColor = 'rgba(0,0,0,0.4)';
-    
-    // Create modal content
+      // Create modal content
     let modalContent = document.createElement('div');
     modalContent.className = 'modal-content';
-    modalContent.style.backgroundColor = '#fff';
     modalContent.style.margin = '10% auto';
     modalContent.style.padding = '20px';
-    modalContent.style.border = '1px solid #888';
     modalContent.style.width = '50%';
     modalContent.style.borderRadius = '5px';
     
