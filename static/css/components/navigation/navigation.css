@@ -44,7 +44,6 @@
   gap: 0.75rem;
   padding: 0.5rem 0.8rem 0.5rem 0.5rem;
   border-radius: 30px;
-  background: linear-gradient(to right, var(--hover-bg), rgba(var(--hover-bg-rgb, 232, 240, 254), 0.5));
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
   overflow: hidden;
@@ -53,7 +52,7 @@
 }
 
 .user-info:hover {
-  background: linear-gradient(to right, var(--primary-color-light, #e3f2fd), rgba(var(--primary-color-light-rgb, 227, 242, 253), 0.7));
+
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

@@ -90,10 +90,6 @@ h2 {
   margin-left: 20px
 }
 
-li:nth-child(2n) {
-  background-color: #f9f9f9
-}
-
 input,
 select {
   transition: background-color .3s,color .3s,border-color .3s,box-shadow .3s

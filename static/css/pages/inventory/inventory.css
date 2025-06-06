@@ -217,6 +217,10 @@ label {
   font-size: 0.95rem;
 }
 
+.form-group label {
+  color: white;
+}
+
 .form-control {
   width: 100%;
   padding: 0.75rem 1rem;
@@ -379,7 +383,7 @@ select.form-control {
   border-bottom: 1px solid var(--border-color);
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--dark-color);
+  color: white;
 }
 
 .equipment-list .equipment-table {
@@ -408,14 +412,14 @@ select.form-control {
 }
 
 .equipment-table th {
-  background-color: var(--primary-light);
+  background-color: var(--border-color);
   font-weight: 500;
-  color: var(--dark-color);
+  color: var(--text-color);
   position: sticky;
   top: 0;
   z-index: 10;
   white-space: nowrap;
-  overflow: visible; /* Zapobiega ucięciu nagłówków */
+  overflow: visible; /* Prevents header truncation */
 }
 
 /* Specific column widths for better fitting */
@@ -513,7 +517,8 @@ select.form-control {
   padding: 1rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
-  background-color: var(--primary-light);
+  background-color: var(--card-bg);
+  color: var(--text-color);
   overflow: hidden;
   overflow-x: visible !important;
 }
@@ -586,7 +591,8 @@ select.form-control {
   padding: 1rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
-  background-color: var(--primary-light);
+  background-color: var(--card-bg);
+  color: var(--text-color);
 }
 
 .invoice-data-table {
@@ -604,7 +610,8 @@ select.form-control {
 
 .invoice-data-table th {
   font-weight: 500;
-  background-color: rgba(0, 0, 0, 0.03);
+  background-color: var(--border-color);
+  color: var(--text-color);
 }
 
 .pdf-processing {
@@ -760,7 +767,9 @@ textarea:focus-visible {
 .product-categories {
     margin-bottom: 1rem;
     padding: 0.5rem;
-    background: var(--primary-light);
+    background: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius);
 }
 

@@ -1,0 +1,47 @@
+/* Light Theme Variables and Overrides */
+:root {
+    /* Light theme color variables */
+    --primary-color: #1a73e8;
+    --primary-dark: #1557b0;
+    --primary-light: #4285f4;
+    --secondary-color: #f8f9fa;
+    
+    /* Text colors */
+    --text-color: #2c3e50;
+    --text-muted: #888;
+    
+    /* Background colors */
+    --bg-color: #fff;
+    --card-bg: #fff;
+    --hover-bg: #e8f0fe;
+    
+    /* Border and shadow */
+    --border-color: #e1e4e8;
+    --shadow-color: rgba(0,0,0,.1);
+    
+    /* Status colors */
+    --success: #1a73e8;
+    --warning: #ff9800;
+    --danger: #dc3545;
+    --info: #17a2b8;
+    --neutral: #6c757d;
+}
+
+/* Light theme specific overrides */
+[data-theme="light"] body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+[data-theme="light"] .card {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+[data-theme="light"] .nav-link {
+    color: var(--text-color);
+}
+
+[data-theme="light"] .nav-link:hover {
+    background-color: var(--hover-bg);
+}

@@ -312,7 +312,7 @@
 
 .filter-group label {
     font-weight: 500;
-    color: #333;
+    color:white;
 }
 
 .filter-group select,
@@ -369,6 +369,16 @@
 
 .accent-btn:hover {
     background-color: #0b7dda;
+}
+
+/* Dark theme override for accent button */
+[data-theme="dark"] .accent-btn {
+    background-color: #2ecc71;
+    color: white;
+}
+
+[data-theme="dark"] .accent-btn:hover {
+    background-color: #27ae60;
 }
 
 .reports-container {

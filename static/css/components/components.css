@@ -1,20 +1,45 @@
 .card-header {
   padding: 1.5rem;
   display: flex;
-  background: linear-gradient(135deg,var(--gradient-start),var(--gradient-end))!important;
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)) !important;
   gap: 1rem;
   align-items: center;
-  color: #fff
+  color: #fff;
+  border-left: none !important;
+  border-right: none !important;
+  position: relative !important;
+  box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3) !important;
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
+}
+
+.card-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .card-header i {
-  font-size: 1.5rem
+  font-size: 1.5rem;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
 }
 
 .card-header h2 {
   margin: 0;
   font-weight: 500;
-  font-size: 1.5rem
+  font-size: 1.5rem;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.02em;
 }
 
 .card-content {
@@ -99,4 +124,15 @@
 
 .refresh-button.secondary:hover {
   background: var(--hover-bg)
+}
+
+/* Card header hover effects */
+.card-header:hover {
+  box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4) !important;
+  transform: translateY(-2px);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card-header:hover::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
 }
