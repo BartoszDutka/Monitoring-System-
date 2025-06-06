@@ -543,7 +543,43 @@ def force_refresh_glpi():
 @permission_required('view_logs')
 def force_refresh_graylog():
     cache.delete('graylog_data')
-    return jsonify(get_cached_graylog_data())
+    
+    # Wywołaj funkcję get_data bezpośrednio
+    start_time = datetime.now()
+    
+    # Pobierz limit z parametrów zapytania, podobnie jak w funkcji get_graylog_messages
+    limit = request.args.get('limit', session.get('graylog_limit', 300), type=int)
+    session['graylog_limit'] = limit
+    
+    # Pobierz dane bezpośrednio z modułu, bez cache
+    data = get_logs(time_range_minutes=5, force_refresh=True)
+    
+    # Teraz pobierz wiadomości z bazy danych z określonym limitem
+    end_time = datetime.now()
+    start_time_range = end_time - timedelta(minutes=5)
+    
+    messages_data = get_detailed_messages(start_time_range, end_time, limit=limit)
+    
+    # Zaktualizuj dane o wiadomości z odpowiednim limitem
+    data['logs'] = [
+        {
+            'timestamp': msg['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
+            'level': msg['level'],
+            'severity': msg['severity'],
+            'category': msg['category'],
+            'message': msg['message'],
+            'details': json.loads(msg['details']) if msg['details'] else {}
+        }
+        for msg in messages_data['messages']
+    ]
+    data['total_results'] = len(messages_data['messages'])
+    data['stats'] = messages_data['stats']
+    data['time_range'] = f"Last 5 minutes • Showing {limit} of {messages_data['total_in_db']} entries"
+    
+    response_time = (datetime.now() - start_time).total_seconds()
+    logger.info(f"Graylog data force refreshed in {response_time:.2f} seconds with limit {limit}")
+    
+    return jsonify(data)
 
 @app.route('/available-hosts')
 @login_required

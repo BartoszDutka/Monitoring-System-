@@ -399,24 +399,16 @@ function refreshLogs() {
     const currentLimit = sessionStorage.getItem('graylog_limit') || 
                         new URLSearchParams(window.location.search).get('limit') || 
                         '300';
-    
-    fetch(`/api/graylog/refresh?limit=${currentLimit}`, {
-        method: 'POST'
-    })
+      fetch(`/api/graylog/force_refresh?limit=${currentLimit}`)
     .then(response => response.json())
     .then(data => {
-        if (data.status === 'success') {
-            updateLogStats(data.stats);
-            document.querySelector('.time-range').textContent = data.time_range;
-            
-            return fetch(`/api/graylog/messages?limit=${currentLimit}`);
-        } else {
-            throw new Error(__('error_loading'));
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
+        // Aktualizuj statystyki na podstawie otrzymanych danych
+        updateLogStats(data.stats);
+        document.querySelector('.time-range').textContent = data.time_range;
+        
+        // Aktualizuj zawartość logów
         updateLogContent(data.logs);
+        
         buttonText.textContent = __('refresh_complete');
         setTimeout(() => {
             buttonText.textContent = originalText;

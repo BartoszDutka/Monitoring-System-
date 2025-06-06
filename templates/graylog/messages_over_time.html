@@ -69,6 +69,74 @@
 <script>
 let timelineChart;
 
+// Funkcja do przetwarzania i wyświetlania danych wykresu
+function processChartData(data, language, rangeValue, rangeUnit) {
+    if (timelineChart) {
+        timelineChart.destroy();
+    }
+    
+    const ctx = document.getElementById('messageTimeline').getContext('2d');
+    
+    // Translate chart labels based on language
+    if (language === 'pl') {
+        // Translate dataset labels
+        data.datasets.forEach(dataset => {
+            if (dataset.label === 'Errors') dataset.label = 'Błędy';
+            if (dataset.label === 'Warnings') dataset.label = 'Ostrzeżenia';
+            if (dataset.label === 'Info') dataset.label = 'Informacje';
+            
+            // Dodajemy również tłumaczenie dla etykiet priorytetów, jeśli są jeszcze w języku angielskim
+            if (dataset.label === 'High Priority') dataset.label = 'Wysoki';
+            if (dataset.label === 'Medium Priority') dataset.label = 'Średni';
+            if (dataset.label === 'Low Priority') dataset.label = 'Niski';
+        });
+    }
+    
+    const rangeUnitTranslation = {
+        'minutes': language === 'pl' ? 'minut' : 'minutes',
+        'hours': language === 'pl' ? 'godzin' : 'hours',
+        'days': language === 'pl' ? 'dni' : 'days'
+    };
+    
+    timelineChart = new Chart(ctx, {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                title: {
+                    display: true,
+                    text: language === 'pl' ? 
+                        `Rozkład wiadomości (ostatnie ${rangeValue} ${rangeUnitTranslation[rangeUnit]})` :
+                        `Message Distribution (Last ${rangeValue} ${rangeUnit})`
+                }
+            }
+        }
+    });
+    
+    updateStats(data);
+}
+
 function updateTimeOptions() {
     const rangeUnit = document.getElementById('timeRangeUnit').value;
     const rangeSelect = document.getElementById('timeRangeValue');
@@ -118,7 +186,7 @@ function updateTimeOptions() {
     updateChart();
 }
 
-function updateChart() {
+function updateChart(forceRefresh = false) {
     const rangeValue = document.getElementById('timeRangeValue').value;
     const rangeUnit = document.getElementById('timeRangeUnit').value;
     const interval = document.getElementById('timeInterval').value;
@@ -129,79 +197,34 @@ function updateChart() {
     button.disabled = true;
     icon.classList.add('fa-spin');
     
-    fetch(`/api/graylog/timeline?range=${rangeValue}&range_type=${rangeUnit}&interval=${interval}&language=${language}`)
+    // Jeśli wymuszamy odświeżenie, najpierw wywołujemy force_refresh, aby wyczyścić cache
+    if (forceRefresh) {
+        fetch(`/api/graylog/force_refresh`)
+            .then(response => response.json())
+            .then(() => {
+                // Po wymuszonym odświeżeniu pobieramy dane z timeline
+                return fetch(`/api/graylog/timeline?range=${rangeValue}&range_type=${rangeUnit}&interval=${interval}&language=${language}`);
+            })
+            .catch(error => {
+                console.error('Error refreshing data:', error);                return fetch(`/api/graylog/timeline?range=${rangeValue}&range_type=${rangeUnit}&interval=${interval}&language=${language}`);
+            })
+            .then(response => response.json())
+            .then(data => processChartData(data, language, rangeValue, rangeUnit))
+            .catch(error => console.error('Error updating chart:', error))
+            .finally(() => {
+                button.disabled = false;
+                icon.classList.remove('fa-spin');            });
+    } else {
+        // Standardowe zachowanie - pobierz dane z API (mogą być z cache)
+        fetch(`/api/graylog/timeline?range=${rangeValue}&range_type=${rangeUnit}&interval=${interval}&language=${language}`)
         .then(response => response.json())
-        .then(data => {
-            if (timelineChart) {
-                timelineChart.destroy();
-            }
-            
-            const ctx = document.getElementById('messageTimeline').getContext('2d');
-            
-            // Translate chart labels based on language
-            if (language === 'pl') {
-                // Translate dataset labels
-                data.datasets.forEach(dataset => {
-                    if (dataset.label === 'Errors') dataset.label = 'Błędy';
-                    if (dataset.label === 'Warnings') dataset.label = 'Ostrzeżenia';
-                    if (dataset.label === 'Info') dataset.label = 'Informacje';
-                    
-                    // Dodajemy również tłumaczenie dla etykiet priorytetów, jeśli są jeszcze w języku angielskim
-                    if (dataset.label === 'High Priority') dataset.label = 'Wysoki';
-                    if (dataset.label === 'Medium Priority') dataset.label = 'Średni';
-                    if (dataset.label === 'Low Priority') dataset.label = 'Niski';
-                });
-            }
-            
-            const rangeUnitTranslation = {
-                'minutes': language === 'pl' ? 'minut' : 'minutes',
-                'hours': language === 'pl' ? 'godzin' : 'hours',
-                'days': language === 'pl' ? 'dni' : 'days'
-            };
-            
-            timelineChart = new Chart(ctx, {
-                type: 'bar',
-                data: data,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            stacked: true,
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
-                        },
-                        y: {
-                            stacked: true,
-                            beginAtZero: true
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'top'
-                        },
-                        title: {
-                            display: true,
-                            text: language === 'pl' ? 
-                                `Rozkład wiadomości (ostatnie ${rangeValue} ${rangeUnitTranslation[rangeUnit]})` :
-                                `Message Distribution (Last ${rangeValue} ${rangeUnit})`
-                        }
-                    }
-                }
-            });
-            
-            updateStats(data);
-        })
+        .then(data => processChartData(data, language, rangeValue, rangeUnit))
         .catch(error => console.error('Error updating chart:', error))
         .finally(() => {
             button.disabled = false;
             icon.classList.remove('fa-spin');
         });
+    }
 }
 
 function updateStats(data) {
@@ -218,7 +241,8 @@ function updateStats(data) {
 }
 
 function refreshChart() {
-    updateChart();
+    // Wywołaj updateChart z parametrem true, aby wymusić odświeżenie
+    updateChart(true);
 }
 
 // Inicjalizacja
