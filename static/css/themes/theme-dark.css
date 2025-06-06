@@ -261,8 +261,11 @@
     border-color: var(--border-color);
 }
 
-[data-theme="dark"] tr:hover {
-    background: rgba(46, 204, 113, 0.05);
+/* Primary button hover fix */
+[data-theme="dark"] .primary-btn:hover {
+    color: white !important;
+    background: var(--primary-dark) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* Equipment Table Header Fix */
