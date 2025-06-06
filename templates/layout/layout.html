@@ -9,11 +9,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/auth/loading.css') }}">
-    {% block head %}{% endblock %}
-    <!-- Theme styles -->
+    {% block head %}{% endblock %}    <!-- Theme styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/themes/theme-light.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/themes/theme-dark.css') }}">
-    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>    <!-- Language support -->
+    <script src="{{ url_for('static', filename='js/core/charts.js') }}"></script>    <!-- Language support -->
     <script>
         // Dodajemy globalną zmienną, aby moduły miały dostęp do języka
         window.currentLanguage = "{{ session.get('language', 'en') }}";
