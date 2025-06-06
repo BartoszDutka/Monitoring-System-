@@ -172,7 +172,7 @@ def role_required(required_roles):
                 return redirect(url_for('login'))
             user_role = session.get('user_info', {}).get('role', 'viewer')
             if user_role not in required_roles:
-                return render_template('403.html'), 403
+                return render_template('errors/403.html'), 403
             return f(*args, **kwargs)
         return decorated_function
     return decorator
@@ -197,7 +197,7 @@ def login():
         
         if not username or not password:
             flash('Please provide both username and password')
-            return render_template('login.html', error='Please provide both username and password')
+            return render_template('auth/login.html', error='Please provide both username and password')
         
         # Najpierw próbujemy logowania LDAP
         if authenticate_user(username, password):
@@ -265,8 +265,7 @@ def login():
                     traceback.print_exc()
                 
                 return redirect(url_for('index'))
-                
-        # Jeśli LDAP nie zadziała, próbujemy lokalnej bazy
+                  # Jeśli LDAP nie zadziała, próbujemy lokalnej bazy
         elif verify_user(username, password):
             user_info = get_user_info(username)
             if user_info:
@@ -275,12 +274,12 @@ def login():
                 session['user_info'] = user_info
                 return redirect(url_for('index'))
         
-        return render_template('login.html', error='Invalid username or password')
+        return render_template('auth/login.html', error='Invalid username or password')
     
     if session.get('logged_in'):
         return redirect(url_for('index'))
         
-    return render_template('login.html')
+    return render_template('auth/login.html')
 
 @app.route('/logout')
 def logout():
@@ -458,15 +457,14 @@ def index():
                     'other': 0
                 }
             }
-        
-        # Get other monitoring data
+          # Get other monitoring data
         zabbix_data = get_cached_zabbix_data()
         graylog_data = get_cached_graylog_data()
         
         response_time = (datetime.now() - start_time).total_seconds()
         logger.info(f"Dashboard loaded in {response_time:.2f} seconds")
         
-        return render_template('index.html',
+        return render_template('dashboard/index.html',
                              zabbix=zabbix_data,
                              graylog=graylog_data,
                              glpi=glpi_data,
@@ -474,7 +472,7 @@ def index():
                              
     except Exception as e:
         logger.error(f"Error loading dashboard: {e}")
-        return render_template('error.html', error=str(e)), 500
+        return render_template('errors/error.html', error=str(e)), 500
 
 # Add new API endpoints for cached data
 @app.route('/api/zabbix/refresh')
@@ -551,19 +549,19 @@ def force_refresh_graylog():
 @login_required
 @permission_required('view_monitoring')
 def available_hosts():
-    return render_template('available_hosts.html', request=request)
+    return render_template('hosts/available_hosts.html', request=request)
 
 @app.route('/unavailable-hosts')
 @login_required
 @permission_required('view_monitoring')
 def unavailable_hosts():
-    return render_template('unavailable_hosts.html', request=request)
+    return render_template('hosts/unavailable_hosts.html', request=request)
 
 @app.route('/unknown-hosts')
 @login_required
 @permission_required('view_monitoring')
 def unknown_hosts():
-    return render_template('unknown_hosts.html', request=request)
+    return render_template('hosts/unknown_hosts.html', request=request)
 
 @app.route('/api/data')
 @login_required
@@ -595,7 +593,8 @@ def glpi_workstations():
     global glpi_cache
     if glpi_cache is None:
         glpi_cache = get_glpi_data()
-    return render_template('glpi_category.html',
+    
+    return render_template('glpi/glpi_category.html',
                          category_title='Workstations (KS)',
                          devices=glpi_cache['categorized']['workstations'],
                          request=request)
@@ -607,7 +606,7 @@ def glpi_terminals():
     global glpi_cache
     if glpi_cache is None:
         glpi_cache = get_glpi_data()
-    return render_template('glpi_category.html',
+    return render_template('glpi/glpi_category.html',
                          category_title='Terminals (KT)',
                          devices=glpi_cache['categorized']['terminals'],
                          request=request)
@@ -619,7 +618,7 @@ def glpi_servers():
     global glpi_cache
     if glpi_cache is None:
         glpi_cache = get_glpi_data()
-    return render_template('glpi_category.html',
+    return render_template('glpi/glpi_category.html',
                          category_title='Servers',
                          devices=glpi_cache['categorized']['servers'],
                          request=request)
@@ -631,7 +630,7 @@ def glpi_network():
     global glpi_cache
     if glpi_cache is None:
         glpi_cache = get_glpi_data()
-    return render_template('glpi_category.html',
+    return render_template('glpi/glpi_category.html',
                          category_title='Network Devices',
                          devices=glpi_cache['network_devices'],
                          request=request)
@@ -643,7 +642,7 @@ def glpi_printers():
     global glpi_cache
     if glpi_cache is None:
         glpi_cache = get_glpi_data()
-    return render_template('glpi_category.html',
+    return render_template('glpi/glpi_category.html',
                          category_title='Printers',
                          devices=glpi_cache['printers'],
                          request=request)
@@ -655,7 +654,7 @@ def glpi_monitors():
     global glpi_cache
     if glpi_cache is None:
         glpi_cache = get_glpi_data()
-    return render_template('glpi_category.html',
+    return render_template('glpi/glpi_category.html',
                          category_title='Monitors',
                          devices=glpi_cache['monitors'],
                          request=request)
@@ -667,7 +666,7 @@ def glpi_racks():
     global glpi_cache
     if glpi_cache is None:
         glpi_cache = get_glpi_data()
-    return render_template('glpi_category.html',
+    return render_template('glpi/glpi_category.html',
                          category_title='Racks',
                          devices=glpi_cache['racks'],
                          request=request)
@@ -679,7 +678,7 @@ def glpi_others():
     global glpi_cache
     if glpi_cache is None:
         glpi_cache = get_glpi_data()
-    return render_template('glpi_category.html',
+    return render_template('glpi/glpi_category.html',
                          category_title='Other Devices',
                          devices=glpi_cache['categorized']['other'],
                          request=request)
@@ -715,15 +714,14 @@ def connect_vnc():
 def graylog_loading():
     target_page = request.args.get('target', '/graylog/logs')
     query_string = request.args.get('query_string', '')
-    
-    # Pobierz bieżący język użytkownika
+      # Pobierz bieżący język użytkownika
     current_language = session.get('language', 'en')  # Domyślnie angielski (spójnie z resztą aplikacji)
     
     if (query_string):
         target_page = f"{target_page}?{query_string}"
     
     # Przekazujemy informację o języku do szablonu
-    return render_template('loading.html', 
+    return render_template('layout/loading.html', 
                          target_page=target_page,
                          current_language=current_language)  # dodajemy informację o języku
 
@@ -979,7 +977,7 @@ def profile():
                 }
             })
         
-        return render_template('profile.html', user_info=user, departments=departments)
+        return render_template('auth/profile.html', user_info=user, departments=departments)
     except Exception as e:
         logger.error(f"Error loading profile: {e}")
         flash('Error loading profile', 'error')
@@ -1229,11 +1227,10 @@ def unified_management():
             p for p in permissions_by_category['assets'] 
             if p['permission_key'] != 'assign_assets'
         ]
-    
-    # Calculate total permissions count
+      # Calculate total permissions count
     total_permissions_count = sum(len(perms) for perms in permissions_by_category.values())
     
-    return render_template('unified_management.html',
+    return render_template('management/unified_management.html',
                           users=users,
                           departments=departments,
                           roles=roles,
@@ -1244,7 +1241,7 @@ def unified_management():
 
 @app.errorhandler(403)
 def forbidden_error(error):
-    return render_template('403.html'), 403
+    return render_template('errors/403.html'), 403
 
 @app.route('/api/delete_user', methods=['POST'])
 @admin_required
@@ -1369,14 +1366,13 @@ def reports_page():
                 'name': report['name'],
                 'type': report_type,  # Przekazujemy niżmieniony typ, tłumaczenia obsłużymy w szablonie
                 'date': report['generated_at'].strftime('%Y-%m-%d %H:%M:%S') if isinstance(report['generated_at'], datetime) else report['generated_at'],
-                'records': report['record_count']
-            }
+                'records': report['record_count']            }
             formatted_reports.append(formatted_report)
-            
-        return render_template('reports.html', reports=formatted_reports)
+        
+        return render_template('reports/reports.html', reports=formatted_reports)
     except Exception as e:
         logger.error(f"Error loading reports page: {e}")
-        return render_template('error.html', error=str(e)), 500
+        return render_template('errors/error.html', error=str(e)), 500
 
 @app.route('/generate-report', methods=['POST'])
 @login_required
@@ -1504,12 +1500,11 @@ def view_report(report_id):
         if not report:
             flash('Report not found', 'error')
             return redirect(url_for('reports_page'))
-        
-        # For HTML reports, we can display them directly
+          # For HTML reports, we can display them directly
         if report['format'] == 'html':
             with open(os.path.join(REPORTS_DIR, report['path']), 'r', encoding='utf-8') as f:
                 html_content = f.read()
-            return render_template('report_viewer.html', 
+            return render_template('reports/report_viewer.html', 
                                  report=report, 
                                  html_content=html_content)
         else:
@@ -1581,11 +1576,10 @@ def inventory():    # Get the current language from session or default to Englis
         departments = []
         current_department = None
         people = []
-    
-    # Set Polish title if Polish language is selected
+      # Set Polish title if Polish language is selected
     page_title = "Zarządzanie inwentarzem" if current_language == 'pl' else "Inventory Management"
     
-    return render_template('inventory.html', 
+    return render_template('inventory/inventory.html', 
                           departments=departments, 
                           current_department=current_department,
                           people=people,

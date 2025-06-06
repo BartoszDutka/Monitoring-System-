@@ -1,8 +1,8 @@
-{% extends "layout.html" %}
+{% extends "layout/layout.html" %}
 
 {% block content %}
 <div class="dashboard-header">
-    <h1 data-en="Unavailable Hosts" data-pl="Niedostępne hosty">Unavailable Hosts</h1>
+    <h1 data-en="Unknown Hosts" data-pl="Nieznane hosty">Unknown Hosts</h1>
 </div>
 
 <div class="dashboard-grid">
@@ -17,11 +17,11 @@
                     <i class="fas fa-check-circle"></i>
                     <span data-en="Available" data-pl="Dostępne">Available</span>
                 </a>
-                <a href="/unavailable-hosts" class="dashboard-nav-link unavailable active">
+                <a href="/unavailable-hosts" class="dashboard-nav-link unavailable">
                     <i class="fas fa-times-circle"></i>
                     <span data-en="Unavailable" data-pl="Niedostępne">Unavailable</span>
                 </a>
-                <a href="/unknown-hosts" class="dashboard-nav-link unknown">
+                <a href="/unknown-hosts" class="dashboard-nav-link unknown active">
                     <i class="fas fa-question-circle"></i>
                     <span data-en="Unknown" data-pl="Nieznane">Unknown</span>
                 </a>
@@ -36,18 +36,19 @@
             <div class="header-actions">
                 <div class="search-container">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="host-search" placeholder="Search unavailable hosts..." data-en-placeholder="Search unavailable hosts..." data-pl-placeholder="Wyszukaj niedostępne hosty...">
+                    <input type="text" class="host-search" placeholder="Search unknown hosts..." data-en-placeholder="Search unknown hosts..." data-pl-placeholder="Wyszukaj nieznane hosty...">
                 </div>
             </div>
         </div>
         <div class="card-content">
-            <div class="hosts-container" id="unavailable-hosts">
+            <div class="hosts-container" id="unknown-hosts">
                 <!-- Data will be dynamically inserted here -->
             </div>
         </div>
     </div>
 </div>
 
+<!-- Add this JavaScript block at the end of your content block -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Update placeholder text when language changes

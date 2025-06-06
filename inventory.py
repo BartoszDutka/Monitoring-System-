@@ -40,11 +40,10 @@ def view_inventory():
             user = cursor.fetchone()
             if user:
                 current_department = user['Department']
-    
-    # Get language preference from session or default to English
+      # Get language preference from session or default to English
     lang = session.get('language', 'en')
     
-    return render_template('inventory.html', 
+    return render_template('inventory/inventory.html', 
                          departments=departments, 
                          current_department=current_department,
                          lang=lang)

@@ -103,11 +103,11 @@ def permission_required(permission_key: str):
         @functools.wraps(f)
         def decorated_function(*args, **kwargs):
             if not session.get('logged_in'):
-                return redirect(url_for('login', next=request.url))
+                            return redirect(url_for('login', next=request.url))
                 
             if not has_permission(permission_key):
                 flash("Nie masz uprawnień do wykonania tej akcji", "error")
-                return render_template('403.html'), 403
+                return render_template('errors/403.html'), 403
                 
             return f(*args, **kwargs)
         return decorated_function
@@ -125,7 +125,7 @@ def role_required(required_roles: List[str]):
                 
             user_role = session.get('user_info', {}).get('role')
             if not user_role or user_role not in required_roles:
-                return render_template('403.html'), 403
+                return render_template('errors/403.html'), 403
                 
             return f(*args, **kwargs)
         return decorated_function

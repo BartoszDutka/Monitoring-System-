@@ -37,7 +37,7 @@ def admin_required(f):
         if not session.get('logged_in'):
             return redirect(url_for('login'))
         if session.get('user_info', {}).get('role') != 'admin':
-            return render_template('403.html'), 403
+            return render_template('errors/403.html'), 403
         return f(*args, **kwargs)
     return decorated_function
 
@@ -72,11 +72,10 @@ def index():
         cursor.execute("""
             SELECT username, display_name, email, department
             FROM users
-            ORDER BY username
-        """)
+            ORDER BY username        """)
         users = cursor.fetchall()
         
-    return render_template('tasks.html', 
+        return render_template('tasks/tasks.html', 
                           tasks=tasks_list, 
                           users=users, 
                           can_create=has_permission('create_tasks'),
