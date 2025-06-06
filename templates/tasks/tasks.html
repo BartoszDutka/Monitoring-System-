@@ -575,18 +575,75 @@ function loadGlpiDevices() {
         });
 }
 
-// Function to load Zabbix alerts (placeholder)
+// Function to load Zabbix alerts
 function loadZabbixAlerts() {
     const alertSelect = document.getElementById('zabbix_alert_id');
     const searchInput = document.getElementById('zabbix_alert_search');
     
+    // Show loading state
     alertSelect.innerHTML = '<option value="">Loading alerts...</option>';
     
-    // Implement Zabbix alert loading here
-    // For now, just show a placeholder message
-    setTimeout(() => {
-        alertSelect.innerHTML = '<option value="">No alerts available</option>';
-    }, 500);
+    // Fetch alerts from API
+    fetch('/tasks/api/zabbix_alerts')
+        .then(response => response.json())
+        .then(data => {
+            // Clear loading state
+            alertSelect.innerHTML = '';
+            
+            // Check if we have alerts
+            if (data.length === 0) {
+                alertSelect.innerHTML = '<option value="">No alerts found</option>';
+                return;
+            }
+            
+            // Store alerts data for search functionality
+            window.zabbixAlerts = data;
+            
+            // Add alerts to select
+            data.forEach(alert => {
+                const option = document.createElement('option');
+                option.value = alert.id;
+                option.textContent = `${alert.description} - ${alert.host_name} (${alert.priority})`;
+                option.setAttribute('data-description', alert.description);
+                option.setAttribute('data-host', alert.host_name);
+                option.setAttribute('data-priority', alert.priority);
+                option.setAttribute('data-last-change', alert.last_change);
+                alertSelect.appendChild(option);
+            });
+            
+            // Add search functionality
+            searchInput.addEventListener('input', function() {
+                const searchText = this.value.toLowerCase();
+                Array.from(alertSelect.options).forEach(option => {
+                    const alertData = window.zabbixAlerts.find(a => a.id == option.value);
+                    if (alertData) {
+                        const matches = alertData.search_text.includes(searchText);
+                        option.style.display = matches ? '' : 'none';
+                    }
+                });
+            });
+            
+            // Handle alert selection
+            alertSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    const relatedData = {
+                        id: this.value,
+                        description: selectedOption.getAttribute('data-description'),
+                        host_name: selectedOption.getAttribute('data-host'),
+                        priority: selectedOption.getAttribute('data-priority'),
+                        last_change: selectedOption.getAttribute('data-last-change')
+                    };
+                    
+                    // Update hidden input with JSON data
+                    document.getElementById('related_data').value = JSON.stringify(relatedData);
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error loading Zabbix alerts:', error);
+            alertSelect.innerHTML = '<option value="">Error loading alerts</option>';
+        });
 }
 
 // Load task details
@@ -705,10 +762,48 @@ function loadTaskDetails(taskId) {
                         .catch(error => {
                             console.error('Error loading device details:', error);
                             relatedItemDetails.innerHTML = `<p class="text-danger">${language === 'pl' ? 'Nie udało się załadować szczegółów urządzenia' : 'Failed to load device details'}</p>`;
+                        });                } else if (task.related_type === 'zabbix_alert') {
+                    // Fetch Zabbix alert details
+                    fetch(`/tasks/api/zabbix_alert/${task.related_id}`)
+                        .then(response => response.json())
+                        .then(alert => {
+                            if (alert.error) {
+                                relatedItemDetails.innerHTML = `<p class="text-danger">${language === 'pl' ? 'Błąd: ' : 'Error: '}${alert.error}</p>`;
+                                return;
+                            }
+                            
+                            // Show alert details with proper translations
+                            const priorityLabels = {
+                                'not_classified': { 'en': 'Not classified', 'pl': 'Nieklasyfikowany' },
+                                'information': { 'en': 'Information', 'pl': 'Informacja' },
+                                'warning': { 'en': 'Warning', 'pl': 'Ostrzeżenie' },
+                                'average': { 'en': 'Average', 'pl': 'Średni' },
+                                'high': { 'en': 'High', 'pl': 'Wysoki' },
+                                'disaster': { 'en': 'Disaster', 'pl': 'Kryzys' }
+                            };
+                            
+                            const descriptionLabel = language === 'pl' ? 'Opis alertu' : 'Alert Description';
+                            const hostLabel = language === 'pl' ? 'Host' : 'Host';
+                            const priorityLabel = language === 'pl' ? 'Priorytet' : 'Priority';
+                            const lastChangeLabel = language === 'pl' ? 'Ostatnia zmiana' : 'Last Change';
+                            
+                            const priorityText = priorityLabels[alert.priority] ? 
+                                priorityLabels[alert.priority][language] : 
+                                alert.priority;
+                                  relatedItemDetails.innerHTML = `
+                                <div class="related-info">
+                                    <h5>${alert.description}</h5>
+                                    <p><strong>${hostLabel}:</strong> ${alert.host_name}</p>
+                                    <p><strong>${priorityLabel}:</strong> <span class="priority-badge ${alert.priority}">${priorityText}</span></p>
+                                    <p><strong>${lastChangeLabel}:</strong> ${alert.last_change}</p>
+                                    <p><strong>ID:</strong> ${alert.id}</p>
+                                </div>
+                            `;
+                        })
+                        .catch(error => {
+                            console.error('Error loading alert details:', error);
+                            relatedItemDetails.innerHTML = `<p class="text-danger">${language === 'pl' ? 'Nie udało się załadować szczegółów alertu' : 'Failed to load alert details'}</p>`;
                         });
-                } else if (task.related_type === 'zabbix_alert') {
-                    // Handle Zabbix alert
-                    relatedItemDetails.innerHTML = `<p>${language === 'pl' ? 'Alert Zabbix ID' : 'Zabbix Alert ID'}: ${task.related_id}</p>`;
                 }
             } else {
                 relatedItemContainer.style.display = 'none';

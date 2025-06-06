@@ -381,11 +381,31 @@ textarea {
 }
 
 .related-info {
-    margin: 10px 0;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 1px solid #cbd5e0;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 15px 0;
+}
+
+.related-info h5 {
+    color: #2d3748;
+    margin-bottom: 15px;
+    font-weight: 600;
+    font-size: 1.1em;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 10px;
 }
 
 .related-info p {
-    margin: 5px 0;
+    margin: 8px 0;
+    font-size: 0.95em;
+    line-height: 1.4;
+}
+
+.related-info strong {
+    color: #4a5568;
+    font-weight: 600;
 }
 
 /* API endpoints for related items */
@@ -744,4 +764,103 @@ textarea {
     padding: 10px;
     margin-top: 10px;
     width: 100%;
+}
+
+/* Priority badges for both GLPI and Zabbix */
+.related-info .priority-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    margin-left: 8px;
+}
+
+.related-info .priority-badge.not_classified {
+    background-color: #f7fafc;
+    color: #718096;
+    border: 1px solid #e2e8f0;
+}
+
+.related-info .priority-badge.information {
+    background-color: #ebf8ff;
+    color: #2b6cb0;
+    border: 1px solid #90cdf4;
+}
+
+.related-info .priority-badge.warning {
+    background-color: #fffbeb;
+    color: #d69e2e;
+    border: 1px solid #fbd38d;
+}
+
+.related-info .priority-badge.average {
+    background-color: #fef5e7;
+    color: #dd6b20;
+    border: 1px solid #f6ad55;
+}
+
+.related-info .priority-badge.high {
+    background-color: #fed7d7;
+    color: #c53030;
+    border: 1px solid #feb2b2;
+}
+
+.related-info .priority-badge.disaster {
+    background-color: #fed7e2;
+    color: #97266d;
+    border: 1px solid #f687b3;
+}
+
+/* Dark theme support for related items */
+[data-theme="dark"] .related-info {
+    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+    border: 1px solid #4a5568;
+}
+
+[data-theme="dark"] .related-info h5 {
+    color: #e2e8f0;
+    border-bottom-color: #4a5568;
+}
+
+[data-theme="dark"] .related-info strong {
+    color: #cbd5e0;
+}
+
+[data-theme="dark"] .related-info .priority-badge.not_classified {
+    background-color: #2d3748;
+    color: #a0aec0;
+    border: 1px solid #4a5568;
+}
+
+[data-theme="dark"] .related-info .priority-badge.information {
+    background-color: #2a4365;
+    color: #90cdf4;
+    border: 1px solid #4299e1;
+}
+
+[data-theme="dark"] .related-info .priority-badge.warning {
+    background-color: #744210;
+    color: #fbd38d;
+    border: 1px solid #d69e2e;
+}
+
+[data-theme="dark"] .related-info .priority-badge.average {
+    background-color: #7b341e;
+    color: #f6ad55;
+    border: 1px solid #dd6b20;
+}
+
+[data-theme="dark"] .related-info .priority-badge.high {
+    background-color: #742a2a;
+    color: #feb2b2;
+    border: 1px solid #c53030;
+}
+
+[data-theme="dark"] .related-info .priority-badge.disaster {
+    background-color: #702459;
+    color: #f687b3;
+    border: 1px solid #97266d;
 }

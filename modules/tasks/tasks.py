@@ -379,6 +379,66 @@ def get_related_device(device_id):
         print(f"Error fetching related device: {e}")
         return jsonify({"error": str(e)}), 500
 
+@tasks.route('/api/zabbix_alerts')
+@permission_required('tasks_view')
+def get_zabbix_alerts_api():
+    """Get Zabbix alerts for task creation"""
+    try:
+        from ..external.zabbix import get_zabbix_alerts
+        alerts = get_zabbix_alerts()
+        
+        # Format alerts for the frontend
+        formatted_alerts = []
+        for alert in alerts:
+            formatted_alerts.append({
+                'id': alert['triggerid'],
+                'description': alert['description'],
+                'priority': alert['priority'],
+                'host_name': alert['host_name'],
+                'last_change': alert['last_change'],
+                'search_text': f"{alert['description']} {alert['host_name']}".lower()
+            })
+        
+        return jsonify(formatted_alerts)
+        
+    except Exception as e:
+        print(f"Error fetching Zabbix alerts: {e}")
+        return jsonify([]), 500
+
+@tasks.route('/api/zabbix_alert/<alert_id>')
+@permission_required('tasks_view')
+def get_zabbix_alert_details(alert_id):
+    """Get details of a specific Zabbix alert"""
+    try:
+        from ..external.zabbix import get_zabbix_alerts
+        alerts = get_zabbix_alerts()
+        
+        # Find the specific alert
+        alert_details = None
+        for alert in alerts:
+            if alert['triggerid'] == alert_id:
+                alert_details = alert
+                break
+        
+        if alert_details:
+            return jsonify({
+                'id': alert_details['triggerid'],
+                'description': alert_details['description'], 
+                'priority': alert_details['priority'],
+                'priority_num': alert_details['priority_num'],
+                'host_name': alert_details['host_name'],
+                'last_change': alert_details['last_change'],
+                'status': alert_details['status'],
+                'state': alert_details['state'],
+                'value': alert_details['value']
+            })
+        else:
+            return jsonify({'error': 'Alert not found'}), 404
+            
+    except Exception as e:
+        print(f"Error fetching Zabbix alert details: {e}")
+        return jsonify({'error': str(e)}), 500
+
 def setup_tasks_tables():
     """Create tasks tables if not exists"""
     with get_db_cursor() as cursor:

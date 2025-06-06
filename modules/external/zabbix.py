@@ -174,3 +174,90 @@ def get_unknown_hosts():
     except requests.exceptions.RequestException as e:
         print(f"Error getting unknown hosts: {e}")
         return []
+
+def get_zabbix_alerts():
+    """Get active alerts/triggers from Zabbix"""
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        response = requests.post(
+            ZABBIX_URL,
+            headers=headers,
+            json={
+                "jsonrpc": "2.0",
+                "method": "trigger.get",
+                "params": {
+                    "output": [
+                        "triggerid", "description", "status", "state", 
+                        "lastchange", "priority", "value"
+                    ],
+                    "selectHosts": ["hostid", "name"],
+                    "filter": {
+                        "status": 0,  # Enabled triggers
+                        "state": 1    # Problem state
+                    },
+                    "sortfield": ["lastchange"],
+                    "sortorder": "DESC",
+                    "limit": 100
+                },
+                "auth": ZABBIX_TOKEN,
+                "id": 1
+            },
+            verify=False
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            if 'result' in data:
+                alerts = []
+                for trigger in data['result']:
+                    # Get priority level
+                    priority_map = {
+                        '0': 'not_classified',
+                        '1': 'information',
+                        '2': 'warning',
+                        '3': 'average',
+                        '4': 'high',
+                        '5': 'disaster'
+                    }
+                    
+                    priority_level = priority_map.get(trigger.get('priority', '0'), 'not_classified')
+                    
+                    # Format last change time
+                    last_change = trigger.get('lastchange', '0')
+                    if last_change != '0':
+                        last_change_dt = datetime.fromtimestamp(int(last_change))
+                        formatted_time = last_change_dt.strftime('%Y-%m-%d %H:%M:%S')
+                    else:
+                        formatted_time = 'Unknown'
+                    
+                    # Get host information
+                    host_name = 'Unknown Host'
+                    if trigger.get('hosts') and len(trigger['hosts']) > 0:
+                        host_name = trigger['hosts'][0]['name']
+                    
+                    alert = {
+                        'triggerid': trigger['triggerid'],
+                        'description': trigger['description'],
+                        'priority': priority_level,
+                        'priority_num': trigger.get('priority', '0'),
+                        'host_name': host_name,
+                        'last_change': formatted_time,
+                        'last_change_timestamp': last_change,
+                        'status': trigger.get('status', '0'),
+                        'state': trigger.get('state', '0'),
+                        'value': trigger.get('value', '0')
+                    }
+                    
+                    alerts.append(alert)
+                
+                return alerts
+            
+        return []
+        
+    except Exception as e:
+        print(f"Error getting Zabbix alerts: {e}")
+        log_system_event('zabbix', 'error', 'system', f"Error fetching alerts: {str(e)}")
+        return []
