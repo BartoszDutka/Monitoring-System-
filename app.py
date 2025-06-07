@@ -477,6 +477,7 @@ def index():
 # Add new API endpoints for cached data
 @app.route('/api/zabbix/refresh')
 @login_required
+@permission_required('view_monitoring')
 def get_cached_zabbix_data():
     start_time = datetime.now()
     
@@ -487,6 +488,11 @@ def get_cached_zabbix_data():
     data = get_data()
     response_time = (datetime.now() - start_time).total_seconds()
     logger.info(f"Zabbix data retrieved in {response_time:.2f} seconds")
+    
+    # Check if data contains error and handle appropriately
+    if isinstance(data, dict) and 'error' in data and 'result' not in data:
+        # This is an error response, return it as JSON with 200 status but with error info
+        return jsonify(data)
     
     return jsonify(data) if request.path.startswith('/api/') else data
 
@@ -512,7 +518,7 @@ def get_cached_graylog_data():
 @permission_required('view_monitoring')
 def force_refresh_zabbix():
     cache.delete('zabbix_data')
-    return jsonify(get_cached_zabbix_data())
+    return get_cached_zabbix_data()
 
 @app.route('/api/glpi/force_refresh')
 @login_required
