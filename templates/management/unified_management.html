@@ -91,25 +91,24 @@
                 </select>
               </td>
               <td>{{ user.last_login|default('Nigdy') }}</td>
-              <td>
-                {% if user.username == session.username %}
-                  <button class="btn-action btn-primary" onclick="toggleEdit({{ user.user_id }})">
+              <td>                {% if user.username == session.username %}
+                  <button class="btn-action btn-primary" onclick="toggleEdit('{{ user.user_id }}')">
                     <i class="fas fa-edit"></i> Edytuj
                   </button>
-                  <button class="btn-action btn-success d-none" onclick="saveChanges({{ user.user_id }})">
+                  <button class="btn-action btn-success d-none" onclick="saveChanges('{{ user.user_id }}')">
                     <i class="fas fa-save"></i> Zapisz
                   </button>
                   <button class="btn-action btn-danger" disabled>
                     <i class="fas fa-trash"></i> Usuń
                   </button>
                 {% else %}
-                  <button class="btn-action btn-primary" onclick="toggleEdit({{ user.user_id }})">
+                  <button class="btn-action btn-primary" onclick="toggleEdit('{{ user.user_id }}')">
                     <i class="fas fa-edit"></i> Edytuj
                   </button>
-                  <button class="btn-action btn-success d-none" onclick="saveChanges({{ user.user_id }})">
+                  <button class="btn-action btn-success d-none" onclick="saveChanges('{{ user.user_id }}')">
                     <i class="fas fa-save"></i> Zapisz
                   </button>
-                  <button class="btn-action btn-danger" onclick="deleteUser({{ user.user_id }})">
+                  <button class="btn-action btn-danger" onclick="deleteUser('{{ user.user_id }}')">
                     <i class="fas fa-trash"></i> Usuń
                   </button>
                 {% endif %}

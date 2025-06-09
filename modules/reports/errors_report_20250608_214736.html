@@ -1,0 +1,4627 @@
+
+            <!DOCTYPE html>
+            <html lang="pl">
+            <head>
+                <meta charset="UTF-8">
+                <title>Raport błędów</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        margin: 20px;
+                        color: #333;
+                    }
+                    h1 {
+                        color: #2c3e50;
+                        border-bottom: 2px solid #3498db;
+                        padding-bottom: 10px;
+                        margin-bottom: 20px;
+                    }
+                    .report-header {
+                        background-color: #f8f9fa;
+                        padding: 15px;
+                        border-radius: 5px;
+                        margin-bottom: 20px;
+                    }
+                    .report-metadata {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 20px;
+                        margin-bottom: 15px;
+                    }
+                    .metadata-item {
+                        flex: 1 0 200px;
+                    }
+                    .metadata-item h3 {
+                        margin: 0 0 5px 0;
+                        font-size: 14px;
+                        color: #666;
+                    }
+                    .metadata-item p {
+                        margin: 0;
+                        font-weight: bold;
+                        color: #333;
+                    }
+                    table.data-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 20px 0;
+                        font-size: 12px; /* Smaller font size for PDF */
+                    }
+                    .data-table th, 
+                    .data-table td {
+                        padding: 6px;
+                        border: 1px solid #ddd;
+                        text-align: left;
+                        word-wrap: break-word;
+                        max-width: 200px; /* Limit column width */
+                    }
+                    .data-table th {
+                        background-color: #f2f2f2;
+                        color: #333;
+                        font-weight: bold;
+                    }
+                    .data-table tr:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+                    .footer {
+                        text-align: center;
+                        margin-top: 30px;
+                        padding-top: 10px;
+                        border-top: 1px solid #eee;
+                        font-size: 12px;
+                        color: #666;
+                    }
+                    @page {
+                        size: landscape; /* Use landscape orientation for wide tables */
+                        margin: 2cm;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="report-header">
+                    <h1>Raport błędów</h1>
+                    <div class="report-metadata">
+                        <div class="metadata-item">
+                            <h3>Typ raportu:</h3>
+                            <p>Raport błędów</p>
+                        </div>
+                        <div class="metadata-item">
+                            <h3>Zakres dat:</h3>
+                            <p>2025-05-09 do 2025-06-08</p>
+                        </div>
+                        <div class="metadata-item">
+                            <h3>Wygenerowano:</h3>
+                            <p>2025-06-08 21:47:36</p>
+                        </div>
+                        <div class="metadata-item">
+                            <h3>Liczba rekordów:</h3>
+                            <p>500</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>ID logu</th>
+      <th>Data i czas</th>
+      <th>Poziom</th>
+      <th>Źródło</th>
+      <th>Nazwa hosta</th>
+      <th>Wiadomość</th>
+      <th>Szczegóły</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>283616</td>
+      <td>2025-05-12 07:24:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129427280</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "2157", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>286262</td>
+      <td>2025-05-12 10:55:29</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129460906</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "680", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>286384</td>
+      <td>2025-05-12 10:55:30</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129455731</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1916", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>286508</td>
+      <td>2025-05-12 10:55:35</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129496956</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "2205", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>286718</td>
+      <td>2025-05-12 10:55:35</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129460906</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "680", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>286831</td>
+      <td>2025-05-12 10:55:55</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129496956</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1066", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>286888</td>
+      <td>2025-05-12 10:55:55</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129422099</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1152", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>286895</td>
+      <td>2025-05-12 10:55:56</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129422099</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1152", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>286943</td>
+      <td>2025-05-12 10:55:56</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129422099</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2065", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>287268</td>
+      <td>2025-05-12 10:56:02</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129496956</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1066", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>287325</td>
+      <td>2025-05-12 10:56:02</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129422099</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1152", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>287374</td>
+      <td>2025-05-12 11:00:10</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Brak sesji formsowej dla identyfikatora: 1BAF1F...</td>
+      <td>{"process_id": "1043", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>287376</td>
+      <td>2025-05-12 11:00:10</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Nie znaleziono sesji formsowej</td>
+      <td>{"process_id": "1043", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>287902</td>
+      <td>2025-05-12 11:00:30</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129463126</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "405", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>288222</td>
+      <td>2025-05-12 11:06:41</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129426496</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "119", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>289744</td>
+      <td>2025-05-12 13:13:50</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129455731</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "995", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>289749</td>
+      <td>2025-05-12 13:13:50</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129425192</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "1016", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>289986</td>
+      <td>2025-05-12 13:13:51</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129426518</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2218", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>290003</td>
+      <td>2025-05-12 13:13:51</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129426518</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2222", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>290809</td>
+      <td>2025-05-12 13:15:17</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129428783</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2038", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>291241</td>
+      <td>2025-05-12 13:15:50</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129426518</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1523", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>291527</td>
+      <td>2025-05-12 13:16:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Brak sesji formsowej dla identyfikatora: AF07D5...</td>
+      <td>{"process_id": "986", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>291529</td>
+      <td>2025-05-12 13:16:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Brak sesji formsowej dla identyfikatora: F9AF74...</td>
+      <td>{"process_id": "1758", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>291531</td>
+      <td>2025-05-12 13:16:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Nie znaleziono sesji formsowej</td>
+      <td>{"process_id": "986", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>291615</td>
+      <td>2025-05-12 13:16:51</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129528208</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "625", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>291634</td>
+      <td>2025-05-12 13:16:51</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129528208</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1071", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>292331</td>
+      <td>2025-05-12 13:17:52</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129437592</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1143", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>292361</td>
+      <td>2025-05-12 13:17:52</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129437592</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2099", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>292455</td>
+      <td>2025-05-12 13:18:06</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Brak sesji formsowej dla identyfikatora: C42924...</td>
+      <td>{"process_id": "1003", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>292457</td>
+      <td>2025-05-12 13:18:06</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Nie znaleziono sesji formsowej</td>
+      <td>{"process_id": "1003", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>292473</td>
+      <td>2025-05-12 13:18:06</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129433500</td>
+      <td>Wystąpił błąd podczas wykonywania funkcji: ri_e...</td>
+      <td>{"process_id": "186", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>292561</td>
+      <td>2025-05-12 13:18:07</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Brak sesji formsowej dla identyfikatora: C42924...</td>
+      <td>{"process_id": "496", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>292563</td>
+      <td>2025-05-12 13:18:07</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Nie znaleziono sesji formsowej</td>
+      <td>{"process_id": "496", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>292649</td>
+      <td>2025-05-12 13:18:07</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129425192</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "599", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>292960</td>
+      <td>2025-05-12 13:22:17</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129460419</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "837", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>293259</td>
+      <td>2025-05-12 13:22:18</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129460419</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "837", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>293518</td>
+      <td>2025-05-12 13:22:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129460419</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "344", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>294064</td>
+      <td>2025-05-12 14:25:35</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129463125</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "39", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>295306</td>
+      <td>2025-05-13 07:41:55</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129631641</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1753", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>295392</td>
+      <td>2025-05-13 07:41:56</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129631641</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1516", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>297349</td>
+      <td>2025-05-13 07:46:25</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Brak sesji formsowej dla identyfikatora: 1DAA30...</td>
+      <td>{"process_id": "135", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>297351</td>
+      <td>2025-05-13 07:46:25</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Nie znaleziono sesji formsowej</td>
+      <td>{"process_id": "135", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>297463</td>
+      <td>2025-05-13 07:46:26</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129633481</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "2184", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>297619</td>
+      <td>2025-05-13 07:46:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129633481</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "2184", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>297749</td>
+      <td>2025-05-13 07:46:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Brak sesji formsowej dla identyfikatora: 1DAA30...</td>
+      <td>{"process_id": "135", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>297751</td>
+      <td>2025-05-13 07:46:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Nie znaleziono sesji formsowej</td>
+      <td>{"process_id": "135", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>298011</td>
+      <td>2025-05-13 07:47:04</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129600318</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1073", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>298018</td>
+      <td>2025-05-13 07:47:04</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129633481</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "2184", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>299479</td>
+      <td>2025-05-13 07:49:36</td>
+      <td>KRYTYCZNY</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129633709</td>
+      <td>Próba wywołania ValidateTheRecord w trakcie trw...</td>
+      <td>{"process_id": "971", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>299741</td>
+      <td>2025-05-13 07:50:06</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129631998</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "330", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>299756</td>
+      <td>2025-05-13 07:50:06</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129631998</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "473", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>299925</td>
+      <td>2025-05-13 07:50:06</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129630141</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1216", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>303200</td>
+      <td>2025-05-13 08:29:39</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129631998</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1383", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>303232</td>
+      <td>2025-05-13 08:29:40</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129627672</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "918", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>303833</td>
+      <td>2025-05-13 08:30:20</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129604737</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1815", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>305063</td>
+      <td>2025-05-13 08:36:25</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129605677</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1229", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>305139</td>
+      <td>2025-05-13 08:36:25</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129605986</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1399", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>305650</td>
+      <td>2025-05-13 08:39:30</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129600318</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "463", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>306058</td>
+      <td>2025-05-13 08:39:38</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129600318</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "463", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>308123</td>
+      <td>2025-05-13 08:45:09</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129606401</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "596", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>308172</td>
+      <td>2025-05-13 08:45:09</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129606401</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "694", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>308597</td>
+      <td>2025-05-13 08:45:17</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129606401</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "596", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>309479</td>
+      <td>2025-05-13 08:49:39</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129631994</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "1380", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>309885</td>
+      <td>2025-05-13 08:55:51</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "900", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>309896</td>
+      <td>2025-05-13 08:55:51</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129628705</td>
+      <td>Brak sesji formsowej dla identyfikatora: 3A70CE...</td>
+      <td>{"process_id": "2048", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>310102</td>
+      <td>2025-05-13 08:55:52</td>
+      <td>BŁĄD</td>
+      <td>Błąd systemu</td>
+      <td>129647374</td>
+      <td>Wystąpił błąd podczas wykonywania procedury: ex...</td>
+      <td>{"process_id": "1258", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>310218</td>
+      <td>2025-05-13 09:16:38</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129630618</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "1093", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>310354</td>
+      <td>2025-05-13 09:16:38</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129630618</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "187", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>312072</td>
+      <td>2025-05-13 14:17:41</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129649183</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "1355", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>312127</td>
+      <td>2025-05-13 14:17:41</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129709852</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "977", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>312576</td>
+      <td>2025-05-13 14:18:28</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129606401</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1318", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>312580</td>
+      <td>2025-05-13 14:18:28</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129606401</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1400", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>312883</td>
+      <td>2025-05-13 14:19:02</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129631052</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1234", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>313343</td>
+      <td>2025-05-13 14:19:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129642119</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "1086", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>313354</td>
+      <td>2025-05-13 14:19:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129642119</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "1086", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>313386</td>
+      <td>2025-05-13 14:19:36</td>
+      <td>BŁĄD</td>
+      <td>Błąd systemu</td>
+      <td>129649183</td>
+      <td>OperationResult.Status: Error FormId: 144 Messa...</td>
+      <td>{"process_id": "1859", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>313450</td>
+      <td>2025-05-13 14:20:04</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129649183</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "573", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>313503</td>
+      <td>2025-05-13 14:20:05</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129642119</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "475", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>313516</td>
+      <td>2025-05-13 14:20:05</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129642119</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "475", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>313728</td>
+      <td>2025-05-13 14:20:05</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129642119</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1063", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>313781</td>
+      <td>2025-05-13 14:20:34</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129630513</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "2214", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>313986</td>
+      <td>2025-05-13 14:20:35</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129627616</td>
+      <td>PrintGraphReportPdf: Nie znaleziono pliku: 'esk...</td>
+      <td>{"process_id": "55", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>313989</td>
+      <td>2025-05-13 14:20:35</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129630735</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1280", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>314454</td>
+      <td>2025-05-14 08:24:20</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129788217</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "369", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>314483</td>
+      <td>2025-05-14 08:24:20</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129788217</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2066", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>314521</td>
+      <td>2025-05-14 08:24:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129788217</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1828", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>314622</td>
+      <td>2025-05-14 08:24:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Brak sesji formsowej dla identyfikatora: CB4B05...</td>
+      <td>{"process_id": "355", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>314624</td>
+      <td>2025-05-14 08:24:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Nie znaleziono sesji formsowej</td>
+      <td>{"process_id": "355", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>314963</td>
+      <td>2025-05-14 08:35:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783403</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1093", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>314968</td>
+      <td>2025-05-14 08:35:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783469</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "620", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>315015</td>
+      <td>2025-05-14 08:35:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783469</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1687", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>315594</td>
+      <td>2025-05-14 09:08:51</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129795091</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "2066", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>315677</td>
+      <td>2025-05-14 09:08:51</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783252</td>
+      <td>Wystąpił błąd podczas wykonywania zapytania</td>
+      <td>{"process_id": "963", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>315922</td>
+      <td>2025-05-14 09:09:06</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129794988</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "473", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>316130</td>
+      <td>2025-05-14 09:09:07</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783252</td>
+      <td>Wystąpił błąd podczas wykonywania zapytania</td>
+      <td>{"process_id": "1667", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>316293</td>
+      <td>2025-05-14 09:09:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783252</td>
+      <td>Wystąpił błąd podczas wykonywania zapytania</td>
+      <td>{"process_id": "942", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>316400</td>
+      <td>2025-05-14 09:09:13</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129794988</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "473", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>316523</td>
+      <td>2025-05-14 09:09:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783252</td>
+      <td>Wystąpił błąd podczas wykonywania zapytania</td>
+      <td>{"process_id": "877", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>316772</td>
+      <td>2025-05-14 09:09:42</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783403</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "657", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>316789</td>
+      <td>2025-05-14 09:09:42</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783252</td>
+      <td>Wystąpił błąd podczas wykonywania zapytania</td>
+      <td>{"process_id": "1124", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>316812</td>
+      <td>2025-05-14 09:09:42</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783403</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2049", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>317124</td>
+      <td>2025-05-14 09:29:08</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783403</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "2004", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>317485</td>
+      <td>2025-05-14 09:31:08</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129787864</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "942", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>317539</td>
+      <td>2025-05-14 09:31:08</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129787864</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "811", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>318228</td>
+      <td>2025-05-14 09:35:09</td>
+      <td>BŁĄD</td>
+      <td>Błąd systemu</td>
+      <td>129782914</td>
+      <td>Wystąpił błąd podczas wykonywania procedury: ex...</td>
+      <td>{"process_id": "704", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>318912</td>
+      <td>2025-05-14 09:57:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Brak sesji formsowej dla identyfikatora: 2BFDEE...</td>
+      <td>{"process_id": "1906", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>318914</td>
+      <td>2025-05-14 09:57:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Nie znaleziono sesji formsowej</td>
+      <td>{"process_id": "1906", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>319466</td>
+      <td>2025-05-14 10:09:24</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783252</td>
+      <td>Wystąpił błąd podczas wykonywania zapytania</td>
+      <td>{"process_id": "1597", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>319840</td>
+      <td>2025-05-14 10:17:44</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129837482</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "702", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>320547</td>
+      <td>2025-05-14 11:07:07</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783403</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1845", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>320569</td>
+      <td>2025-05-14 11:07:08</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129788217</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1594", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>320597</td>
+      <td>2025-05-14 11:07:08</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783403</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2099", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>320706</td>
+      <td>2025-05-14 11:43:48</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129843422</td>
+      <td>Wystąpił błąd podczas wykonywania zapytania</td>
+      <td>{"process_id": "1964", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>320800</td>
+      <td>2025-05-14 11:43:48</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129783403</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "889", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>320982</td>
+      <td>2025-05-14 13:42:48</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129865951</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1869", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>321109</td>
+      <td>2025-05-14 13:42:49</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129837482</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1573", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>321260</td>
+      <td>2025-05-14 13:47:49</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129792458</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2035", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>321281</td>
+      <td>2025-05-14 13:47:49</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129796319</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "2121", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>321477</td>
+      <td>2025-05-14 13:47:50</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129790288</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "966", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>322146</td>
+      <td>2025-05-14 14:03:45</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129790571</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "757", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>322454</td>
+      <td>2025-05-14 14:07:46</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129837482</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "544", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>322868</td>
+      <td>2025-05-14 14:08:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129789335</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "917", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>322876</td>
+      <td>2025-05-14 14:08:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129789335</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "399", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>322928</td>
+      <td>2025-05-14 14:08:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129828668</td>
+      <td>Brak sesji formsowej dla identyfikatora: 3164E3...</td>
+      <td>{"process_id": "514", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>323350</td>
+      <td>2025-05-14 14:32:29</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129865150</td>
+      <td>Invalid form ID: 2 instead 138</td>
+      <td>{"process_id": "346", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>323654</td>
+      <td>2025-05-15 11:15:27</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129985029</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2107", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>324008</td>
+      <td>2025-05-15 11:15:29</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129985029</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2107", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>324540</td>
+      <td>2025-05-15 11:29:04</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130067290</td>
+      <td>Błąd tworzenia lub ładowania menu.</td>
+      <td>{"process_id": "1962", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>325256</td>
+      <td>2025-05-15 11:39:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130010853</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "369", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>325263</td>
+      <td>2025-05-15 11:39:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130010853</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "872", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>325694</td>
+      <td>2025-05-15 11:41:34</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130006422</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1001", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>326074</td>
+      <td>2025-05-15 11:45:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130006422</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "18", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>326297</td>
+      <td>2025-05-15 11:45:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd aplikacji:</td>
+      <td>{"process_id": "2114", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>326374</td>
+      <td>2025-05-15 11:45:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130006422</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "18", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>326625</td>
+      <td>2025-05-15 11:45:13</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd aplikacji:</td>
+      <td>{"process_id": "2114", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>327133</td>
+      <td>2025-05-15 11:45:19</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130006422</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "18", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>327676</td>
+      <td>2025-05-15 11:45:28</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130050853</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "845", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>328569</td>
+      <td>2025-05-15 11:47:02</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130050853</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "505", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>329082</td>
+      <td>2025-05-15 11:48:02</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130050853</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1954", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>329386</td>
+      <td>2025-05-15 11:48:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130005795</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "736", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>329737</td>
+      <td>2025-05-15 11:49:02</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130042705</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "175", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>329869</td>
+      <td>2025-05-15 11:49:03</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd aplikacji:</td>
+      <td>{"process_id": "968", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>329901</td>
+      <td>2025-05-15 11:49:03</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130006226</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "428", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>330258</td>
+      <td>2025-05-15 11:50:18</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd aplikacji:</td>
+      <td>{"process_id": "1762", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>330329</td>
+      <td>2025-05-15 11:50:18</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "1496", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>330842</td>
+      <td>2025-05-15 11:50:23</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd aplikacji:</td>
+      <td>{"process_id": "1762", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>330996</td>
+      <td>2025-05-15 11:57:17</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130020016</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "162", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>331445</td>
+      <td>2025-05-15 11:57:24</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130020016</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "162", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>331949</td>
+      <td>2025-05-15 11:57:53</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130020016</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "209", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>332024</td>
+      <td>2025-05-15 11:57:53</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd aplikacji:</td>
+      <td>{"process_id": "1924", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>332730</td>
+      <td>2025-05-15 12:13:25</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130062729</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1495", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>333257</td>
+      <td>2025-05-15 13:07:28</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130003029</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1833", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>333279</td>
+      <td>2025-05-15 13:07:28</td>
+      <td>BŁĄD</td>
+      <td>Błąd systemu</td>
+      <td>130074681</td>
+      <td>OperationResult.Status: Error FormId: 12 Messag...</td>
+      <td>{"process_id": "1585", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>333540</td>
+      <td>2025-05-15 13:07:29</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130012158</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1820", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>333568</td>
+      <td>2025-05-15 13:08:34</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130010006</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1648", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>333822</td>
+      <td>2025-05-15 13:08:35</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd aplikacji:</td>
+      <td>{"process_id": "360", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>333868</td>
+      <td>2025-05-15 13:08:35</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130010006</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1648", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>334122</td>
+      <td>2025-05-15 13:08:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd aplikacji:</td>
+      <td>{"process_id": "360", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>334451</td>
+      <td>2025-05-15 13:46:47</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130075751</td>
+      <td>Wystąpił błąd podczas wykonywania funkcji: rozl...</td>
+      <td>{"process_id": "276", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>334677</td>
+      <td>2025-05-15 13:46:47</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd aplikacji:</td>
+      <td>{"process_id": "1433", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>334824</td>
+      <td>2025-05-15 13:47:21</td>
+      <td>BŁĄD</td>
+      <td>Błąd systemu</td>
+      <td>130110134</td>
+      <td>OperationResult.Status: Error FormId: 4 Message...</td>
+      <td>{"process_id": "488", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>335030</td>
+      <td>2025-05-15 13:47:22</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130012223</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "1006", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>335102</td>
+      <td>2025-05-15 13:48:56</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd aplikacji:</td>
+      <td>{"process_id": "2114", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>335311</td>
+      <td>2025-05-15 13:48:57</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129985110</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "1270", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>335488</td>
+      <td>2025-05-15 13:49:24</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130109595</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2006", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>335907</td>
+      <td>2025-05-15 13:50:48</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130020016</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2113", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>336114</td>
+      <td>2025-05-15 13:53:22</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130020016</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1225", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>336410</td>
+      <td>2025-05-15 13:54:48</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130010150</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "532", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>336555</td>
+      <td>2025-05-15 13:55:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130025725</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "2113", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>336602</td>
+      <td>2025-05-15 13:55:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130010150</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "984", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>336698</td>
+      <td>2025-05-15 13:55:22</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130010150</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1714", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>336855</td>
+      <td>2025-05-15 13:55:22</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130025725</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "2113", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>336902</td>
+      <td>2025-05-15 13:55:22</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130010150</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "984", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>336998</td>
+      <td>2025-05-15 13:55:23</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130010150</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1714", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>337188</td>
+      <td>2025-05-15 13:59:05</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130109595</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1714", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>337203</td>
+      <td>2025-05-15 13:59:05</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130010150</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1469", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>337239</td>
+      <td>2025-05-15 13:59:05</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130109595</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "611", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>337303</td>
+      <td>2025-05-15 13:59:06</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130110273</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1349", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>337510</td>
+      <td>2025-05-15 13:59:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130117149</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "995", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>337680</td>
+      <td>2025-05-15 13:59:13</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130117149</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "995", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>338021</td>
+      <td>2025-05-15 14:10:50</td>
+      <td>BŁĄD</td>
+      <td>Błąd systemu</td>
+      <td>130019137</td>
+      <td>Wystąpił błąd podczas wykonywania procedury: ex...</td>
+      <td>{"process_id": "467", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>338440</td>
+      <td>2025-05-15 14:15:08</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130118062</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "39", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>338544</td>
+      <td>2025-05-15 14:15:08</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130118062</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1015", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>338885</td>
+      <td>2025-05-15 14:15:25</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130010006</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "1881", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>338964</td>
+      <td>2025-05-15 14:18:17</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>129985110</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1116", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>340203</td>
+      <td>2025-05-15 14:27:17</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130058235</td>
+      <td>Timer failed with exception!</td>
+      <td>{"process_id": "1070", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>340718</td>
+      <td>2025-05-19 08:14:40</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130555623</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "1188", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>341198</td>
+      <td>2025-05-19 08:38:54</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540513</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "521", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>341297</td>
+      <td>2025-05-19 08:38:54</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540513</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1517", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>341447</td>
+      <td>2025-05-19 09:15:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540809</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "821", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>341747</td>
+      <td>2025-05-19 09:15:33</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540809</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "821", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>342276</td>
+      <td>2025-05-19 11:05:26</td>
+      <td>KRYTYCZNY</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540855</td>
+      <td>Próba wykonania operacji, gdy oczekiwano wynik ...</td>
+      <td>{"process_id": "987", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>342727</td>
+      <td>2025-05-19 11:36:20</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130571881</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1953", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>342972</td>
+      <td>2025-05-19 11:38:28</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130552520</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1397", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>343242</td>
+      <td>2025-05-19 12:13:43</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540932</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1143", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>343261</td>
+      <td>2025-05-19 12:13:43</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540932</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1469", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>343609</td>
+      <td>2025-05-19 12:13:50</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540932</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1143", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>343628</td>
+      <td>2025-05-19 12:13:50</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540932</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1469", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>343994</td>
+      <td>2025-05-19 12:13:57</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540932</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1143", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>344013</td>
+      <td>2025-05-19 12:13:57</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540932</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1469", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>344355</td>
+      <td>2025-05-19 12:25:28</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130598429</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1989", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>344394</td>
+      <td>2025-05-19 12:25:28</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "693", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>344420</td>
+      <td>2025-05-19 12:25:28</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130598578</td>
+      <td>Brak sesji formsowej dla identyfikatora: 6422AD...</td>
+      <td>{"process_id": "584", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>344465</td>
+      <td>2025-05-19 12:25:28</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130558825</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "87", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>344471</td>
+      <td>2025-05-19 12:25:29</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130558825</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1866", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>344524</td>
+      <td>2025-05-19 12:25:29</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540516</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "560", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>344998</td>
+      <td>2025-05-19 12:46:41</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130574876</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1349", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>345001</td>
+      <td>2025-05-19 12:46:41</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130598429</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1833", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>345004</td>
+      <td>2025-05-19 12:46:41</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540932</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "865", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>345381</td>
+      <td>2025-05-19 12:46:48</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540932</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "367", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>345445</td>
+      <td>2025-05-19 12:46:49</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130574876</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1349", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>345448</td>
+      <td>2025-05-19 12:46:49</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130598429</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1833", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>345451</td>
+      <td>2025-05-19 12:46:49</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540932</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "865", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>345625</td>
+      <td>2025-05-19 12:46:57</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130598429</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "714", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>345638</td>
+      <td>2025-05-19 12:46:58</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130598429</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "714", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>345695</td>
+      <td>2025-05-19 12:46:59</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130598429</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "714", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>345748</td>
+      <td>2025-05-19 12:47:00</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130598429</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "714", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>346226</td>
+      <td>2025-05-19 12:51:17</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540516</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2072", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>346453</td>
+      <td>2025-05-19 12:57:19</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130551307</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1832", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>346757</td>
+      <td>2025-05-19 12:58:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130589309</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "233", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>346901</td>
+      <td>2025-05-19 12:58:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130589309</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2204", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>347174</td>
+      <td>2025-05-19 13:04:56</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130564342</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "223", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>347912</td>
+      <td>2025-05-19 13:26:57</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540932</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "449", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>348036</td>
+      <td>2025-05-19 13:30:38</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540932</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "973", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>348075</td>
+      <td>2025-05-19 13:30:38</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130541450</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "755", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>348086</td>
+      <td>2025-05-19 13:30:38</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540932</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "310", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>348233</td>
+      <td>2025-05-19 13:30:39</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540809</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "593", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>348240</td>
+      <td>2025-05-19 13:30:39</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540809</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2026", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>348323</td>
+      <td>2025-05-19 13:39:31</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540809</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1350", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>348358</td>
+      <td>2025-05-19 13:39:31</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540809</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "35", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>348421</td>
+      <td>2025-05-19 13:39:31</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130540809</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1141", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>348708</td>
+      <td>2025-05-20 07:49:25</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130687302</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1594", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>349208</td>
+      <td>2025-05-20 07:50:20</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130679341</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1641", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>349619</td>
+      <td>2025-05-20 07:50:29</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130679341</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1641", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>349625</td>
+      <td>2025-05-20 07:50:30</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130679341</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1641", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>350372</td>
+      <td>2025-05-20 07:56:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130698036</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1138", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>350589</td>
+      <td>2025-05-20 07:56:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130686674</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1846", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>350616</td>
+      <td>2025-05-20 07:56:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130686674</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "87", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>350666</td>
+      <td>2025-05-20 07:56:35</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130679929</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1450", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>350699</td>
+      <td>2025-05-20 07:56:35</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130679929</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1915", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>350727</td>
+      <td>2025-05-20 07:56:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130679453</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2142", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>350826</td>
+      <td>2025-05-20 07:56:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130687302</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1072", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>351047</td>
+      <td>2025-05-20 07:57:31</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130686902</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1351", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>351069</td>
+      <td>2025-05-20 07:57:31</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130686902</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "942", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>351099</td>
+      <td>2025-05-20 07:57:31</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130686902</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "807", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>352170</td>
+      <td>2025-05-20 08:20:10</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130656368</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "230", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>352577</td>
+      <td>2025-05-20 08:20:16</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130656368</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "230", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>352858</td>
+      <td>2025-05-20 08:20:27</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130565560</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "285", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>352911</td>
+      <td>2025-05-20 08:20:28</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130565560</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "285", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>353330</td>
+      <td>2025-05-20 08:20:33</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130565560</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "285", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>353650</td>
+      <td>2025-05-20 08:20:55</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130679341</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "312", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>354450</td>
+      <td>2025-05-20 08:35:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130688242</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "2204", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>354521</td>
+      <td>2025-05-20 08:35:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130688242</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "2204", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>354809</td>
+      <td>2025-05-20 10:35:33</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130690034</td>
+      <td>Wystąpił błąd podczas wykonywania funkcji: aw_u...</td>
+      <td>{"process_id": "41", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>354849</td>
+      <td>2025-05-20 10:35:34</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130712715</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "372", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>357064</td>
+      <td>2025-05-20 11:10:10</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130689771</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "24", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>357109</td>
+      <td>2025-05-20 11:10:10</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130689771</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1572", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>357488</td>
+      <td>2025-05-20 11:15:20</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "223", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>358478</td>
+      <td>2025-05-20 11:18:08</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130727480</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "689", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>358816</td>
+      <td>2025-05-20 11:18:13</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130727480</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "689", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>359369</td>
+      <td>2025-05-20 11:29:04</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130656368</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2170", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>360130</td>
+      <td>2025-05-20 11:39:08</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130712595</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "661", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>360265</td>
+      <td>2025-05-20 11:45:59</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130688242</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1250", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>360542</td>
+      <td>2025-05-20 11:45:59</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130679493</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "425", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>360598</td>
+      <td>2025-05-20 11:46:05</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130690241</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "41", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>361047</td>
+      <td>2025-05-20 11:46:14</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130690241</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "41", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>361594</td>
+      <td>2025-05-20 11:52:37</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130656368</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2018", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>362027</td>
+      <td>2025-05-20 11:52:52</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130656368</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2018", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>362349</td>
+      <td>2025-05-20 11:52:53</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130656368</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2018", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>362399</td>
+      <td>2025-05-20 11:55:22</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130730046</td>
+      <td>Wystąpił błąd podczas wykonywania zapytania</td>
+      <td>{"process_id": "1832", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>362559</td>
+      <td>2025-05-20 11:55:23</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130656368</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "901", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>362561</td>
+      <td>2025-05-20 11:55:24</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130656368</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "901", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>363018</td>
+      <td>2025-05-20 12:13:27</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130680419</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "92", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>363060</td>
+      <td>2025-05-20 12:13:27</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130680419</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "142", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>363062</td>
+      <td>2025-05-20 12:13:27</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130731720</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1764", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>363565</td>
+      <td>2025-05-20 12:32:42</td>
+      <td>BŁĄD</td>
+      <td>Błąd systemu</td>
+      <td>130727480</td>
+      <td>OperationResult.Status: Error FormId: 61 Messag...</td>
+      <td>{"process_id": "237", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>364224</td>
+      <td>2025-05-20 12:41:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130730927</td>
+      <td>Nie udało się utworzyć obiektu łączącego z apli...</td>
+      <td>{"process_id": "853", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>364298</td>
+      <td>2025-05-20 12:41:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130701593</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "1255", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>364330</td>
+      <td>2025-05-20 12:41:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130701593</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "1255", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>364402</td>
+      <td>2025-05-20 12:41:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130679872</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1825", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>364839</td>
+      <td>2025-05-20 12:45:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130738572</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1371", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>364896</td>
+      <td>2025-05-20 12:45:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130701593</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "1242", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>364919</td>
+      <td>2025-05-20 12:45:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130701593</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "1242", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>365031</td>
+      <td>2025-05-20 12:45:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130738572</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1895", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>365113</td>
+      <td>2025-05-20 12:45:38</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130701593</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1371", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>365218</td>
+      <td>2025-05-20 12:45:39</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130678862</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2061", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>365361</td>
+      <td>2025-05-20 12:50:30</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130690241</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "2007", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>365993</td>
+      <td>2025-05-20 13:03:15</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130738572</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1593", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>366595</td>
+      <td>2025-05-20 13:05:38</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130689771</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "596", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>366832</td>
+      <td>2025-05-20 13:05:39</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130740393</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1917", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>367443</td>
+      <td>2025-05-20 14:21:09</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130693377</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1670", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>367738</td>
+      <td>2025-05-20 14:23:10</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130770583</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "2166", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>368995</td>
+      <td>2025-05-21 08:55:53</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Invalid form ID: 87 instead 88</td>
+      <td>{"process_id": "705", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>369053</td>
+      <td>2025-05-21 08:55:53</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130831785</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "844", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>369921</td>
+      <td>2025-05-21 08:57:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130833650</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "753", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>370507</td>
+      <td>2025-05-21 09:05:29</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130832461</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2113", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>370566</td>
+      <td>2025-05-21 09:05:30</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130831785</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "978", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>370731</td>
+      <td>2025-05-21 09:05:30</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130831785</td>
+      <td>Nie istnieje kolumna na pozycji 4</td>
+      <td>{"process_id": "978", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>371052</td>
+      <td>2025-05-21 09:06:43</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130831880</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1317", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>371362</td>
+      <td>2025-05-21 09:08:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130831785</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "436", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>371610</td>
+      <td>2025-05-21 09:08:13</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130857494</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "420", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>372755</td>
+      <td>2025-05-21 09:22:16</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130831777</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "901", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>373796</td>
+      <td>2025-05-21 09:56:55</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130835081</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1226", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>373874</td>
+      <td>2025-05-21 09:56:55</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130835081</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "808", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>373987</td>
+      <td>2025-05-21 09:56:55</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130835081</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1585", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>374675</td>
+      <td>2025-05-21 11:26:24</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130854642</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2160", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>374738</td>
+      <td>2025-05-21 11:26:24</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130878512</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1456", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>374898</td>
+      <td>2025-05-21 11:26:25</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130863832</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "292", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>375665</td>
+      <td>2025-05-21 11:55:46</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130832461</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1672", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>375931</td>
+      <td>2025-05-21 13:03:57</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130889205</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "1253", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>376248</td>
+      <td>2025-05-21 13:04:03</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130889205</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "1253", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>376507</td>
+      <td>2025-05-21 13:04:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130832039</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2027", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>376727</td>
+      <td>2025-05-21 13:04:13</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130889205</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "1253", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>376828</td>
+      <td>2025-05-21 13:04:18</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130832039</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "927", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>376842</td>
+      <td>2025-05-21 13:04:19</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130858085</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "34", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>376851</td>
+      <td>2025-05-21 13:04:19</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130832039</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1599", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>376914</td>
+      <td>2025-05-21 13:04:19</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130832039</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2027", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>377842</td>
+      <td>2025-05-21 14:07:02</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130854642</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "347", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>377883</td>
+      <td>2025-05-21 14:07:02</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "249", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>377894</td>
+      <td>2025-05-21 14:07:02</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130831299</td>
+      <td>Brak sesji formsowej dla identyfikatora: AD62F8...</td>
+      <td>{"process_id": "1698", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>378183</td>
+      <td>2025-05-21 14:15:00</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130864887</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "493", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>378257</td>
+      <td>2025-05-21 14:15:05</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130854642</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "883", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>378601</td>
+      <td>2025-05-21 14:15:13</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130849268</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "414", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>378703</td>
+      <td>2025-05-21 14:15:14</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "374", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>378770</td>
+      <td>2025-05-21 14:15:14</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130831678</td>
+      <td>Brak sesji formsowej dla identyfikatora: 9A27D1...</td>
+      <td>{"process_id": "1734", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>378864</td>
+      <td>2025-05-21 14:15:19</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130853439</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "638", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>379043</td>
+      <td>2025-05-21 14:15:20</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130849268</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "414", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>379145</td>
+      <td>2025-05-21 14:15:20</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "374", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>379261</td>
+      <td>2025-05-21 14:22:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130864887</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "311", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>379279</td>
+      <td>2025-05-21 14:22:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>130831798</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2200", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>379647</td>
+      <td>2025-05-22 07:46:42</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131025682</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2103", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>379700</td>
+      <td>2025-05-22 07:46:42</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131025682</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "170", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>381516</td>
+      <td>2025-05-22 12:24:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131038145</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "1703", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>381538</td>
+      <td>2025-05-22 12:24:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131075533</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "205", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>381763</td>
+      <td>2025-05-22 12:24:43</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131075533</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "982", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>382189</td>
+      <td>2025-05-22 12:25:02</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131075533</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1144", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>382259</td>
+      <td>2025-05-22 12:25:03</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131075533</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "104", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>382652</td>
+      <td>2025-05-22 12:45:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131088297</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1325", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>382700</td>
+      <td>2025-05-22 12:45:13</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131100547</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "808", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>382769</td>
+      <td>2025-05-22 12:48:19</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131100547</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "554", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>382822</td>
+      <td>2025-05-22 12:48:19</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131053290</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1443", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>383033</td>
+      <td>2025-05-22 12:48:20</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131050316</td>
+      <td>PrintGraphReportPdf: Nie znaleziono pliku: 'ere...</td>
+      <td>{"process_id": "855", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>383324</td>
+      <td>2025-05-22 12:49:13</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "404", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>383543</td>
+      <td>2025-05-22 12:50:19</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131100547</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "172", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>384044</td>
+      <td>2025-05-22 13:07:16</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131041812</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2236", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>384781</td>
+      <td>2025-05-22 13:51:54</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131091894</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1945", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>384860</td>
+      <td>2025-05-26 08:28:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131523877</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "2163", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>385276</td>
+      <td>2025-05-26 08:29:31</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131576928</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "829", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>386031</td>
+      <td>2025-05-26 09:15:34</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131577587</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1623", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>386055</td>
+      <td>2025-05-27 08:11:55</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131698174</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "900", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>386121</td>
+      <td>2025-05-27 08:11:55</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131698174</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1734", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>386374</td>
+      <td>2025-05-27 08:12:23</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131700845</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1945", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>386504</td>
+      <td>2025-05-27 08:12:24</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131698174</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1434", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>386662</td>
+      <td>2025-05-27 08:12:29</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131700845</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "831", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>386669</td>
+      <td>2025-05-27 08:12:30</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131700845</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "831", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>386998</td>
+      <td>2025-05-27 08:12:39</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131698174</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1480", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>387194</td>
+      <td>2025-05-27 08:12:40</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131698174</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1165", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>387528</td>
+      <td>2025-05-27 08:12:47</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131698174</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1480", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>387730</td>
+      <td>2025-05-28 12:54:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131992525</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2091", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>387777</td>
+      <td>2025-05-28 12:54:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131992525</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "422", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>387864</td>
+      <td>2025-05-28 13:26:19</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132008328</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "2016", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>388364</td>
+      <td>2025-05-28 14:00:06</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132078492</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "146", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>389121</td>
+      <td>2025-05-28 14:12:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132027829</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "2489", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>389262</td>
+      <td>2025-05-28 14:12:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132079500</td>
+      <td>Nie udało się utworzyć obiektu łączącego z apli...</td>
+      <td>{"process_id": "1469", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>389576</td>
+      <td>2025-05-28 14:18:43</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "182", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>389598</td>
+      <td>2025-05-28 14:18:43</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131992413</td>
+      <td>Brak sesji formsowej dla identyfikatora: EAC209...</td>
+      <td>{"process_id": "182", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>390295</td>
+      <td>2025-05-28 14:24:07</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132087155</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1231", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>390313</td>
+      <td>2025-05-28 14:24:07</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132087155</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1102", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>390683</td>
+      <td>2025-05-28 14:26:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132087155</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1392", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>390716</td>
+      <td>2025-05-28 14:26:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131992096</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "79", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>390983</td>
+      <td>2025-05-28 14:26:13</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132087155</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1392", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>391039</td>
+      <td>2025-05-28 14:26:13</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>131992096</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "79", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>391843</td>
+      <td>2025-05-29 10:35:51</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132121455</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1795", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>391982</td>
+      <td>2025-05-29 10:35:52</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132125725</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "892", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>392245</td>
+      <td>2025-05-29 10:35:57</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132121455</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1795", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>392625</td>
+      <td>2025-05-29 10:36:30</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "620", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>392630</td>
+      <td>2025-05-29 10:36:30</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132161830</td>
+      <td>Brak sesji formsowej dla identyfikatora: 794829...</td>
+      <td>{"process_id": "1716", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>392724</td>
+      <td>2025-05-29 10:36:59</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132156750</td>
+      <td>Nie udało się utworzyć obiektu łączącego z apli...</td>
+      <td>{"process_id": "931", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>393042</td>
+      <td>2025-05-29 10:37:29</td>
+      <td>BŁĄD</td>
+      <td>Błąd systemu</td>
+      <td>132161673</td>
+      <td>OperationResult.Status: Error FormId: 13 Messag...</td>
+      <td>{"process_id": "826", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>393349</td>
+      <td>2025-05-29 10:38:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132121645</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "744", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>393359</td>
+      <td>2025-05-29 10:38:01</td>
+      <td>BŁĄD</td>
+      <td>Błąd systemu</td>
+      <td>132161673</td>
+      <td>OperationResult.Status: Error FormId: 14 Messag...</td>
+      <td>{"process_id": "285", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>393635</td>
+      <td>2025-05-29 10:38:30</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132161673</td>
+      <td>Wystąpił błąd podczas wykonywania procedury: sz...</td>
+      <td>{"process_id": "2304", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>393958</td>
+      <td>2025-05-29 10:39:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132145393</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "809", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>394538</td>
+      <td>2025-05-29 10:40:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132125725</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "2245", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>394591</td>
+      <td>2025-05-29 10:40:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132019627</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2189", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>394650</td>
+      <td>2025-05-29 10:40:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132019627</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2085", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>395363</td>
+      <td>2025-05-29 10:45:05</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132125725</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "2436", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>395754</td>
+      <td>2025-05-29 10:45:34</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132121645</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1810", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>396490</td>
+      <td>2025-05-29 10:46:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132125725</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "355", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>396510</td>
+      <td>2025-05-29 10:46:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132161673</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1393", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>397434</td>
+      <td>2025-05-29 11:03:08</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132039940</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1110", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>397445</td>
+      <td>2025-05-29 11:03:08</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132039940</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2416", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>397594</td>
+      <td>2025-05-29 11:27:05</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132121269</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "556", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>397938</td>
+      <td>2025-05-29 11:27:12</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132149225</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "537", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>398190</td>
+      <td>2025-05-29 11:27:35</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132149225</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "798", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>398196</td>
+      <td>2025-05-29 11:27:35</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132181640</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "534", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>398227</td>
+      <td>2025-05-29 11:27:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132149225</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "798", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>398233</td>
+      <td>2025-05-29 11:27:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132181640</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "534", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>398591</td>
+      <td>2025-05-29 11:27:41</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132149225</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "798", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>398597</td>
+      <td>2025-05-29 11:27:41</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132181640</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "534", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>399263</td>
+      <td>2025-05-29 11:41:18</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132165377</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "809", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>399387</td>
+      <td>2025-05-29 11:41:19</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132181640</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "888", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>400206</td>
+      <td>2025-05-29 11:43:31</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132145393</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2459", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>400769</td>
+      <td>2025-05-29 11:45:17</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132165377</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "214", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>401084</td>
+      <td>2025-05-29 11:49:17</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132167462</td>
+      <td>Wystąpił błąd podczas wykonywania zapytania</td>
+      <td>{"process_id": "809", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>401170</td>
+      <td>2025-05-29 11:49:17</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "1089", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>401172</td>
+      <td>2025-05-29 11:49:17</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "2388", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>401200</td>
+      <td>2025-05-29 11:49:17</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132178964</td>
+      <td>Timer failed with exception!</td>
+      <td>{"process_id": "2402", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>401305</td>
+      <td>2025-05-29 11:49:18</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132167462</td>
+      <td>Wystąpił błąd podczas wykonywania zapytania</td>
+      <td>{"process_id": "520", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>401480</td>
+      <td>2025-05-29 11:56:09</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132167462</td>
+      <td>Wystąpił błąd podczas wykonywania zapytania</td>
+      <td>{"process_id": "2220", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>401531</td>
+      <td>2025-05-29 11:56:09</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Brak sesji formsowej dla identyfikatora: 0357EC...</td>
+      <td>{"process_id": "533", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>401533</td>
+      <td>2025-05-29 11:56:09</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Nie znaleziono sesji formsowej</td>
+      <td>{"process_id": "533", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>402023</td>
+      <td>2025-05-29 11:56:29</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132167462</td>
+      <td>Wystąpił błąd podczas wykonywania zapytania</td>
+      <td>{"process_id": "1032", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>402860</td>
+      <td>2025-05-29 12:08:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132156016</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "161", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>403164</td>
+      <td>2025-05-29 12:19:20</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132121424</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "726", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>403244</td>
+      <td>2025-05-29 12:19:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132149374</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "33", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>403259</td>
+      <td>2025-05-29 12:19:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132149374</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "33", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>403347</td>
+      <td>2025-05-29 12:19:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "1177", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>403387</td>
+      <td>2025-05-29 12:19:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132121424</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "862", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>403447</td>
+      <td>2025-05-29 12:19:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132149374</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1214", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>403583</td>
+      <td>2025-05-29 12:20:44</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132149374</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "1818", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>403599</td>
+      <td>2025-05-29 12:20:44</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132149374</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "1818", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>403727</td>
+      <td>2025-05-29 12:20:45</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132121446</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "521", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>403850</td>
+      <td>2025-05-29 12:22:29</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132186668</td>
+      <td>Brak sesji formsowej dla identyfikatora: 37D889...</td>
+      <td>{"process_id": "931", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>403925</td>
+      <td>2025-05-29 12:22:29</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Invalid form ID: 124 instead 126</td>
+      <td>{"process_id": "1920", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>404058</td>
+      <td>2025-05-29 12:26:18</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132145393</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "556", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>404328</td>
+      <td>2025-05-29 12:26:19</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132152442</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "817", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>404460</td>
+      <td>2025-05-29 12:33:56</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132019627</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1795", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>404509</td>
+      <td>2025-05-29 12:33:56</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132019627</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1290", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>404705</td>
+      <td>2025-05-29 12:37:50</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132019627</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "594", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>405262</td>
+      <td>2025-05-29 13:41:58</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132124436</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2215", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>405855</td>
+      <td>2025-05-29 13:43:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132124436</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2378", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>405889</td>
+      <td>2025-05-29 13:43:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132124436</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1507", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>406340</td>
+      <td>2025-05-29 13:43:31</td>
+      <td>BŁĄD</td>
+      <td>Błąd systemu</td>
+      <td>132121645</td>
+      <td>OperationResult.Status: Error FormId: 95 Messag...</td>
+      <td>{"process_id": "2347", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>406498</td>
+      <td>2025-05-29 13:44:01</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132144765</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2522", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>406683</td>
+      <td>2025-05-29 13:44:02</td>
+      <td>BŁĄD</td>
+      <td>Błąd systemu</td>
+      <td>132141555</td>
+      <td>Wystąpił błąd podczas wykonywania procedury: ex...</td>
+      <td>{"process_id": "2473", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>406858</td>
+      <td>2025-05-29 13:44:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "526", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>406859</td>
+      <td>2025-05-29 13:44:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132144765</td>
+      <td>Brak sesji formsowej dla identyfikatora: 73670F...</td>
+      <td>{"process_id": "2050", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>407010</td>
+      <td>2025-05-29 13:44:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132144765</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2522", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>407370</td>
+      <td>2025-05-29 13:45:31</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132156016</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "361", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>407406</td>
+      <td>2025-05-29 13:45:32</td>
+      <td>KRYTYCZNY</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132156016</td>
+      <td>Błąd wywołania metody Run</td>
+      <td>{"process_id": "361", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>407407</td>
+      <td>2025-05-29 13:45:32</td>
+      <td>BŁĄD</td>
+      <td>Błąd systemu</td>
+      <td>132156016</td>
+      <td>Error received from called service: Aktualny st...</td>
+      <td>{"process_id": "361", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>407431</td>
+      <td>2025-05-29 13:45:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132124088</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "750", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>407854</td>
+      <td>2025-05-29 13:46:03</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132156016</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "361", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>407890</td>
+      <td>2025-05-29 13:46:03</td>
+      <td>KRYTYCZNY</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132156016</td>
+      <td>Błąd wywołania metody Run</td>
+      <td>{"process_id": "361", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>407891</td>
+      <td>2025-05-29 13:46:03</td>
+      <td>BŁĄD</td>
+      <td>Błąd systemu</td>
+      <td>132156016</td>
+      <td>Error received from called service: Aktualny st...</td>
+      <td>{"process_id": "361", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>408104</td>
+      <td>2025-05-29 13:46:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132011674</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1802", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>408847</td>
+      <td>2025-05-29 13:47:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132166271</td>
+      <td>Brakuje odpowiedniego wpisu w konfiguracji arch...</td>
+      <td>{"process_id": "644", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>408894</td>
+      <td>2025-05-29 13:48:02</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132145393</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1826", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>409532</td>
+      <td>2025-05-29 13:49:02</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132011674</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1709", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>409556</td>
+      <td>2025-05-29 13:49:02</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132011674</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "369", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>409730</td>
+      <td>2025-05-29 13:49:03</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132166271</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1250", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>410102</td>
+      <td>2025-05-29 13:50:03</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132019627</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2233", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>410647</td>
+      <td>2025-05-29 13:53:14</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132124378</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "204", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>411550</td>
+      <td>2025-05-29 14:04:32</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132144036</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2371", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>411757</td>
+      <td>2025-05-29 14:07:21</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132165683</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1570", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>411866</td>
+      <td>2025-05-29 14:13:57</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132011674</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2156", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>412216</td>
+      <td>2025-05-29 14:14:37</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132152692</td>
+      <td>Timer failed with exception!</td>
+      <td>{"process_id": "892", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>412414</td>
+      <td>2025-05-29 14:14:38</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132146342</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1906", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>412420</td>
+      <td>2025-05-29 14:14:38</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132146342</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "343", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>412830</td>
+      <td>2025-05-29 14:17:15</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132205453</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "521", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>412839</td>
+      <td>2025-05-29 14:17:15</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132205453</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "570", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>413041</td>
+      <td>2025-05-29 14:17:16</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>unknown</td>
+      <td>Błąd przy pobieraniu akcji do wykonania przez a...</td>
+      <td>{"process_id": "136", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>413050</td>
+      <td>2025-05-29 14:17:16</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132125371</td>
+      <td>Brak sesji formsowej dla identyfikatora: B8DC4F...</td>
+      <td>{"process_id": "2050", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>413572</td>
+      <td>2025-05-30 07:15:52</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132296723</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "293", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>413599</td>
+      <td>2025-05-30 07:15:52</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132296723</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "526", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>413611</td>
+      <td>2025-05-30 07:15:52</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132296723</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "225", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>413900</td>
+      <td>2025-05-30 07:15:53</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132296723</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "293", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>413927</td>
+      <td>2025-05-30 07:15:53</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132296723</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "526", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>413939</td>
+      <td>2025-05-30 07:15:53</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132296723</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "225", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>414751</td>
+      <td>2025-05-30 07:23:03</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132296549</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "50", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>414869</td>
+      <td>2025-05-30 07:24:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132297173</td>
+      <td>Nie udało się utworzyć obiektu łączącego z apli...</td>
+      <td>{"process_id": "2064", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>414937</td>
+      <td>2025-05-30 07:24:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132296723</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "374", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>414962</td>
+      <td>2025-05-30 07:24:11</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132296723</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1884", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>416356</td>
+      <td>2025-05-30 07:49:50</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132296723</td>
+      <td>Nie istnieje kolumna na pozycji 2</td>
+      <td>{"process_id": "1513", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>417088</td>
+      <td>2025-05-30 08:01:08</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132263936</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "2339", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>418094</td>
+      <td>2025-05-30 08:15:09</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132263936</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "1570", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>418200</td>
+      <td>2025-05-30 08:16:22</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132262472</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1422", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>419371</td>
+      <td>2025-05-30 08:50:38</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132303496</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2521", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>419567</td>
+      <td>2025-05-30 08:50:49</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132303496</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "2521", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>419907</td>
+      <td>2025-05-30 08:53:35</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132262728</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1100", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>420890</td>
+      <td>2025-05-30 10:05:41</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132266081</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1619", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>421465</td>
+      <td>2025-05-30 10:07:15</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132262728</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1794", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>421578</td>
+      <td>2025-05-30 10:07:15</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132319650</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "369", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>421840</td>
+      <td>2025-05-30 10:07:55</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132266081</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1956", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>421922</td>
+      <td>2025-05-30 10:07:57</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132266081</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1956", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>422038</td>
+      <td>2025-05-30 10:07:59</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132297882</td>
+      <td>Nie udało się utworzyć obiektu łączącego z apli...</td>
+      <td>{"process_id": "1143", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>422042</td>
+      <td>2025-05-30 10:07:59</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132310377</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1584", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>422319</td>
+      <td>2025-05-30 10:13:15</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132262948</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1320", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>422423</td>
+      <td>2025-05-30 10:18:40</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132263809</td>
+      <td>PrintGraphReportPdf: Nie znaleziono pliku: 'esk...</td>
+      <td>{"process_id": "30", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>422895</td>
+      <td>2025-05-30 10:19:05</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132318269</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "440", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>423100</td>
+      <td>2025-05-30 10:20:35</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132306040</td>
+      <td>Wystąpił błąd podczas wykonywania funkcji: aw_n...</td>
+      <td>{"process_id": "430", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>423167</td>
+      <td>2025-05-30 10:20:36</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132306040</td>
+      <td>Wystąpił błąd podczas wykonywania funkcji: aw_n...</td>
+      <td>{"process_id": "430", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>423467</td>
+      <td>2025-05-30 10:20:40</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132306040</td>
+      <td>Wystąpił błąd podczas wykonywania funkcji: aw_n...</td>
+      <td>{"process_id": "430", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>423534</td>
+      <td>2025-05-30 10:20:41</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132306040</td>
+      <td>Wystąpił błąd podczas wykonywania funkcji: aw_n...</td>
+      <td>{"process_id": "430", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>423681</td>
+      <td>2025-05-30 10:21:13</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132310377</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1704", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>423692</td>
+      <td>2025-05-30 10:21:13</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132310377</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "786", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>423749</td>
+      <td>2025-05-30 10:21:14</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132297483</td>
+      <td>Timer failed with exception!</td>
+      <td>{"process_id": "750", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>424026</td>
+      <td>2025-05-30 10:21:43</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132266081</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1740", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>424399</td>
+      <td>2025-05-30 10:22:14</td>
+      <td>BŁĄD</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>132310377</td>
+      <td>ORA-01086: SavepointNeverEstablishedException: ...</td>
+      <td>{"process_id": "1699", "formssessionname": "202...</td>
+    </tr>
+  </tbody>
+</table>
+                </div>
+                
+                <div class="footer">
+                    <p>Wygenerowane przez System Monitoringu 2025-06-08 21:47:36</p>
+                </div>
+            </body>
+            </html>
+            

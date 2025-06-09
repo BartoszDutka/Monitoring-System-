@@ -218,7 +218,7 @@ label {
 }
 
 .form-group label {
-  color: white;
+  color: black;
 }
 
 .form-control {
@@ -546,37 +546,54 @@ select.form-control {
   font-size: 0.92rem; /* Smaller font for product names */
 }
 
-/* Adjust column widths for better fit */
+/* Adjust column widths for better fit - optimized for Polish translations */
+/* Column 1: Checkbox */
 .invoice-data-table th:first-child,
 .invoice-data-table td:first-child {
-  width: 25%;
+  width: 30px; /* Fixed width for checkbox column */
+  min-width: 30px;
 }
 
+/* Column 2: Product Name */
 .invoice-data-table th:nth-child(2),
 .invoice-data-table td:nth-child(2) {
-  width: 12%;
+  width: 20%; /* Product names */
 }
 
+/* Column 3: Category - increased for Polish translations */
 .invoice-data-table th:nth-child(3),
 .invoice-data-table td:nth-child(3) {
-  width: 8%;
+  width: 18%; /* Increased for category translations (Oprogramowanie, etc.) */
 }
 
+/* Column 4: Quantity */
 .invoice-data-table th:nth-child(4),
-.invoice-data-table td:nth-child(4),
+.invoice-data-table td:nth-child(4) {
+  width: 8%; /* Quantity */
+}
+
+/* Column 5: Unit Price */
 .invoice-data-table th:nth-child(5),
 .invoice-data-table td:nth-child(5) {
-  width: 10%;
+  width: 10%; /* Unit price */
 }
 
+/* Column 6: Total Price */
 .invoice-data-table th:nth-child(6),
 .invoice-data-table td:nth-child(6) {
-  width: 22%;
+  width: 10%; /* Total price */
 }
 
+/* Column 7: Assign To Department */
+.invoice-data-table th:nth-child(7),
+.invoice-data-table td:nth-child(7) {
+  width: 20%; /* Department assignment dropdown */
+}
+
+/* Column 8: Actions */
 .invoice-data-table th:last-child,
 .invoice-data-table td:last-child {
-  width: 13%;
+  width: 14%; /* Action buttons */
 }
 
 /* Remove duplicate definitions */
@@ -778,4 +795,61 @@ textarea:focus-visible {
     max-width: 95%;
     width: 1400px;
     margin: 0 auto;
+}
+
+/* Special handling for category column with Polish translations */
+.invoice-data-table .product-category-select {
+  width: 100%;
+  min-width: 140px; /* Minimum width to accommodate "Oprogramowanie" */
+  max-width: 100%;
+  font-size: 0.9rem;
+  padding: 0.4rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+}
+
+/* Ensure department assignment dropdown has enough space */
+.invoice-data-table .assign-to-select {
+  width: 100%;
+  min-width: 160px;
+  font-size: 0.9rem;
+  padding: 0.4rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+}
+
+/* Prevent text overflow in category cells */
+.invoice-data-table td:nth-child(3) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 140px;
+}
+
+/* Ensure quantity input fits properly */
+.invoice-data-table .quantity-input {
+  width: 60px;
+  max-width: 100%;
+  padding: 0.3rem;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+}
+
+/* Make sure the table layout is stable */
+.invoice-data-table {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 900px; /* Minimum width to accommodate all columns */
+}
+
+/* Add horizontal scroll for small screens */
+.invoice-preview {
+  overflow-x: auto;
 }

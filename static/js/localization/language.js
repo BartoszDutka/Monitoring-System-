@@ -138,12 +138,35 @@ function updateLanguageWithoutRefresh(lang) {
             }
         } catch (e) {
             console.error('Błąd przy stabilizacji fokusa po zmianie języka:', e);
-        }
-    }, 100);
+        }    }, 100);
+}
+
+// Update language toggle button display
+function updateLanguageToggleDisplay(lang) {
+    const currentLanguageSpan = document.getElementById('current-language');
+    if (currentLanguageSpan) {
+        currentLanguageSpan.textContent = lang.toUpperCase();
+    }
 }
 
 // Tłumaczenie strony / Translate page content
 function translatePage(lang) {
+    // Update page title
+    const titleElement = document.querySelector('title[data-en][data-pl]');
+    if (titleElement) {
+        const titleTranslation = titleElement.getAttribute(`data-${lang}`);
+        if (titleTranslation) {
+            titleElement.textContent = titleTranslation;
+        }
+    }
+    
+    // Update html lang attribute
+    const htmlElement = document.documentElement;
+    if (htmlElement.hasAttribute(`data-${lang}-lang`)) {
+        const langAttr = htmlElement.getAttribute(`data-${lang}-lang`);
+        htmlElement.setAttribute('lang', langAttr);
+    }
+    
     // Znajdź wszystkie elementy z atrybutami data-en i data-pl
     const elements = document.querySelectorAll('[data-en][data-pl]');
     
@@ -163,10 +186,16 @@ function translatePage(lang) {
         }
     });
     
-    // Dispatch event that language has changed (for other components)
+    // Update language toggle button display
+    updateLanguageToggleDisplay(lang);
+      // Dispatch event that language has changed (for other components)
     document.dispatchEvent(new CustomEvent('languageChanged', { 
         detail: { language: lang } 
     }));
+      // Update inventory translations for dynamically created elements
+    if (typeof updateInventoryTranslations === 'function') {
+        updateInventoryTranslations(lang);
+    }
 }
 
 // Funkcja tłumacząca opisy działów / Function to translate department descriptions
@@ -347,6 +376,34 @@ function translateText(key, lang = null) {
             'Software Development': 'Rozwój Oprogramowania'
         }
     };
+      return translations[lang]?.[key] || translations['en'][key] || key;
+}
+
+// Function to update dynamically created inventory elements
+function updateInventoryTranslations(lang) {
+    // Update category selects in invoice processing
+    document.querySelectorAll('.product-category-select').forEach(select => {
+        Array.from(select.options).forEach(option => {
+            const value = option.value;
+            if (value === 'hardware') {
+                option.textContent = lang === 'pl' ? 'Sprzęt' : 'Hardware';
+            } else if (value === 'software') {
+                option.textContent = lang === 'pl' ? 'Oprogramowanie' : 'Software';
+            } else if (value === 'furniture') {
+                option.textContent = lang === 'pl' ? 'Meble' : 'Furniture';
+            } else if (value === 'accessories') {
+                option.textContent = lang === 'pl' ? 'Akcesoria' : 'Accessories';
+            } else if (value === 'other') {
+                option.textContent = lang === 'pl' ? 'Inne' : 'Other';
+            }
+        });
+    });
     
-    return translations[lang]?.[key] || translations['en'][key] || key;
+    // Update "Select Department" placeholder in assign-to-select dropdowns
+    document.querySelectorAll('.assign-to-select').forEach(select => {
+        const firstOption = select.querySelector('option[value=""]');
+        if (firstOption) {
+            firstOption.textContent = lang === 'pl' ? 'Wybierz dział...' : 'Select Department';
+        }
+    });
 }

@@ -1,0 +1,4146 @@
+
+            <!DOCTYPE html>
+            <html lang="pl">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Raport wiadomości</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        margin: 20px;
+                        color: #333;
+                    }
+                    h1 {
+                        color: #2c3e50;
+                        border-bottom: 2px solid #3498db;
+                        padding-bottom: 10px;
+                        margin-bottom: 20px;
+                    }
+                    .report-header {
+                        background-color: #f8f9fa;
+                        padding: 15px;
+                        border-radius: 5px;
+                        margin-bottom: 20px;
+                    }
+                    .report-metadata {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 20px;
+                        margin-bottom: 15px;
+                    }
+                    .metadata-item {
+                        flex: 1 0 200px;
+                    }
+                    .metadata-item h3 {
+                        margin: 0 0 5px 0;
+                        font-size: 14px;
+                        color: #666;
+                    }
+                    .metadata-item p {
+                        margin: 0;
+                        font-weight: bold;
+                        color: #333;
+                    }
+                    table.data-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 20px 0;
+                        font-size: 14px;
+                    }
+                    .data-table th, 
+                    .data-table td {
+                        padding: 10px;
+                        border: 1px solid #ddd;
+                        text-align: left;
+                    }
+                    .data-table th {
+                        background-color: #f2f2f2;
+                        color: #333;
+                        font-weight: bold;
+                        position: sticky;
+                        top: 0;
+                    }
+                    .data-table tr:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+                    .data-table tr:hover {
+                        background-color: #f1f1f1;
+                    }
+                    .footer {
+                        text-align: center;
+                        margin-top: 30px;
+                        padding-top: 10px;
+                        border-top: 1px solid #eee;
+                        font-size: 12px;
+                        color: #666;
+                    }
+                    
+                    /* Responsive design */
+                    @media (max-width: 768px) {
+                        .report-metadata {
+                            flex-direction: column;
+                            gap: 10px;
+                        }
+                        .data-table {
+                            font-size: 12px;
+                        }
+                        .data-table th, 
+                        .data-table td {
+                            padding: 6px;
+                        }
+                        
+                        /* Enable horizontal scrolling for tables on small screens */
+                        .table-container {
+                            width: 100%;
+                            overflow-x: auto;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="report-header">
+                    <h1>Raport wiadomości</h1>
+                    <div class="report-metadata">
+                        <div class="metadata-item">
+                            <h3>Typ raportu:</h3>
+                            <p>Raport wiadomości</p>
+                        </div>
+                        <div class="metadata-item">
+                            <h3>Zakres dat:</h3>
+                            <p>2025-05-09 do 2025-06-08</p>
+                        </div>
+                        <div class="metadata-item">
+                            <h3>Wygenerowano:</h3>
+                            <p>2025-06-08 21:37:46</p>
+                        </div>
+                        <div class="metadata-item">
+                            <h3>Liczba rekordów:</h3>
+                            <p>500</p>
+                        </div>
+                    </div>
+                </div>
+                  <div class="table-container">
+                    <table class="data-table" cellspacing="0" cellpadding="5">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Data i czas</th>
+      <th>Poziom</th>
+      <th>Ważność</th>
+      <th>Kategoria</th>
+      <th>Wiadomość</th>
+      <th>Szczegóły</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 1065</td>
+      <td>{"process_id": "116", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->CheckboxChanged (Cb.Cb067[0]), (Shift,Ctrl,A...</td>
+      <td>{"process_id": "2101", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: Cb.Cb067[0] = [en...</td>
+      <td>{"process_id": "1959", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_check | ODKARTASZ:CB.CB067[1] {} |</td>
+      <td>{"process_id": "2101", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> CheckboxChanged (Cb.Cb067[0]), (Shift,Ctrl,...</td>
+      <td>{"process_id": "2101", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Skie2.SkieDataWystawieniaSkie[2]), (Sh...</td>
+      <td>{"process_id": "287", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (Ctrl.BSzczegolyPobytu[0]), (S...</td>
+      <td>{"process_id": "1122", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>ODPOBYT > ODPOBYT: 495ms</td>
+      <td>{"process_id": "597", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Nieobsługiwane wywołanie GET_ITEM_PROPERTY('DSP...</td>
+      <td>{"process_id": "597", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: Ctrl.DspChkAktual...</td>
+      <td>{"process_id": "384", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_uncheck | SLISTPAC:CTRL.DSP_CHK_AKTUALNE...</td>
+      <td>{"process_id": "1273", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> CheckboxChanged (Ctrl.DspChkAktualnePobyty[...</td>
+      <td>{"process_id": "1273", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OEWSKLAB:SKIE2.SKIE_DATA_WYSTAWI...</td>
+      <td>{"process_id": "287", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Skie2.SkieDataWystawieniaSkie[2]), (S...</td>
+      <td>{"process_id": "287", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>FormId: 20 Message: Sekcja 2. Przesłano 4 rekor...</td>
+      <td>{"process_id": "1085", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (Ctrl.Etykieta[0]), (Shift,Ctr...</td>
+      <td>{"process_id": "1085", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>External operation started (type: Print)</td>
+      <td>{"process_id": "1213", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Zakończono generacje raportu graficznego (repor...</td>
+      <td>{"process_id": "1213", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Rozpoczęto generacje raportu graficznego (repor...</td>
+      <td>{"process_id": "1213", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 877</td>
+      <td>{"process_id": "1761", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Wo.WoData[2]), (Shift,Ctrl,Alt)=(False...</td>
+      <td>{"process_id": "1644", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKARGOR:WO.WO_DATA[3] {Data} |</td>
+      <td>{"process_id": "1644", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Wo.WoData[2]), (Shift,Ctrl,Alt)=(Fals...</td>
+      <td>{"process_id": "1644", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza SzDefMenu z Eskulap.Core.Gen.</td>
+      <td>{"process_id": "597", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza OdpobytForm z Eskulap.Ruch...</td>
+      <td>{"process_id": "597", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:00</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Uruchomiono nowy wątek formularza (thread id=597)</td>
+      <td>{"process_id": "597", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODPOBYT:CTRL.B_SZCZEGOLY_POBYTU[...</td>
+      <td>{"process_id": "1122", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (Ctrl.BSzczegolyPobytu[0]), (...</td>
+      <td>{"process_id": "1122", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza SzDefMenu z Eskulap.Core.Gen.</td>
+      <td>{"process_id": "1213", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza IpreprunForm z Eskulap.Ruc...</td>
+      <td>{"process_id": "1213", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Uruchomiono nowy wątek formularza (thread id=1213)</td>
+      <td>{"process_id": "1213", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>wysoki</td>
+      <td>Błąd systemu</td>
+      <td>Firing the On-Error trigger for an error: Nie u...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Display a Message on form: FRM-47026: Nie udało...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>wysoki</td>
+      <td>Błąd systemu</td>
+      <td>Firing the On-Error trigger for an error: Nie u...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Display a Message on form: FRM-47026: Nie udało...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>wysoki</td>
+      <td>Błąd systemu</td>
+      <td>Firing the On-Error trigger for an error: Nie u...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Display a Message on form: FRM-47026: Nie udało...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>wysoki</td>
+      <td>Błąd systemu</td>
+      <td>Firing the On-Error trigger for an error: Nie u...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Display a Message on form: FRM-47026: Nie udało...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>wysoki</td>
+      <td>Błąd systemu</td>
+      <td>Firing the On-Error trigger for an error: Nie u...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Display a Message on form: FRM-47026: Nie udało...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OSKIEACK:CTRL.ETYKIETA[1] {Etyki...</td>
+      <td>{"process_id": "1085", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (Ctrl.Etykieta[0]), (Shift,Ct...</td>
+      <td>{"process_id": "1085", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>External operation finished (type: Print)</td>
+      <td>{"process_id": "134", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Cg.RvHighValue[2]), (Shift,Ctrl,Alt)=(...</td>
+      <td>{"process_id": "511", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKARGOR:CG.RV_HIGH_VALUE[3] {} |</td>
+      <td>{"process_id": "511", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // ODKARGOR</td>
+      <td>{"process_id": "511", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Cg.RvHighValue[2]), (Shift,Ctrl,Alt)=...</td>
+      <td>{"process_id": "511", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->RadioChanged (Skie2.SkieStanSkierowania[0]),...</td>
+      <td>{"process_id": "1859", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: Skie2.SkieStanSki...</td>
+      <td>{"process_id": "1816", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Wy.DspWyTypeAbbrev[1]), (Shift,Ctrl,Al...</td>
+      <td>{"process_id": "470", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODPOBYT:WY.DSP_WY_TYPE_ABBREV[2]...</td>
+      <td>{"process_id": "470", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Wy.DspWyTypeAbbrev[1]), (Shift,Ctrl,A...</td>
+      <td>{"process_id": "470", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_check | OEWSKLAB:SKIE2.SKIE_STAN_SKIEROW...</td>
+      <td>{"process_id": "1859", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> RadioChanged (Skie2.SkieStanSkierowania[0])...</td>
+      <td>{"process_id": "1859", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Ps.DspSposobWypisania[3]), (Shift,Ctrl...</td>
+      <td>{"process_id": "1004", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODPOBYT:PS.DSP_SPOSOB_WYPISANIA[...</td>
+      <td>{"process_id": "1004", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Ps.DspSposobWypisania[3]), (Shift,Ctr...</td>
+      <td>{"process_id": "1004", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Key keyCode:116, (block.item)=(.), (Shift,Ct...</td>
+      <td>{"process_id": "469", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>ShowAlert: "Czy chcesz usunąć również podrzędne...</td>
+      <td>{"process_id": "2191", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_key |  | F5</td>
+      <td>{"process_id": "469", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Key keyCode:116, (block.item)=(.), (Shift,C...</td>
+      <td>{"process_id": "469", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Skie.DspPacjent[16]), (Shift,Ctrl,Alt)...</td>
+      <td>{"process_id": "1533", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OSKIEACK:SKIE.DSP_PACJENT[17] {P...</td>
+      <td>{"process_id": "1533", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Skie.DspPacjent[16]), (Shift,Ctrl,Alt...</td>
+      <td>{"process_id": "1533", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (Ctrl.BZbuduj[0]), (Shift,Ctrl...</td>
+      <td>{"process_id": "961", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODPOBYT:CTRL.B_ZBUDUJ[1] {Pobier...</td>
+      <td>{"process_id": "961", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (Ctrl.BZbuduj[0]), (Shift,Ctr...</td>
+      <td>{"process_id": "961", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (P.DspMiRodzNazwa[0]), (Shift,Ctrl,Alt)...</td>
+      <td>{"process_id": "1326", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | RIKARTA:P.DSP_MI_RODZ_NAZWA[1] {...</td>
+      <td>{"process_id": "1326", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (P.DspMiRodzNazwa[0]), (Shift,Ctrl,Alt...</td>
+      <td>{"process_id": "1326", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 1579</td>
+      <td>{"process_id": "462", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Wy.DspOpis[0]), (Shift,Ctrl,Alt)=(Fals...</td>
+      <td>{"process_id": "1086", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODPOBYT:WY.DSP_OPIS[1] {} |</td>
+      <td>{"process_id": "1086", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Wy.DspOpis[0]), (Shift,Ctrl,Alt)=(Fal...</td>
+      <td>{"process_id": "1086", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->TabChanged tabsCanvas: OdPobytCanvas, select...</td>
+      <td>{"process_id": "170", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODPOBYT:OD_POBYT>POBYTY |</td>
+      <td>{"process_id": "170", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // ODPOBYT</td>
+      <td>{"process_id": "170", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> TabChanged tabsCanvas: OdPobytCanvas, selec...</td>
+      <td>{"process_id": "170", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ResumeAfterLov lovName: BadaniaSym, rowId: 3...</td>
+      <td>{"process_id": "652", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_lov_select | OEWSKLAB:BADANIA_SYM | 3 {[...</td>
+      <td>{"process_id": "652", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ResumeAfterLov lovName: BadaniaSym, rowId: 3</td>
+      <td>{"process_id": "652", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (Ctrl.BButton02_2[0]), (Shift,...</td>
+      <td>{"process_id": "945", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>SLISTPAC > ODKARGOR: 1918ms</td>
+      <td>{"process_id": "503", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ScrollDown block: Wy, step: 1, changes: 0 - ...</td>
+      <td>{"process_id": "534", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_scrolldown | ODPOBYT:WY | rec=1</td>
+      <td>{"process_id": "534", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ScrollDown block: Wy, step: 1, changes: 0</td>
+      <td>{"process_id": "534", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Key keyCode:9, (block.item)=(.), (Shift,Ctrl...</td>
+      <td>{"process_id": "2083", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>/->startEdit Loczz1.LoczzDValue - OperationResu...</td>
+      <td>{"process_id": "155", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>#-> startEdit Loczz1.LoczzDValue</td>
+      <td>{"process_id": "155", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: P.DspPkStopien[0]...</td>
+      <td>{"process_id": "2191", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_key |  | TAB</td>
+      <td>{"process_id": "2083", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_type | RIKARTA:P.DSP_PK_STOPIEN[1] {Stop...</td>
+      <td>{"process_id": "2083", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Key keyCode:9, (block.item)=(.), (Shift,Ctr...</td>
+      <td>{"process_id": "2083", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 724</td>
+      <td>{"process_id": "416", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 88</td>
+      <td>{"process_id": "1663", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 3227</td>
+      <td>{"process_id": "2049", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>/->startEdit P.DspPkStopien - OperationResult.S...</td>
+      <td>{"process_id": "2144", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>#-> startEdit P.DspPkStopien</td>
+      <td>{"process_id": "2144", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> LovQuery: 'BadaniaSym', page:1, page size:3...</td>
+      <td>{"process_id": "2144", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Key keyCode:113, (block.item)=(.), (Shift,Ct...</td>
+      <td>{"process_id": "941", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>ShowLov: "BadaniaSym", filter:""</td>
+      <td>{"process_id": "1816", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_key |  | F2</td>
+      <td>{"process_id": "941", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Key keyCode:113, (block.item)=(.), (Shift,C...</td>
+      <td>{"process_id": "941", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza OdkargorForm z Eskulap.His...</td>
+      <td>{"process_id": "503", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Uruchomiono nowy wątek formularza (thread id=503)</td>
+      <td>{"process_id": "503", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | SLISTPAC:CTRL.B_BUTTON02_2[1] {[...</td>
+      <td>{"process_id": "945", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (Ctrl.BButton02_2[0]), (Shift...</td>
+      <td>{"process_id": "945", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>External operation started (type: Print)</td>
+      <td>{"process_id": "150", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Key keyCode:120, (block.item)=(.), (Shift,Ct...</td>
+      <td>{"process_id": "339", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_key |  | F9</td>
+      <td>{"process_id": "339", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Key keyCode:120, (block.item)=(.), (Shift,C...</td>
+      <td>{"process_id": "339", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Wy.DspWyTypeAbbrev[5]), (Shift,Ctrl,Al...</td>
+      <td>{"process_id": "462", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODPOBYT:WY.DSP_WY_TYPE_ABBREV[6]...</td>
+      <td>{"process_id": "462", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Wy.DspWyTypeAbbrev[5]), (Shift,Ctrl,A...</td>
+      <td>{"process_id": "462", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Mm.DspSymbol[0]), (Shift,Ctrl,Alt)=(Fa...</td>
+      <td>{"process_id": "1326", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OEWSKLAB:MM.DSP_SYMBOL[1] {Symbo...</td>
+      <td>{"process_id": "1326", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Mm.DspSymbol[0]), (Shift,Ctrl,Alt)=(F...</td>
+      <td>{"process_id": "1326", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (Ctrl.BButton03_2[0]), (Shift,...</td>
+      <td>{"process_id": "643", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>SLISTPAC > ODPOBYT: 398ms</td>
+      <td>{"process_id": "822", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->TabChanged tabsCanvas: KartyCanvas, selected...</td>
+      <td>{"process_id": "1696", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza OdpobytForm z Eskulap.Ruch...</td>
+      <td>{"process_id": "822", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Uruchomiono nowy wątek formularza (thread id=822)</td>
+      <td>{"process_id": "822", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | SLISTPAC:CTRL.B_BUTTON03_2[1] {[...</td>
+      <td>{"process_id": "643", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (Ctrl.BButton03_2[0]), (Shift...</td>
+      <td>{"process_id": "643", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Loczz1.LoczzDValue[0]), (Shift,Ctrl,Al...</td>
+      <td>{"process_id": "961", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | EV_LISTY_OCZ:LOCZZ1.LOCZZ_D_VALU...</td>
+      <td>{"process_id": "961", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Loczz1.LoczzDValue[0]), (Shift,Ctrl,A...</td>
+      <td>{"process_id": "961", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | RIKARTA:KARTY>K3 |</td>
+      <td>{"process_id": "1696", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> TabChanged tabsCanvas: KartyCanvas, selecte...</td>
+      <td>{"process_id": "1696", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 1067</td>
+      <td>{"process_id": "1875", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 7613</td>
+      <td>{"process_id": "1857", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ResumeAfterLov lovName: JednSzpLov, rowId: 4...</td>
+      <td>{"process_id": "1533", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_lov_select | OEWSKLAB:JEDN_SZP_LOV | 4 {...</td>
+      <td>{"process_id": "1533", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ResumeAfterLov lovName: JednSzpLov, rowId: 4</td>
+      <td>{"process_id": "1533", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Po.DspPNazwisko[4]), (Shift,Ctrl,Alt)=...</td>
+      <td>{"process_id": "469", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | SLISTPAC:PO.DSP_P_NAZWISKO[5] {N...</td>
+      <td>{"process_id": "469", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // SLISTPAC</td>
+      <td>{"process_id": "469", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Po.DspPNazwisko[4]), (Shift,Ctrl,Alt)...</td>
+      <td>{"process_id": "469", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->TabChanged tabsCanvas: Przyciski3Canvas, sel...</td>
+      <td>{"process_id": "1004", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | SLISTPAC:PRZYCISKI3>PRZYCISKI03 |</td>
+      <td>{"process_id": "1004", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> TabChanged tabsCanvas: Przyciski3Canvas, se...</td>
+      <td>{"process_id": "1004", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Locz.LoczNazwa[7]), (Shift,Ctrl,Alt)=(...</td>
+      <td>{"process_id": "1859", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | EV_LISTY_OCZ:LOCZ.LOCZ_NAZWA[8] ...</td>
+      <td>{"process_id": "1859", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Locz.LoczNazwa[7]), (Shift,Ctrl,Alt)=...</td>
+      <td>{"process_id": "1859", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>FormId: 34 Message: FRM-40737: Niedozwolona pro...</td>
+      <td>{"process_id": "470", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (Ctrl.Szczeg[0]), (Shift,Ctrl,...</td>
+      <td>{"process_id": "470", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>ODKSODDZ > ODPOBYT: 453ms</td>
+      <td>{"process_id": "2157", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>wysoki</td>
+      <td>Błąd systemu</td>
+      <td>Firing the On-Error trigger for an error: Niedo...</td>
+      <td>{"process_id": "2157", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Display a Message on form: FRM-40737: Niedozwol...</td>
+      <td>{"process_id": "2157", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>BŁĄD</td>
+      <td>wysoki</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Restricted function 'NEXT_ITEM' called in trigg...</td>
+      <td>{"process_id": "2157", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Uruchomiono nowy wątek formularza (thread id=2157)</td>
+      <td>{"process_id": "2157", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKSODDZ:CTRL.SZCZEG[1] { (F5) S...</td>
+      <td>{"process_id": "470", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // ODKSODDZ</td>
+      <td>{"process_id": "470", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (Ctrl.Szczeg[0]), (Shift,Ctrl...</td>
+      <td>{"process_id": "470", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>External operation finished (type: MethodCall)</td>
+      <td>{"process_id": "916", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>External operation started (type: MethodCall)</td>
+      <td>{"process_id": "150", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> LovQuery: 'JednSzpLov', page:1, page size:3...</td>
+      <td>{"process_id": "169", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>ShowLov: "JednSzpLov", filter:""</td>
+      <td>{"process_id": "1816", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Ko.KoWartosc[0]), (Shift,Ctrl,Alt)=(Fa...</td>
+      <td>{"process_id": "1761", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: P.PImieMatki[0] =...</td>
+      <td>{"process_id": "2191", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | RIKARTA:KO.KO_WARTOSC[1] {Wartoś...</td>
+      <td>{"process_id": "1761", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_type | RIKARTA:P.P_IMIE_MATKI[1] {Imię m...</td>
+      <td>{"process_id": "1761", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Ko.KoWartosc[0]), (Shift,Ctrl,Alt)=(F...</td>
+      <td>{"process_id": "1761", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Skie2.DspJednostkaSzp[0]), (Shift,Ctrl...</td>
+      <td>{"process_id": "287", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OEWSKLAB:SKIE2.DSP_JEDNOSTKA_SZP...</td>
+      <td>{"process_id": "287", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Skie2.DspJednostkaSzp[0]), (Shift,Ctr...</td>
+      <td>{"process_id": "287", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (DefToolbar.Exit[0]), (Shift,C...</td>
+      <td>{"process_id": "793", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Próba wywołania GET_WINDOW_PROPERTY('MAIN', WIN...</td>
+      <td>{"process_id": "1298", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>OSKIEACK > OSKIEACK: 2325ms</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:01</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Uruchomiono nowy wątek formularza (thread id=597)</td>
+      <td>{"process_id": "597", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>External operation finished (type: Print)</td>
+      <td>{"process_id": "2071", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | IPHCH:DEF_TOOLBAR.EXIT[1] {} |</td>
+      <td>{"process_id": "702", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // IPHCH</td>
+      <td>{"process_id": "702", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (DefToolbar.Exit[0]), (Shift,...</td>
+      <td>{"process_id": "702", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>External operation started (type: MethodCall)</td>
+      <td>{"process_id": "150", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>External operation finished (type: LibExists)</td>
+      <td>{"process_id": "2133", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OSK:DEF_TOOLBAR.EXIT[1] {} |</td>
+      <td>{"process_id": "793", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // OSK</td>
+      <td>{"process_id": "793", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 668</td>
+      <td>{"process_id": "452", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>FormId: 3 Message: FRM-40400:Wprowadzone zmiany...</td>
+      <td>{"process_id": "359", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Key keyCode:115, (block.item)=(.), (Shift,Ct...</td>
+      <td>{"process_id": "359", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: Loczz2.LoczzDValu...</td>
+      <td>{"process_id": "2086", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_key |  | F4</td>
+      <td>{"process_id": "359", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_type | EV_LISTY_OCZ:LOCZZ2.LOCZZ_D_VALUE...</td>
+      <td>{"process_id": "359", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Key keyCode:115, (block.item)=(.), (Shift,C...</td>
+      <td>{"process_id": "359", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (DefToolbar.Exit[0]), (Shift,C...</td>
+      <td>{"process_id": "640", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Próba wywołania GET_WINDOW_PROPERTY('MAIN', WIN...</td>
+      <td>{"process_id": "1342", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Skie2.SkieDataWystawieniaSkie[1]), (Sh...</td>
+      <td>{"process_id": "162", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 691</td>
+      <td>{"process_id": "1843", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OEWSKLAB:SKIE2.SKIE_DATA_WYSTAWI...</td>
+      <td>{"process_id": "162", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Skie2.SkieDataWystawieniaSkie[1]), (S...</td>
+      <td>{"process_id": "162", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKARGOR:DEF_TOOLBAR.EXIT[1] {} |</td>
+      <td>{"process_id": "640", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 418</td>
+      <td>{"process_id": "1819", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OEWSKLAB:DEF_TOOLBAR.EXIT[1] {} |</td>
+      <td>{"process_id": "1964", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 790</td>
+      <td>{"process_id": "1074", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 456</td>
+      <td>{"process_id": "1099", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>FormId: 34 Message: FRM-40400:Wprowadzone zmian...</td>
+      <td>{"process_id": "1192", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->RadioChanged (Skie2.SkieStanSkierowania[0]),...</td>
+      <td>{"process_id": "1192", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>External operation started (type: LibExists)</td>
+      <td>{"process_id": "150", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: Skie2.SkieStanSki...</td>
+      <td>{"process_id": "1816", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_check | OEWSKLAB:SKIE2.SKIE_STAN_SKIEROW...</td>
+      <td>{"process_id": "1192", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> RadioChanged (Skie2.SkieStanSkierowania[0])...</td>
+      <td>{"process_id": "1192", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 1221</td>
+      <td>{"process_id": "1494", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>FormId: 19 Message: Sekcja 2. Przesłano 1 rekor...</td>
+      <td>{"process_id": "1900", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (Ctrl.Etykieta[0]), (Shift,Ctr...</td>
+      <td>{"process_id": "1900", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>External operation started (type: Print)</td>
+      <td>{"process_id": "1977", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Zakończono generacje raportu graficznego (repor...</td>
+      <td>{"process_id": "1977", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Rozpoczęto generacje raportu graficznego (repor...</td>
+      <td>{"process_id": "1977", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | EDMDOKUMENTY:DEF_TOOLBAR.EXIT[1]...</td>
+      <td>{"process_id": "1841", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza SzDefMenu z Eskulap.Core.Gen.</td>
+      <td>{"process_id": "1977", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza IpreprunForm z Eskulap.Ruc...</td>
+      <td>{"process_id": "1977", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Uruchomiono nowy wątek formularza (thread id=1977)</td>
+      <td>{"process_id": "1977", "formssessionname": "no_...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>wysoki</td>
+      <td>Błąd systemu</td>
+      <td>Firing the On-Error trigger for an error: Nie u...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Display a Message on form: FRM-47026: Nie udało...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>wysoki</td>
+      <td>Błąd systemu</td>
+      <td>Firing the On-Error trigger for an error: Nie u...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Display a Message on form: FRM-47026: Nie udało...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>wysoki</td>
+      <td>Błąd systemu</td>
+      <td>Firing the On-Error trigger for an error: Nie u...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Display a Message on form: FRM-47026: Nie udało...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>wysoki</td>
+      <td>Błąd systemu</td>
+      <td>Firing the On-Error trigger for an error: Nie u...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Display a Message on form: FRM-47026: Nie udało...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>wysoki</td>
+      <td>Błąd systemu</td>
+      <td>Firing the On-Error trigger for an error: Nie u...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Display a Message on form: FRM-47026: Nie udało...</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OSKIEACK:CTRL.ETYKIETA[1] {Etyki...</td>
+      <td>{"process_id": "1900", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (Ctrl.Etykieta[0]), (Shift,Ct...</td>
+      <td>{"process_id": "1900", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Skie2.SkieDataWystawieniaSkie[4]), (Sh...</td>
+      <td>{"process_id": "633", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->CheckboxChanged (Cb.Cb054[0]), (Shift,Ctrl,A...</td>
+      <td>{"process_id": "601", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: Cb.Cb054[0] = [en...</td>
+      <td>{"process_id": "1959", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_check | ODKARTASZ:CB.CB054[1] {} |</td>
+      <td>{"process_id": "601", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> CheckboxChanged (Cb.Cb054[0]), (Shift,Ctrl,...</td>
+      <td>{"process_id": "601", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 390</td>
+      <td>{"process_id": "785", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ResumeAfterLov lovName: BadaniaSym, rowId: 1...</td>
+      <td>{"process_id": "692", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_lov_select | OEWSKLAB:BADANIA_SYM | 14 {...</td>
+      <td>{"process_id": "692", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ResumeAfterLov lovName: BadaniaSym, rowId: 14</td>
+      <td>{"process_id": "692", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Cg.RvHighValue[2]), (Shift,Ctrl,Alt)=(...</td>
+      <td>{"process_id": "1623", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKARGOR:CG.RV_HIGH_VALUE[3] {} |</td>
+      <td>{"process_id": "1623", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // ODKARGOR</td>
+      <td>{"process_id": "1623", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Cg.RvHighValue[2]), (Shift,Ctrl,Alt)=...</td>
+      <td>{"process_id": "1623", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->TabChanged tabsCanvas: Przyciski3Canvas, sel...</td>
+      <td>{"process_id": "450", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | SLISTPAC:PRZYCISKI3>PRZYCISKI02 |</td>
+      <td>{"process_id": "450", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // SLISTPAC</td>
+      <td>{"process_id": "450", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> TabChanged tabsCanvas: Przyciski3Canvas, se...</td>
+      <td>{"process_id": "450", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OEWSKLAB:SKIE2.SKIE_DATA_WYSTAWI...</td>
+      <td>{"process_id": "633", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Skie2.SkieDataWystawieniaSkie[4]), (S...</td>
+      <td>{"process_id": "633", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (Ctrl.Curr[0]), (Shift,Ctrl,Al...</td>
+      <td>{"process_id": "1495", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OSKIEACK:CTRL.CURR[1] {(F6) Wyśl...</td>
+      <td>{"process_id": "1495", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (Ctrl.Curr[0]), (Shift,Ctrl,A...</td>
+      <td>{"process_id": "1495", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Doc.DspTytul[14]), (Shift,Ctrl,Alt)=(F...</td>
+      <td>{"process_id": "209", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | EDMDOKUMENTY:DOC.DSP_TYTUL[15] {...</td>
+      <td>{"process_id": "209", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Doc.DspTytul[14]), (Shift,Ctrl,Alt)=(...</td>
+      <td>{"process_id": "209", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Skie2.SkieDataWystawieniaSkie[3]), (Sh...</td>
+      <td>{"process_id": "692", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>External operation finished (type: MethodCall)</td>
+      <td>{"process_id": "2101", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:24:02</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>OSKIEACK > OSKIEACK: 2325ms</td>
+      <td>{"process_id": "1183", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Kol.DspLocz[0]), (Shift,Ctrl,Alt)=(Fal...</td>
+      <td>{"process_id": "1762", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | IPKOLEJ:KOL.DSP_LOCZ[1] {Harmono...</td>
+      <td>{"process_id": "1762", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Kol.DspLocz[0]), (Shift,Ctrl,Alt)=(Fa...</td>
+      <td>{"process_id": "1762", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>/->startEdit Wo.WoNWartosc - OperationResult.St...</td>
+      <td>{"process_id": "262", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>#-> startEdit Wo.WoNWartosc</td>
+      <td>{"process_id": "262", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->TabChanged tabsCanvas: SkierCanvas, selected...</td>
+      <td>{"process_id": "650", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | IPKOLEJ:SKIER>SKIER2 |</td>
+      <td>{"process_id": "650", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> TabChanged tabsCanvas: SkierCanvas, selecte...</td>
+      <td>{"process_id": "650", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Skie2.SkieDataWystawieniaSkie[2]), (Sh...</td>
+      <td>{"process_id": "2017", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Key keyCode:38, (block.item)=(.), (Shift,Ctr...</td>
+      <td>{"process_id": "2032", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_key |  | UP</td>
+      <td>{"process_id": "2032", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Key keyCode:38, (block.item)=(.), (Shift,Ct...</td>
+      <td>{"process_id": "2032", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OEWSKLAB:SKIE2.SKIE_DATA_WYSTAWI...</td>
+      <td>{"process_id": "2017", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Skie2.SkieDataWystawieniaSkie[2]), (S...</td>
+      <td>{"process_id": "2017", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Wo.WoNWartosc[1]), (Shift,Ctrl,Alt)=(F...</td>
+      <td>{"process_id": "442", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKARGOR:WO.WO_N_WARTOSC[2] {War...</td>
+      <td>{"process_id": "442", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Wo.WoNWartosc[1]), (Shift,Ctrl,Alt)=(...</td>
+      <td>{"process_id": "442", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ResumeAfterLov lovName: LvKategoriaPac, rowI...</td>
+      <td>{"process_id": "443", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_lov_select | IPKOLEJ:LV_KATEGORIA_PAC | ...</td>
+      <td>{"process_id": "443", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ResumeAfterLov lovName: LvKategoriaPac, row...</td>
+      <td>{"process_id": "443", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Wo.WoData[1]), (Shift,Ctrl,Alt)=(False...</td>
+      <td>{"process_id": "811", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKARGOR:WO.WO_DATA[2] {Data} |</td>
+      <td>{"process_id": "811", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Wo.WoData[1]), (Shift,Ctrl,Alt)=(Fals...</td>
+      <td>{"process_id": "811", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ResumeAfterLov lovName: LovKolOczekujeNa, ro...</td>
+      <td>{"process_id": "150", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_lov_select | IPKOLEJ:LOV_KOL_OCZEKUJE_NA...</td>
+      <td>{"process_id": "150", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ResumeAfterLov lovName: LovKolOczekujeNa, r...</td>
+      <td>{"process_id": "150", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // SLISTPAC</td>
+      <td>{"process_id": "1484", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Cg.RvHighValue[15]), (Shift,Ctrl,Alt)=...</td>
+      <td>{"process_id": "818", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKARGOR:CG.RV_HIGH_VALUE[16] {} |</td>
+      <td>{"process_id": "818", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Cg.RvHighValue[15]), (Shift,Ctrl,Alt)...</td>
+      <td>{"process_id": "818", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> LovQuery: 'LovKolOczekujeNa', page:1, page ...</td>
+      <td>{"process_id": "1847", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Key keyCode:113, (block.item)=(.), (Shift,Ct...</td>
+      <td>{"process_id": "532", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>ShowLov: "LovKolOczekujeNa", filter:""</td>
+      <td>{"process_id": "853", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_key |  | F2</td>
+      <td>{"process_id": "532", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Key keyCode:113, (block.item)=(.), (Shift,C...</td>
+      <td>{"process_id": "532", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> LovQuery: 'LvKategoriaPac', page:1, page si...</td>
+      <td>{"process_id": "1226", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>External operation started (type: MethodCall)</td>
+      <td>{"process_id": "2213", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>ShowLov: "LvKategoriaPac", filter:""</td>
+      <td>{"process_id": "1624", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>External operation finished (type: MethodCall)</td>
+      <td>{"process_id": "646", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Kol.KolOczekujeNa[0]), (Shift,Ctrl,Alt...</td>
+      <td>{"process_id": "1959", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: Kol.KolPlanDataPr...</td>
+      <td>{"process_id": "853", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | IPKOLEJ:KOL.KOL_OCZEKUJE_NA[1] {...</td>
+      <td>{"process_id": "1959", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_type | IPKOLEJ:KOL.KOL_PLAN_DATA_PRZ[1] ...</td>
+      <td>{"process_id": "1959", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Kol.KolOczekujeNa[0]), (Shift,Ctrl,Al...</td>
+      <td>{"process_id": "1959", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (DefToolbar.Exit[0]), (Shift,C...</td>
+      <td>{"process_id": "1294", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Próba wywołania GET_WINDOW_PROPERTY('MAIN', WIN...</td>
+      <td>{"process_id": "2170", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>FormId: 8 Message: FRM-40400:Wprowadzone zmiany...</td>
+      <td>{"process_id": "1109", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (DefToolbar.Save[0]), (Shift,C...</td>
+      <td>{"process_id": "1109", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 116</td>
+      <td>{"process_id": "415", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 1583</td>
+      <td>{"process_id": "1045", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: Wo.WoNWartosc[6] ...</td>
+      <td>{"process_id": "1326", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKARGOR:DEF_TOOLBAR.SAVE[1] {} |</td>
+      <td>{"process_id": "1109", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_type | ODKARGOR:WO.WO_N_WARTOSC[7] {Wart...</td>
+      <td>{"process_id": "1109", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (DefToolbar.Save[0]), (Shift,...</td>
+      <td>{"process_id": "1109", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODREALOP:DEF_TOOLBAR.EXIT[1] {} |</td>
+      <td>{"process_id": "1294", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (DefToolbar.Exit[0]), (Shift,...</td>
+      <td>{"process_id": "1294", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Kol.DspKategoriaPac[0]), (Shift,Ctrl,A...</td>
+      <td>{"process_id": "2016", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | IPKOLEJ:KOL.DSP_KATEGORIA_PAC[1]...</td>
+      <td>{"process_id": "2016", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Kol.DspKategoriaPac[0]), (Shift,Ctrl,...</td>
+      <td>{"process_id": "2016", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>FormId: 13 Message: FRM-40400:Wprowadzone zmian...</td>
+      <td>{"process_id": "818", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Key keyCode:115, (block.item)=(.), (Shift,Ct...</td>
+      <td>{"process_id": "818", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:10</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_key |  | F4</td>
+      <td>{"process_id": "818", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Key keyCode:115, (block.item)=(.), (Shift,C...</td>
+      <td>{"process_id": "818", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 1</td>
+      <td>{"process_id": "187", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ResumeAfterLov lovName: LovJo, rowId: 4 - Op...</td>
+      <td>{"process_id": "1484", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_lov_select | IPKOLEJ:LOV_JO | 4 {[enc]vA...</td>
+      <td>{"process_id": "1484", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ResumeAfterLov lovName: LovJo, rowId: 4</td>
+      <td>{"process_id": "1484", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ResumeAfterLov lovName: LwKategoriePielegn, ...</td>
+      <td>{"process_id": "150", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_lov_select | ODREALOP:LW_KATEGORIE_PIELE...</td>
+      <td>{"process_id": "150", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ResumeAfterLov lovName: LwKategoriePielegn,...</td>
+      <td>{"process_id": "150", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>/->startEdit Wo.WoNWartosc - OperationResult.St...</td>
+      <td>{"process_id": "155", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>#-> startEdit Wo.WoNWartosc</td>
+      <td>{"process_id": "155", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>External operation started (type: MethodCall)</td>
+      <td>{"process_id": "2213", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>External operation finished (type: LibExists)</td>
+      <td>{"process_id": "443", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Skie2.SkieDataWystawieniaSkie[1]), (Sh...</td>
+      <td>{"process_id": "1460", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Wo.WoNWartosc[6]), (Shift,Ctrl,Alt)=(F...</td>
+      <td>{"process_id": "442", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKARGOR:WO.WO_N_WARTOSC[7] {War...</td>
+      <td>{"process_id": "442", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Wo.WoNWartosc[6]), (Shift,Ctrl,Alt)=(...</td>
+      <td>{"process_id": "442", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> LovQuery: 'LwKategoriePielegn', page:1, pag...</td>
+      <td>{"process_id": "110", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Key keyCode:113, (block.item)=(.), (Shift,Ct...</td>
+      <td>{"process_id": "2017", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>ShowLov: "LwKategoriePielegn", filter:""</td>
+      <td>{"process_id": "884", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_key |  | F2</td>
+      <td>{"process_id": "2017", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Key keyCode:113, (block.item)=(.), (Shift,C...</td>
+      <td>{"process_id": "2017", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 35</td>
+      <td>{"process_id": "1552", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Wo.WoData[6]), (Shift,Ctrl,Alt)=(False...</td>
+      <td>{"process_id": "2032", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKARGOR:WO.WO_DATA[7] {Data} |</td>
+      <td>{"process_id": "2032", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Wo.WoData[6]), (Shift,Ctrl,Alt)=(Fals...</td>
+      <td>{"process_id": "2032", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Dp.DpKategoriaPielegn[0]), (Shift,Ctrl...</td>
+      <td>{"process_id": "650", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODREALOP:DP.DP_KATEGORIA_PIELEGN...</td>
+      <td>{"process_id": "650", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // ODREALOP</td>
+      <td>{"process_id": "650", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Dp.DpKategoriaPielegn[0]), (Shift,Ctr...</td>
+      <td>{"process_id": "650", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 60</td>
+      <td>{"process_id": "1953", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OEWSKLAB:SKIE2.SKIE_DATA_WYSTAWI...</td>
+      <td>{"process_id": "1460", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // OEWSKLAB</td>
+      <td>{"process_id": "1460", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Skie2.SkieDataWystawieniaSkie[1]), (S...</td>
+      <td>{"process_id": "1460", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>FormId: 8 Message: FRM-40400:Wprowadzone zmiany...</td>
+      <td>{"process_id": "1762", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ResumeAfterAlert alertName: , buttonNo: 0 - ...</td>
+      <td>{"process_id": "1762", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 1401</td>
+      <td>{"process_id": "591", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 5603</td>
+      <td>{"process_id": "265", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>FormId: 36 Message: FRM-40400:Wprowadzone zmian...</td>
+      <td>{"process_id": "1816", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->RadioChanged (Skie2.SkieStanSkierowania[0]),...</td>
+      <td>{"process_id": "1816", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: Skie2.SkieStanSki...</td>
+      <td>{"process_id": "1806", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_check | OEWSKBR:SKIE2.SKIE_STAN_SKIEROWA...</td>
+      <td>{"process_id": "1816", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> RadioChanged (Skie2.SkieStanSkierowania[0])...</td>
+      <td>{"process_id": "1816", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 1109</td>
+      <td>{"process_id": "201", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | [btn=1] {Czy chcesz zapisać wpro...</td>
+      <td>{"process_id": "1762", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ResumeAfterAlert alertName: , buttonNo: 0</td>
+      <td>{"process_id": "1762", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (Ctrl.BButton02_1[0]), (Shift,...</td>
+      <td>{"process_id": "1063", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>SLISTPAC > ODREALOP: 140ms</td>
+      <td>{"process_id": "884", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza SzDefMenu z Eskulap.Core.Gen.</td>
+      <td>{"process_id": "884", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza OdrealopForm z Eskulap.His...</td>
+      <td>{"process_id": "884", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Uruchomiono nowy wątek formularza (thread id=884)</td>
+      <td>{"process_id": "884", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | SLISTPAC:CTRL.B_BUTTON02_1[1] {[...</td>
+      <td>{"process_id": "1063", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (Ctrl.BButton02_1[0]), (Shift...</td>
+      <td>{"process_id": "1063", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 61</td>
+      <td>{"process_id": "963", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 732</td>
+      <td>{"process_id": "759", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Cg.RvHighValue[14]), (Shift,Ctrl,Alt)=...</td>
+      <td>{"process_id": "873", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>ShowAlert: "Czy chcesz zapisać wprowadzone zmia...</td>
+      <td>{"process_id": "1326", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKARGOR:CG.RV_HIGH_VALUE[15] {} |</td>
+      <td>{"process_id": "873", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Cg.RvHighValue[14]), (Shift,Ctrl,Alt)...</td>
+      <td>{"process_id": "873", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ResumeAfterLov lovName: BadaniaLov, rowId: 0...</td>
+      <td>{"process_id": "890", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_lov_select | OEWSKBR:BADANIA_LOV | 0 {[e...</td>
+      <td>{"process_id": "890", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ResumeAfterLov lovName: BadaniaLov, rowId: 0</td>
+      <td>{"process_id": "890", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> LovQuery: 'LovJo', page:1, page size:30, qu...</td>
+      <td>{"process_id": "718", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>/->startEdit Kol.KolPlanDataPrz - OperationResu...</td>
+      <td>{"process_id": "155", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>#-> startEdit Kol.KolPlanDataPrz</td>
+      <td>{"process_id": "155", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>ShowLov: "LovJo", filter:""</td>
+      <td>{"process_id": "1624", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Kol.DspSpecjalnoscOddzial[0]), (Shift,...</td>
+      <td>{"process_id": "450", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | IPKOLEJ:KOL.DSP_SPECJALNOSC_ODDZ...</td>
+      <td>{"process_id": "450", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Kol.DspSpecjalnoscOddzial[0]), (Shift...</td>
+      <td>{"process_id": "450", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 938</td>
+      <td>{"process_id": "785", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Key keyCode:38, (block.item)=(.), (Shift,Ctr...</td>
+      <td>{"process_id": "1099", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_key |  | UP</td>
+      <td>{"process_id": "1099", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // SLISTPAC</td>
+      <td>{"process_id": "1099", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Key keyCode:38, (block.item)=(.), (Shift,Ct...</td>
+      <td>{"process_id": "1099", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Kol.KolPlanDataPrz[0]), (Shift,Ctrl,Al...</td>
+      <td>{"process_id": "1074", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | IPKOLEJ:KOL.KOL_PLAN_DATA_PRZ[1]...</td>
+      <td>{"process_id": "1074", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // IPKOLEJ</td>
+      <td>{"process_id": "1074", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Kol.KolPlanDataPrz[0]), (Shift,Ctrl,A...</td>
+      <td>{"process_id": "1074", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>FormId: 8 Message: FRM-40202:Pole musi być wpro...</td>
+      <td>{"process_id": "1843", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (DefToolbar.Save[0]), (Shift,C...</td>
+      <td>{"process_id": "1843", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>wysoki</td>
+      <td>Błąd systemu</td>
+      <td>Firing the On-Error trigger for an error: Pole ...</td>
+      <td>{"process_id": "1326", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Display a Message on form: FRM-40202: Pole musi...</td>
+      <td>{"process_id": "1326", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: Wo.WoNWartosc[6] ...</td>
+      <td>{"process_id": "1326", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKARGOR:DEF_TOOLBAR.SAVE[1] {} |</td>
+      <td>{"process_id": "1843", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_type | ODKARGOR:WO.WO_N_WARTOSC[7] {Wart...</td>
+      <td>{"process_id": "1843", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (DefToolbar.Save[0]), (Shift,...</td>
+      <td>{"process_id": "1843", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (Bd.BadaniaSkierowanie[0]), (S...</td>
+      <td>{"process_id": "156", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>IPHCH > OEWSKLAB: 422ms</td>
+      <td>{"process_id": "32", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 1125</td>
+      <td>{"process_id": "452", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->RadioChanged (Rg.Rg007[0]), (Shift,Ctrl,Alt)...</td>
+      <td>{"process_id": "2157", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> LovQuery: 'BadaniaLov', page:1, page size:3...</td>
+      <td>{"process_id": "262", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>ShowLov: "BadaniaLov", filter:""</td>
+      <td>{"process_id": "1806", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Klucz DRUKOWANIE_ETYKIET_HCH nie jest wspierany...</td>
+      <td>{"process_id": "32", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: Rg.Rg007[0] = [en...</td>
+      <td>{"process_id": "1559", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_check | ODKARTASZ:RG.RG007[1][P001] {G|C...</td>
+      <td>{"process_id": "2157", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> RadioChanged (Rg.Rg007[0]), (Shift,Ctrl,Alt...</td>
+      <td>{"process_id": "2157", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza OewsklabForm z Eskulap.His...</td>
+      <td>{"process_id": "32", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Uruchomiono nowy wątek formularza (thread id=32)</td>
+      <td>{"process_id": "32", "formssessionname": "no_se...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | IPHCH:BD.BADANIA_SKIEROWANIE[1] ...</td>
+      <td>{"process_id": "156", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (Bd.BadaniaSkierowanie[0]), (...</td>
+      <td>{"process_id": "156", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (DefToolbar.Exit[0]), (Shift,C...</td>
+      <td>{"process_id": "1880", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Próba wywołania GET_WINDOW_PROPERTY('MAIN', WIN...</td>
+      <td>{"process_id": "2170", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ResumeAfterLov lovName: LvKsiegi, rowId: 0 -...</td>
+      <td>{"process_id": "1056", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_lov_select | IPKOLEJ:LV_KSIEGI | 0 {[enc...</td>
+      <td>{"process_id": "1056", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ResumeAfterLov lovName: LvKsiegi, rowId: 0</td>
+      <td>{"process_id": "1056", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODREALOP:DEF_TOOLBAR.EXIT[1] {} |</td>
+      <td>{"process_id": "1880", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (DefToolbar.Exit[0]), (Shift,...</td>
+      <td>{"process_id": "1880", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Mm.DspNazwa[2]), (Shift,Ctrl,Alt)=(Fal...</td>
+      <td>{"process_id": "1634", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OEWSKBR:MM.DSP_NAZWA[3] {Badanie} |</td>
+      <td>{"process_id": "1634", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Mm.DspNazwa[2]), (Shift,Ctrl,Alt)=(Fa...</td>
+      <td>{"process_id": "1634", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (Ctrl.BSzczegoly[0]), (Shift,C...</td>
+      <td>{"process_id": "106", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>IPKSOCZE > IPKOLEJ: 365ms</td>
+      <td>{"process_id": "853", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Bd.JcMeaning[2]), (Shift,Ctrl,Alt)=(Fa...</td>
+      <td>{"process_id": "2010", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | IPHCH:BD.JC_MEANING[3] {} |</td>
+      <td>{"process_id": "2010", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // IPHCH</td>
+      <td>{"process_id": "2010", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Bd.JcMeaning[2]), (Shift,Ctrl,Alt)=(F...</td>
+      <td>{"process_id": "2010", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza IpkolejForm z Eskulap.Ruch...</td>
+      <td>{"process_id": "853", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Uruchomiono nowy wątek formularza (thread id=853)</td>
+      <td>{"process_id": "853", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | IPKSOCZE:CTRL.B_SZCZEGOLY[1] {(F...</td>
+      <td>{"process_id": "106", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // IPKSOCZE</td>
+      <td>{"process_id": "106", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (Ctrl.BSzczegoly[0]), (Shift,...</td>
+      <td>{"process_id": "106", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 1640</td>
+      <td>{"process_id": "162", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>FormId: 12 Message: FRM-40400:Wprowadzone zmian...</td>
+      <td>{"process_id": "906", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Key keyCode:115, (block.item)=(.), (Shift,Ct...</td>
+      <td>{"process_id": "906", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_key |  | F4</td>
+      <td>{"process_id": "906", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->RadioChanged (Rg.Rg006[0]), (Shift,Ctrl,Alt)...</td>
+      <td>{"process_id": "961", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: Rg.Rg006[0] = [en...</td>
+      <td>{"process_id": "1559", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_check | ODKARTASZ:RG.RG006[1][P001] {G|C...</td>
+      <td>{"process_id": "961", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> RadioChanged (Rg.Rg006[0]), (Shift,Ctrl,Alt...</td>
+      <td>{"process_id": "961", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_lov_select | ODREALOP:LW_KATEGORIE_PIELE...</td>
+      <td>{"process_id": "287", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> LovQuery: 'LvKsiegi', page:1, page size:30,...</td>
+      <td>{"process_id": "2188", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OEWSKBR:DEF_TOOLBAR.EXIT[1] {} |</td>
+      <td>{"process_id": "1173", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // OEWSKBR</td>
+      <td>{"process_id": "1173", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>ShowLov: "LvKsiegi", filter:""</td>
+      <td>{"process_id": "1624", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 785</td>
+      <td>{"process_id": "703", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_lov_select | OEWSKBR:BADANIA_LOV | 0 {[e...</td>
+      <td>{"process_id": "95", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | SLISTPAC:DEF_TOOLBAR.EXIT[1] {} |</td>
+      <td>{"process_id": "809", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 3288</td>
+      <td>{"process_id": "1879", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | RIKARTA:DEF_TOOLBAR.EXIT[1] {} |</td>
+      <td>{"process_id": "1707", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->RadioChanged (Rg.Rg005[0]), (Shift,Ctrl,Alt)...</td>
+      <td>{"process_id": "2014", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: Rg.Rg005[0] = [en...</td>
+      <td>{"process_id": "1559", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Updating value by user input: V.V004[0] = [enc]...</td>
+      <td>{"process_id": "1559", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_check | ODKARTASZ:RG.RG005[1][P001] {G|C...</td>
+      <td>{"process_id": "2014", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_type | ODKARTASZ:V.V004[1] {Szczegóły:} ...</td>
+      <td>{"process_id": "2014", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> RadioChanged (Rg.Rg005[0]), (Shift,Ctrl,Alt...</td>
+      <td>{"process_id": "2014", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (Ctrl.BtnOpen[0]), (Shift,Ctrl...</td>
+      <td>{"process_id": "1663", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Status usługi</td>
+      <td>External operation started (type: LibExists)</td>
+      <td>{"process_id": "2213", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>FormId: 23 Message:</td>
+      <td>{"process_id": "503", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OEWSKLAB:DEF_TOOLBAR.EXIT[1] {} |</td>
+      <td>{"process_id": "503", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Cg.RvHighValue[2]), (Shift,Ctrl,Alt)=(...</td>
+      <td>{"process_id": "134", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | EDMDOKUMENTY:CTRL.BTN_OPEN[1] {(...</td>
+      <td>{"process_id": "1663", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (Ctrl.BtnOpen[0]), (Shift,Ctr...</td>
+      <td>{"process_id": "1663", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->ButtonPressed (Ctrl.BOczekiwanie[0]), (Shift...</td>
+      <td>{"process_id": "2061", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>IPWIZWIP > IPKOLEJ: 823ms</td>
+      <td>{"process_id": "1624", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKARGOR:CG.RV_HIGH_VALUE[3] {} |</td>
+      <td>{"process_id": "134", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // ODKARGOR</td>
+      <td>{"process_id": "134", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Cg.RvHighValue[2]), (Shift,Ctrl,Alt)=...</td>
+      <td>{"process_id": "134", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>IPHCH > OEWSKBR: 254ms</td>
+      <td>{"process_id": "342", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>FormId: 76 Message: FRM-40401:Brak zmian do zap...</td>
+      <td>{"process_id": "1355", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>IPMAIN > AWPANEL: 146ms</td>
+      <td>{"process_id": "139", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Mm.DspNazwa[1]), (Shift,Ctrl,Alt)=(Fal...</td>
+      <td>{"process_id": "359", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OEWSKBR:MM.DSP_NAZWA[2] {Badanie} |</td>
+      <td>{"process_id": "359", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Mm.DspNazwa[1]), (Shift,Ctrl,Alt)=(Fa...</td>
+      <td>{"process_id": "359", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza AwmainMenu z Eskulap.Aptek...</td>
+      <td>{"process_id": "139", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza AwpanelForm z Eskulap.Apte...</td>
+      <td>{"process_id": "139", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Uruchomiono nowy wątek formularza (thread id=139)</td>
+      <td>{"process_id": "139", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click_and_go | //a[@data-module='Apteka'] |</td>
+      <td>{"process_id": "131", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> // IPMAIN</td>
+      <td>{"process_id": "131", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> SelectModule moduleName: Apteka</td>
+      <td>{"process_id": "131", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 7674</td>
+      <td>{"process_id": "1859", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Ping - seconds since last user activity: 1128</td>
+      <td>{"process_id": "1122", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>SLISTPAC > ODREALOP: 366ms</td>
+      <td>{"process_id": "22", "formssessionname": "20250...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Ładowanie formularza OewskbrForm z Eskulap.Hist...</td>
+      <td>{"process_id": "342", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Uruchomiono nowy wątek formularza (thread id=342)</td>
+      <td>{"process_id": "342", "formssessionname": "no_s...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>INFORMACJA</td>
+      <td>wysoki</td>
+      <td>Błąd systemu</td>
+      <td>Firing the On-Error trigger for an error: Brak ...</td>
+      <td>{"process_id": "702", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:11</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Display a Message on form: FRM-40401: Brak zmia...</td>
+      <td>{"process_id": "702", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:16</td>
+      <td>OSTRZEŻENIE</td>
+      <td>średni</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>Próba wywołania GET_WINDOW_PROPERTY('MAIN', WIN...</td>
+      <td>{"process_id": "1342", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:16</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | OEWSKLAB:SKIE2.SKIE_DATA_WYSTAWI...</td>
+      <td>{"process_id": "359", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:16</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Skie2.SkieDataWystawieniaSkie[1]), (S...</td>
+      <td>{"process_id": "359", "formssessionname": "2025...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:16</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODKARGOR:DEF_TOOLBAR.EXIT[1] {} |</td>
+      <td>{"process_id": "1308", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:16</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> ButtonPressed (DefToolbar.Exit[0]), (Shift,...</td>
+      <td>{"process_id": "1308", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:16</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->CheckboxChanged (Ctrl.Pobr[0]), (Shift,Ctrl,...</td>
+      <td>{"process_id": "1707", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:16</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>/->Goto (Dp.DpOpisZmiany[8]), (Shift,Ctrl,Alt)=...</td>
+      <td>{"process_id": "2014", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:16</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_click | ODREALOP:DP.DP_OPIS_ZMIANY[9] {Z...</td>
+      <td>{"process_id": "2014", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:16</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> Goto (Dp.DpOpisZmiany[8]), (Shift,Ctrl,Alt)...</td>
+      <td>{"process_id": "2014", "formssessionname": "202...</td>
+    </tr>
+    <tr>
+      <td>2025-05-12 07:25:16</td>
+      <td>INFORMACJA</td>
+      <td>niski</td>
+      <td>Ogólne ostrzeżenie</td>
+      <td>#-> nt_breadcrumb | 3 {Panel lekarski} |</td>
+      <td>{"process_id": "956", "formssessionname": "2025...</td>
+    </tr>
+  </tbody>
+</table>
+                </div>
+                
+                <div class="footer">
+                    <p>Wygenerowane przez System Monitoringu 2025-06-08 21:37:46</p>
+                </div>
+            </body>
+            </html>
+            

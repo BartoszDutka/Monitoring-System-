@@ -13,6 +13,18 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (err) {
         console.error('Błąd podczas początkowego tłumaczenia:', err);
     }
+    
+    // Listen for language changes and update inventory-specific elements
+    document.addEventListener('languageChanged', function(e) {
+        const newLanguage = e.detail.language;
+        
+        // Update any inventory-specific elements that need translation
+        setTimeout(() => {
+            if (typeof updateInventoryTranslations === 'function') {
+                updateInventoryTranslations(newLanguage);
+            }
+        }, 10);
+    });
       // Konfiguracja obserwerów
     setupMutationObserver();
     
@@ -221,14 +233,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         // Create a more detailed row with better spacing
                         row.innerHTML = `
-                            <td data-full-text="${escapeHtml(fullProductName)}">${escapeHtml(fullProductName)}</td>
-                            <td>
+                            <td data-full-text="${escapeHtml(fullProductName)}">${escapeHtml(fullProductName)}</td>                            <td>
                                 <select class="product-category-select">
-                                    <option value="hardware" ${category === 'Hardware' ? 'selected' : ''}>Hardware</option>
-                                    <option value="software" ${category === 'Software' ? 'selected' : ''}>Software</option>
-                                    <option value="furniture" ${category === 'Furniture' ? 'selected' : ''}>Furniture</option>
-                                    <option value="accessories" ${category === 'Accessories' ? 'selected' : ''}>Accessories</option>
-                                    <option value="other" ${category === 'Other' ? 'selected' : ''}>Other</option>
+                                    <option value="hardware" ${category === 'Hardware' ? 'selected' : ''}>${language === 'pl' ? 'Sprzęt' : 'Hardware'}</option>
+                                    <option value="software" ${category === 'Software' ? 'selected' : ''}>${language === 'pl' ? 'Oprogramowanie' : 'Software'}</option>
+                                    <option value="furniture" ${category === 'Furniture' ? 'selected' : ''}>${language === 'pl' ? 'Meble' : 'Furniture'}</option>
+                                    <option value="accessories" ${category === 'Accessories' ? 'selected' : ''}>${language === 'pl' ? 'Akcesoria' : 'Accessories'}</option>
+                                    <option value="other" ${category === 'Other' ? 'selected' : ''}>${language === 'pl' ? 'Inne' : 'Other'}</option>
                                 </select>
                             </td>
                             <td>
@@ -259,9 +270,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
-                        `;
-                        
+                        `;                        
                         productTableBody.appendChild(row);
+                        
+                        // Update translations for newly added row
+                        if (typeof updateInventoryTranslations === 'function') {
+                            const currentLang = document.documentElement.getAttribute('data-language') || 'en';
+                            updateInventoryTranslations(currentLang);
+                        }
                         
                         // Add click handler to show full product name
                         const nameCell = row.querySelector('td:first-child');
@@ -404,13 +420,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>
                     <input type="text" class="form-control" value="${newProduct.name}" placeholder="${language === 'pl' ? 'Wprowadź nazwę' : 'Enter name'}" onchange="window.invoiceProducts[${newProductIndex}].name = this.value">
                 </td>
-                <td>
-                    <select class="product-category-select">
-                        <option value="hardware">Hardware</option>
-                        <option value="software">Software</option>
-                        <option value="furniture">Furniture</option>
-                        <option value="accessories">Accessories</option>
-                        <option value="other" selected>Other</option>
+                <td>                    <select class="product-category-select">
+                        <option value="hardware">${language === 'pl' ? 'Sprzęt' : 'Hardware'}</option>
+                        <option value="software">${language === 'pl' ? 'Oprogramowanie' : 'Software'}</option>
+                        <option value="furniture">${language === 'pl' ? 'Meble' : 'Furniture'}</option>
+                        <option value="accessories">${language === 'pl' ? 'Akcesoria' : 'Accessories'}</option>
+                        <option value="other" selected>${language === 'pl' ? 'Inne' : 'Other'}</option>
                     </select>
                 </td>
                 <td>
@@ -442,9 +457,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
-            `;
-            
+            `;            
             productTableBody.appendChild(row);
+            
+            // Update translations for newly added row
+            if (typeof updateInventoryTranslations === 'function') {
+                const currentLang = document.documentElement.getAttribute('data-language') || 'en';
+                updateInventoryTranslations(currentLang);
+            }
             
             // Dodaj obsługę przycisków do nowego wiersza
             const importBtn = row.querySelector('.import-product');

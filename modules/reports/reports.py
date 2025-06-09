@@ -155,8 +155,7 @@ class ReportGenerator:
                 'devices': 'Urządzenia',
                 'no_data': 'Brak danych',
                 'no_records': 'Nie znaleziono rekordów dla wybranego okresu'
-            },
-            'columns': {
+            },            'columns': {
                 # Messages report
                 'timestamp': 'Data i czas',
                 'level': 'Poziom',
@@ -177,6 +176,54 @@ class ReportGenerator:
                 'category': 'Kategoria',
                 'metric': 'Metryka',
                 'period': 'Okres'
+            },            'data_values': {
+                # Level translations
+                'INFO': 'INFORMACJA',
+                'WARN': 'OSTRZEŻENIE',
+                'WARNING': 'OSTRZEŻENIE',
+                'ERROR': 'BŁĄD',
+                'DEBUG': 'DEBUGOWANIE',
+                'FATAL': 'KRYTYCZNY',
+                # Severity translations
+                'low': 'niski',
+                'medium': 'średni',
+                'high': 'wysoki',
+                'critical': 'krytyczny',
+                # Category translations
+                'General Warning': 'Ogólne ostrzeżenie',
+                'System Error': 'Błąd systemu',
+                'Service Status': 'Status usługi',
+                'Performance Issue': 'Problem wydajności',
+                'Security Alert': 'Alert bezpieczeństwa',
+                'Network Issue': 'Problem sieciowy',
+                'Database Error': 'Błąd bazy danych',
+                'Application Error': 'Błąd aplikacji',
+                # Performance metrics translations
+                'cpu_usage': 'użycie CPU',
+                'memory_usage': 'użycie pamięci',
+                'disk_usage': 'użycie dysku',
+                'network_io': 'I/O sieci',
+                'disk_io': 'I/O dysku',
+                # Server names translations
+                'server1': 'serwer1',
+                'server2': 'serwer2',
+                'webserver': 'serwer www',
+                'database': 'baza danych',
+                'mailserver': 'serwer poczty',                # Error report source translations
+                'graylog': 'graylog',
+                'system': 'system',
+                'application': 'aplikacja',
+                'database': 'baza danych',
+                # Summary report category translations
+                'messages': 'wiadomości',
+                'hosts': 'hosty',
+                'errors': 'błędy',
+                'performance': 'wydajność',
+                # Summary report metric translations
+                'online': 'online',
+                'offline': 'offline',
+                'maintenance': 'konserwacja',
+                'total': 'razem'
             }
         }
     }
@@ -184,8 +231,7 @@ class ReportGenerator:
     def _process_date_range(self):
         """Process date range selection into start and end dates."""
         today = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        
-        # Only process if custom dates aren't already provided
+          # Only process if custom dates aren't already provided
         if self.date_range != 'custom' or not (self.start_date and self.end_date):
             if self.date_range == 'today':
                 self.start_date = today
@@ -201,13 +247,22 @@ class ReportGenerator:
             elif self.date_range == 'custom':
                 # Custom range is handled by the form inputs
                 pass
-            else:
-                # Default to last 7 days
+            else:                # Default to last 7 days
                 self.start_date = today - datetime.timedelta(days=7)
                 self.end_date = today.replace(hour=23, minute=59, second=59)
         
         print(f"Date range processed: {self.start_date} to {self.end_date}")
-    
+
+    def _format_date_range(self):
+        """Format date range with proper translation for 'to' word."""
+        start_str = self.start_date.strftime('%Y-%m-%d')
+        end_str = self.end_date.strftime('%Y-%m-%d')
+        
+        if self.language == 'pl':
+            return f"{start_str} do {end_str}"
+        else:
+            return f"{start_str} to {end_str}"
+
     def _translate_dataframe_columns(self, df):
         """Translate DataFrame column names based on selected language."""
         lang = self.language if self.language in self.TRANSLATIONS else 'en'
@@ -222,9 +277,76 @@ class ReportGenerator:
                 translated_columns[col] = translations[col_lower]
             else:
                 translated_columns[col] = col
-                
-        # Rename the DataFrame columns
+                  # Rename the DataFrame columns
         return df.rename(columns=translated_columns)
+        
+    def _translate_dataframe_values(self, df):
+        """Translate DataFrame data values based on selected language."""
+        if self.language != 'pl':
+            return df  # Only translate for Polish language
+            
+        print(f"DEBUG: Translating data values for language: {self.language}")
+        print(f"DEBUG: DataFrame columns: {list(df.columns)}")
+        
+        # Make a copy to avoid modifying the original
+        translated_df = df.copy()
+        
+        # Get the data value translations for Polish
+        data_translations = self.TRANSLATIONS['pl'].get('data_values', {})
+        print(f"DEBUG: Available translations: {list(data_translations.keys())}")
+        
+        # Define column mapping for translation - exact column names to check
+        columns_to_translate = {
+            'level': True,          # Messages/errors level
+            'Level': True,
+            'poziom': True,
+            'Poziom': True,
+            'severity': True,       # Messages/errors severity
+            'Severity': True, 
+            'ważność': True,
+            'Ważność': True,
+            'category': True,       # Messages/errors category
+            'Category': True,
+            'kategoria': True,
+            'Kategoria': True,
+            'metric_type': True,    # Performance report metric types
+            'Metric Type': True,
+            'typ metryki': True,
+            'Typ metryki': True,
+            'Typ Metryki': True,
+            'source': True,         # Error report sources
+            'Source': True,
+            'źródło': True,
+            'Źródło': True,            'host_name': True,      # Host names in various reports
+            'Host Name': True,
+            'nazwa hosta': True,
+            'Nazwa hosta': True,
+            'Nazwa Hosta': True,
+            'metric': True,         # Summary report metrics
+            'Metric': True,
+            'metryka': True,
+            'Metryka': True
+        }
+        
+        for col in translated_df.columns:
+            # Check if this exact column name should be translated
+            should_translate = columns_to_translate.get(col, False)
+            print(f"DEBUG: Column '{col}' should translate: {should_translate}")
+            
+            if should_translate:
+                print(f"DEBUG: Translating column '{col}'")
+                original_values = translated_df[col].unique()[:5]  # First 5 unique values
+                print(f"DEBUG: Original values sample: {original_values}")
+                
+                # Translate values in this column
+                translated_df[col] = translated_df[col].apply(
+                    lambda x: data_translations.get(str(x), str(x)) if pd.notna(x) else x
+                )
+                
+                translated_values = translated_df[col].unique()[:5]  # First 5 unique values
+                print(f"DEBUG: Translated values sample: {translated_values}")
+        
+        return translated_df
     
     def _resize_table_for_pdf(self, df):
         """Resize table content to fit better in PDF documents."""
@@ -482,14 +604,13 @@ class ReportGenerator:
             
             # Combine all statistics into a single dataset
             summary_data = []
-            
-            # Add message statistics
+              # Add message statistics
             for category, count in message_stats.items():
                 summary_data.append({
                     'category': 'messages',
                     'metric': category,
                     'value': count,
-                    'period': f"{self.start_date.strftime('%Y-%m-%d')} to {self.end_date.strftime('%Y-%m-%d')}"
+                    'period': self._format_date_range()
                 })
             
             # Add host statistics
@@ -498,7 +619,7 @@ class ReportGenerator:
                     'category': 'hosts',
                     'metric': status,
                     'value': count,
-                    'period': f"{self.start_date.strftime('%Y-%m-%d')} to {self.end_date.strftime('%Y-%m-%d')}"
+                    'period': self._format_date_range()
                 })
             
             # Add error statistics
@@ -507,7 +628,7 @@ class ReportGenerator:
                     'category': 'errors',
                     'metric': level,
                     'value': count,
-                    'period': f"{self.start_date.strftime('%Y-%m-%d')} to {self.end_date.strftime('%Y-%m-%d')}"
+                    'period': self._format_date_range()
                 })
             
             return summary_data
@@ -678,9 +799,12 @@ class ReportGenerator:
             # Use language-specific translations
             lang = self.language if self.language in self.TRANSLATIONS else 'en'
             translations = self.TRANSLATIONS[lang]
-            
-            # Convert to pandas DataFrame for easy HTML table generation
+              # Convert to pandas DataFrame for easy HTML table generation
             df = pd.DataFrame(data)
+            
+            # Translate column headers and data values for the preview
+            df = self._translate_dataframe_columns(df)
+            df = self._translate_dataframe_values(df)  # Translate data values (for Polish)
             
             # Limit preview to a small number of records
             preview_count = min(10, len(df))
@@ -704,10 +828,9 @@ class ReportGenerator:
                 <div class="preview-stat">
                     <span class="stat-label">{translations['metadata_labels']['report_type']}:</span>
                     <span class="stat-value">{report_type_display}</span>
-                </div>
-                <div class="preview-stat">
+                </div>                <div class="preview-stat">
                     <span class="stat-label">{translations['metadata_labels']['date_range']}:</span>
-                    <span class="stat-value">{self.start_date.strftime('%Y-%m-%d')} to {self.end_date.strftime('%Y-%m-%d')}</span>
+                    <span class="stat-value">{self._format_date_range()}</span>
                 </div>
             </div>
             <div class="preview-table-container">
@@ -773,12 +896,12 @@ class ReportGenerator:
             # Use the language-specific translations
             lang = self.language if self.language in self.TRANSLATIONS else 'en'
             translations = self.TRANSLATIONS[lang]
-            
-            # Convert data to DataFrame
+              # Convert data to DataFrame
             df = pd.DataFrame(data)
             
             # Translate columns and resize data for better display
             df = self._translate_dataframe_columns(df)
+            df = self._translate_dataframe_values(df)  # Translate data values (for Polish)
             df = self._resize_table_for_pdf(df)  # Works for HTML too
             
             # Generate filename
@@ -910,9 +1033,8 @@ class ReportGenerator:
                         </div>
                     </div>
                 </div>
-                
-                <div class="table-container">
-                    {{ table_html }}
+                  <div class="table-container">
+                    {{ table_html|safe }}
                 </div>
                 
                 <div class="footer">
@@ -921,22 +1043,25 @@ class ReportGenerator:
             </body>
             </html>
             """
-            
-            # Generate table HTML with better styling
-            table_html = df.to_html(classes="data-table", index=False, border=1)
+              # Generate table HTML with better styling
+            table_html = df.to_html(classes="data-table", index=False, border=1, escape=False)
             
             # Fix styling issue with table attributes
             table_html = table_html.replace('<table border="1" class="dataframe data-table">', 
                                           '<table class="data-table" cellspacing="0" cellpadding="5">')
             
-            # Get report type from translations
+            # Debug: Check if table_html contains escaped content
+            print(f"DEBUG: First 200 chars of table_html: {table_html[:200]}")
+            if "&lt;" in table_html or "&#34;" in table_html:
+                print("WARNING: table_html already contains escaped HTML!")
+              # Get report type from translations
             report_type_display = translations['report_types'].get(
                 self.report_type, 
                 self.report_type.capitalize()
             )
             
             # Prepare context for rendering
-            date_range_text = f"{self.start_date.strftime('%Y-%m-%d')} to {self.end_date.strftime('%Y-%m-%d')}"
+            date_range_text = self._format_date_range()
             generated_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
             # Render HTML template
@@ -985,12 +1110,12 @@ class ReportGenerator:
             # Use the language-specific translations
             lang = self.language if self.language in self.TRANSLATIONS else 'en'
             translations = self.TRANSLATIONS[lang]
-            
-            # Convert data to DataFrame
+              # Convert data to DataFrame
             df = pd.DataFrame(data)
             
             # Translate column headers and resize data for better display in PDF
             df = self._translate_dataframe_columns(df)
+            df = self._translate_dataframe_values(df)  # Translate data values (for Polish)
             df = self._resize_table_for_pdf(df)
             
             # Generate filenames
@@ -1124,13 +1249,12 @@ class ReportGenerator:
             # Fix table HTML to ensure proper rendering in PDF
             # Generate table HTML with better styling for PDF
             table_html = df.to_html(classes="data-table", index=False)
-            
-            # Ensure there are no malformed tags or attributes in table
+              # Ensure there are no malformed tags or attributes in table
             table_html = table_html.replace('<table border="1" class="dataframe data-table">', 
                                           '<table class="data-table">')
             
             # Prepare context for rendering
-            date_range_text = f"{self.start_date.strftime('%Y-%m-%d')} to {self.end_date.strftime('%Y-%m-%d')}"
+            date_range_text = self._format_date_range()
             generated_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
             # Render HTML template
@@ -1247,12 +1371,12 @@ class ReportGenerator:
             # Use the language-specific translations
             lang = self.language if self.language in self.TRANSLATIONS else 'en'
             translations = self.TRANSLATIONS[lang]
-            
-            # Create a DataFrame from the data
+              # Create a DataFrame from the data
             df = pd.DataFrame(data)
             
             # Translate column headers for the selected language
             df = self._translate_dataframe_columns(df)
+            df = self._translate_dataframe_values(df)  # Translate data values (for Polish)
             
             # Generate filename
             timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -1301,12 +1425,12 @@ class ReportGenerator:
         try:
             # Use the language-specific translations
             lang = self.language if self.language in self.TRANSLATIONS else 'en'
-            
-            # Convert data to DataFrame
+              # Convert data to DataFrame
             df = pd.DataFrame(data)
             
             # Translate column headers for the selected language
             df = self._translate_dataframe_columns(df)
+            df = self._translate_dataframe_values(df)  # Translate data values (for Polish)
             
             # Generate filename
             timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')

@@ -139,6 +139,9 @@ def isdigit_filter(s):
         return False
     return s[0].isdigit() if s else False
 
+# Import translation utility
+from modules.utils.translations import get_message
+
 # Add this with the other filters
 @app.template_filter('count_values')
 def count_values_filter(dictionary):
@@ -194,10 +197,9 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
         if not username or not password:
-            flash('Please provide both username and password')
-            return render_template('auth/login.html', error='Please provide both username and password')
+            flash(get_message('missing_credentials'))
+            return render_template('auth/login.html', error=get_message('missing_credentials'))
         
         # Najpierw próbujemy logowania LDAP
         if authenticate_user(username, password):
@@ -268,13 +270,13 @@ def login():
                   # Jeśli LDAP nie zadziała, próbujemy lokalnej bazy
         elif verify_user(username, password):
             user_info = get_user_info(username)
-            if user_info:
+            if user_info:                
                 session['logged_in'] = True
                 session['username'] = username
                 session['user_info'] = user_info
                 return redirect(url_for('index'))
         
-        return render_template('auth/login.html', error='Invalid username or password')
+        return render_template('auth/login.html', error=get_message('invalid_credentials'))
     
     if session.get('logged_in'):
         return redirect(url_for('index'))
@@ -1000,13 +1002,11 @@ def profile():
             cursor.execute("""
                 SELECT name, description_en, description_pl
                 FROM departments
-                ORDER BY name
-            """)
+                ORDER BY name            """)
             departments_raw = cursor.fetchall()
-            
-        if not user:
-            flash('User not found', 'error')
-            return redirect(url_for('index'))
+            if not user:
+                flash(get_message('user_not_found'), 'error')
+                return redirect(url_for('index'))
         
         # Format departments for template
         departments = []
@@ -1019,10 +1019,10 @@ def profile():
                 }
             })
         
-        return render_template('auth/profile.html', user_info=user, departments=departments)
+        return render_template('auth/profile.html', user_info=user, departments=departments)    
     except Exception as e:
         logger.error(f"Error loading profile: {e}")
-        flash('Error loading profile', 'error')
+        flash(get_message('error_loading_profile'), 'error')
         return redirect(url_for('index'))
 
 @app.route('/update-profile', methods=['POST'])
@@ -1038,12 +1038,11 @@ def update_profile():
     
     try:
         with get_db_cursor() as cursor:
-            # Get current user data
-            cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+            # Get current user data            cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
             user = cursor.fetchone()
             
             if not user:
-                flash('User not found', 'error')
+                flash(get_message('user_not_found'), 'error')
                 return redirect(url_for('profile'))
             
             # Update basic profile information
@@ -1057,39 +1056,38 @@ def update_profile():
             if email and email != user['email']:
                 update_fields.append('email = %s')
                 update_values.append(email)
-            
-            # Handle password change
+              # Handle password change
             if new_password:
                 if not current_password:
-                    flash('Current password is required to change password', 'error')
+                    flash(get_message('current_password_required'), 'error')
                     return redirect(url_for('profile'))
                 
                 if new_password != confirm_password:
-                    flash('New passwords do not match', 'error')
+                    flash(get_message('passwords_mismatch'), 'error')
                     return redirect(url_for('profile'))
                 
                 # Verify current password (simplified - in production use proper hashing)
                 if current_password != user['password']:
-                    flash('Current password is incorrect', 'error')
+                    flash(get_message('current_password_incorrect'), 'error')
                     return redirect(url_for('profile'))
                 
                 update_fields.append('password = %s')
                 update_values.append(new_password)
-              # Update user data if there are changes
+            
+            # Update user data if there are changes
             if update_fields:
                 update_values.append(username)
                 cursor.execute(f"""
                     UPDATE users SET {', '.join(update_fields)}
-                    WHERE username = %s
-                """, update_values)
+                    WHERE username = %s                """, update_values)
                 
-                flash('Profile updated successfully', 'success')
+                flash(get_message('profile_updated'), 'success')
             else:
-                flash('No changes made', 'info')
+                flash(get_message('no_changes'), 'info')
                 
     except Exception as e:
         logger.error(f"Error updating profile: {e}")
-        flash('Error updating profile', 'error')
+        flash(get_message('error_updating_profile'), 'error')
     
     return redirect(url_for('profile'))
 
@@ -1105,13 +1103,12 @@ def upload_avatar():
     username = session.get('username')
     
     if 'avatar' not in request.files:
-        flash('No file selected', 'error')
+        flash(get_message('no_file_selected'), 'error')
         return redirect(url_for('profile'))
     
     file = request.files['avatar']
-    
     if file.filename == '':
-        flash('No file selected', 'error')
+        flash(get_message('no_file_selected'), 'error')
         return redirect(url_for('profile'))
     
     if file and allowed_file(file.filename):
@@ -1125,19 +1122,18 @@ def upload_avatar():
             
             # Update database
             update_user_avatar(username, filename)
-            
-            # Update session
+              # Update session
             if 'user_info' in session:
                 session['user_info']['avatar_path'] = filename
                 session.modified = True
             
-            flash('Avatar updated successfully', 'success')
+            flash(get_message('avatar_updated'), 'success')
             
         except Exception as e:
             logger.error(f"Error uploading avatar: {e}")
-            flash('Error uploading avatar', 'error')
+            flash(get_message('error_uploading_avatar'), 'error')
     else:
-        flash('Invalid file type. Please use PNG, JPG, JPEG or GIF.', 'error')
+        flash(get_message('invalid_file_type'), 'error')
     
     return redirect(url_for('profile'))
 
@@ -1911,7 +1907,7 @@ def permissions_debug():
         with get_db_cursor() as cursor:
             # Get all task-related permissions
             cursor.execute("""
-                SELECT permission_id, permission_key, name, category 
+                SELECT permission_id, permission_key, name_en as name, category 
                 FROM permissions 
                 WHERE permission_key LIKE '%task%'
                 ORDER BY category, permission_key

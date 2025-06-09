@@ -498,7 +498,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const taskId = this.getAttribute('data-task-id');
             const taskTitle = this.closest('.task-item').querySelector('.task-title').textContent;
             
-            if (confirm(`Are you sure you want to delete task "${taskTitle}"? This action cannot be undone.`)) {
+            // Get current language for confirmation message
+            const currentLanguage = document.documentElement.getAttribute('data-language') || 'en';
+            const confirmMessage = currentLanguage === 'pl' ? 
+                `Czy na pewno chcesz usunąć zadanie "${taskTitle}"? Ta akcja nie może być cofnięta.` :
+                `Are you sure you want to delete task "${taskTitle}"? This action cannot be undone.`;
+            
+            if (confirm(confirmMessage)) {
                 // Create form for POST request
                 const form = document.createElement('form');
                 form.method = 'POST';

@@ -1,45 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Login - Monitoring System</title>
+<html lang="{{ session.get('language', 'pl') }}" data-en-lang="en" data-pl-lang="pl">
+<head>    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="server-language" content="{{ session.get('language', 'pl') }}">
+    <title data-en="Login - Monitoring System" data-pl="Logowanie - System Monitoringu">Logowanie - System Monitoringu</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/auth/login.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/fixes/fixes.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fixes/fixes.css') }}">    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body class="login-body">
-    <div class="login-page">
-        <div class="login-overlay"></div>
-        <div class="login-container">
-            <div class="login-welcome">
-                <h1>Monitoring System</h1>
-                <p>Access your system monitoring dashboard with real-time insights and comprehensive analytics.</p>
-                
-                <div class="login-features">
+    <div class="login-page">        <div class="login-overlay"></div>
+        <div class="login-container"><div class="login-welcome">
+                <h1 data-en="Monitoring System" data-pl="System Monitoringu">System Monitoringu</h1>
+                <p data-en="Access the system monitoring panel with real-time analysis and comprehensive analytics." data-pl="Uzyskaj dostęp do panelu monitoringu systemu z analizą w czasie rzeczywistym i kompleksową analityką.">Uzyskaj dostęp do panelu monitoringu systemu z analizą w czasie rzeczywistym i kompleksową analityką.</p>
+                  <div class="login-features">
                     <div class="login-feature">
                         <i class="fas fa-chart-line"></i>
-                        <span>Real-time performance monitoring</span>
+                        <span data-en="Real-time performance monitoring" data-pl="Monitorowanie wydajności w czasie rzeczywistym">Monitorowanie wydajności w czasie rzeczywistym</span>
                     </div>
                     <div class="login-feature">
                         <i class="fas fa-server"></i>
-                        <span>Server health and status tracking</span>
+                        <span data-en="Server health and status tracking" data-pl="Śledzenie kondycji i statusu serwerów">Śledzenie kondycji i statusu serwerów</span>
                     </div>
                     <div class="login-feature">
                         <i class="fas fa-bell"></i>
-                        <span>Instant alerts and notifications</span>
+                        <span data-en="Instant alerts and notifications" data-pl="Natychmiastowe alerty i powiadomienia">Natychmiastowe alerty i powiadomienia</span>
                     </div>
                 </div>
             </div>
-            
-            <div class="login-form-container">
+              <div class="login-form-container">
+                <!-- Language Toggle Button -->
+                <div class="language-toggle-container">
+                    <button id="language-toggle" class="language-toggle" title="Zmień język / Change language">
+                        <i class="fas fa-globe"></i>
+                        <span id="current-language">PL</span>
+                    </button>
+                </div>
+                
                 <label for="profile-upload" class="login-logo">
                     <input type="file" id="profile-upload" style="display: none;">
-                </label>
-                
-                <div class="login-header">
-                    <h2>Welcome Back</h2>
-                    <p>Enter your credentials to access the dashboard</p>
+                </label>                  <div class="login-header">
+                    <h2 data-en="Welcome back" data-pl="Witamy ponownie">Witamy ponownie</h2>
+                    <p data-en="Enter your login credentials to access the panel" data-pl="Wprowadź swoje dane logowania, aby uzyskać dostęp do panelu">Wprowadź swoje dane logowania, aby uzyskać dostęp do panelu</p>
                 </div>
                 
                 {% if error %}
@@ -47,37 +49,35 @@
                     <i class="fas fa-exclamation-circle"></i>
                     {{ error }}
                 </div>
-                {% endif %}
-
-                <form method="POST" action="{{ url_for('login') }}" class="login-form">
+                {% endif %}                <form method="POST" action="{{ url_for('login') }}" class="login-form">
                     <div class="form-group">
-                        <input type="text" id="username" name="username" placeholder="Username" required>
+                        <input type="text" id="username" name="username" 
+                               data-en-placeholder="Username" 
+                               data-pl-placeholder="Nazwa użytkownika" 
+                               placeholder="Nazwa użytkownika" required>
                         <i class="fas fa-user"></i>
                     </div>
 
                     <div class="form-group">
-                        <input type="password" id="password" name="password" placeholder="Password" required>
+                        <input type="password" id="password" name="password" 
+                               data-en-placeholder="Password" 
+                               data-pl-placeholder="Hasło" 
+                               placeholder="Hasło" required>
                         <i class="fas fa-lock"></i>
-                    </div>
-
-                    <div class="login-options">
+                    </div>                    <div class="login-options">
                         <label class="remember-me">
                             <input type="checkbox" name="remember">
-                            <span>Remember me</span>
+                            <span data-en="Remember me" data-pl="Zapamiętaj mnie">Zapamiętaj mnie</span>
                         </label>
-                        <a href="#" class="forgot-password">Forgot Password?</a>
-                    </div>
-
-                    <button type="submit" class="login-button">
-                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </div>                    <button type="submit" class="login-button">
+                        <i class="fas fa-sign-in-alt"></i> 
+                        <span data-en="Sign in" data-pl="Zaloguj się">Zaloguj się</span>
                     </button>
-                </form>
-                
-                <div class="login-links">
-                    <p>Need help? <a href="#">Contact Support</a></p>
-                </div>
-            </div>
+                </form>            </div>
         </div>
     </div>
+    
+    <!-- Include language switching script -->
+    <script src="{{ url_for('static', filename='js/localization/language.js') }}"></script>
 </body>
 </html>

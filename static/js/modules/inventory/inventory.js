@@ -25,6 +25,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Konfiguracja obserwerów
     setupMutationObserver();
+    
+    // Listen for language changes and update inventory-specific elements
+    document.addEventListener('languageChanged', function(e) {
+        const newLanguage = e.detail.language;
+        updateSelectedCounter(); // Update counter text
+        
+        // Update any other inventory-specific elements that need translation
+        setTimeout(() => {
+            updateInventoryTranslations(newLanguage);
+        }, 10);
+    });
       const methodBtns = document.querySelectorAll('.method-btn');
     const sections = {
         manual: document.querySelector('.manual-section'),
@@ -185,22 +196,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 row.innerHTML += `
                     <td>${escapeHtml(product.name || '')}</td>
-                    <td>
-                        <select class="product-category-select">
-                            <option value="hardware" ${category === 'Hardware' ? 'selected' : ''}>Hardware</option>
-                            <option value="software" ${category === 'Software' ? 'selected' : ''}>Software</option>
-                            <option value="furniture" ${category === 'Furniture' ? 'selected' : ''}>Furniture</option>
-                            <option value="accessories" ${category === 'Accessories' ? 'selected' : ''}>Accessories</option>
-                            <option value="other" ${category === 'Other' ? 'selected' : ''}>Other</option>
+                    <td>                        <select class="product-category-select">
+                            <option value="hardware" ${category === 'Hardware' ? 'selected' : ''}>${language === 'pl' ? 'Sprzęt' : 'Hardware'}</option>
+                            <option value="software" ${category === 'Software' ? 'selected' : ''}>${language === 'pl' ? 'Oprogramowanie' : 'Software'}</option>
+                            <option value="furniture" ${category === 'Furniture' ? 'selected' : ''}>${language === 'pl' ? 'Meble' : 'Furniture'}</option>
+                            <option value="accessories" ${category === 'Accessories' ? 'selected' : ''}>${language === 'pl' ? 'Akcesoria' : 'Accessories'}</option>
+                            <option value="other" ${category === 'Other' ? 'selected' : ''}>${language === 'pl' ? 'Inne' : 'Other'}</option>
                         </select>
                     </td>
                     <td><input type="number" class="quantity-input form-control" value="${product.quantity || 1}" min="1"></td>
                     <td>${product.unit_price ? parseFloat(product.unit_price).toFixed(2) : '0.00'}</td>
                     <td>${product.total_price ? parseFloat(product.total_price).toFixed(2) : '0.00'}</td>
-                    <td>
-                        <select class="assign-to-select form-control">
-                            <option value="">Select Department</option>
-                            ${Array.from(document.querySelectorAll('#departmentSelect option'))
+                    <td>                    <select class="assign-to-select form-control">
+                        <option value="">${language === 'pl' ? 'Wybierz dział...' : 'Select Department'}</option>
+                        ${Array.from(document.querySelectorAll('#departmentSelect option'))
                                 .filter(opt => opt.value)
                                 .map(opt => `
                                     <option value="${opt.value}" ${opt.selected ? 'selected' : ''}>
@@ -219,9 +228,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         <button class="btn-icon delete-product" title="Delete item">
                             <i class="fas fa-trash"></i>
                         </button>
-                    </td>`;
-                
+                    </td>`;                
                 productTableBody.appendChild(row);
+                
+                // Update translations for newly added row
+                if (typeof updateInventoryTranslations === 'function') {
+                    const currentLang = document.documentElement.getAttribute('data-language') || 'en';
+                    updateInventoryTranslations(currentLang);
+                }
                 
                 // Add click handler to show full product name
                 const nameCell = row.querySelector('td:nth-child(2)');
@@ -364,12 +378,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.querySelector('.method-btn[data-method="manual"]').click();
                 });
             });
-            
-            // Add event listeners for delete buttons
+              // Add event listeners for delete buttons
             document.querySelectorAll('.delete-product').forEach((btn, index) => {
                 btn.addEventListener('click', function() {
                     const row = this.closest('tr');
-                    if (confirm('Are you sure you want to remove this item?')) {
+                    const confirmMsg = language === 'pl' ? 
+                        'Czy na pewno chcesz usunąć ten element?' : 
+                        'Are you sure you want to remove this item?';
+                    
+                    if (confirm(confirmMsg)) {
                         row.remove();
                     }
                 });
@@ -514,13 +531,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>
                     <input type="text" class="form-control" value="${newProduct.name}" placeholder="${language === 'pl' ? 'Wprowadź nazwę' : 'Enter name'}" onchange="window.invoiceProducts[${newProductIndex}].name = this.value">
                 </td>
-                <td>
-                    <select class="product-category-select">
-                        <option value="hardware">Hardware</option>
-                        <option value="software">Software</option>
-                        <option value="furniture">Furniture</option>
-                        <option value="accessories">Accessories</option>
-                        <option value="other" selected>Other</option>
+                <td>                    <select class="product-category-select">
+                        <option value="hardware">${language === 'pl' ? 'Sprzęt' : 'Hardware'}</option>
+                        <option value="software">${language === 'pl' ? 'Oprogramowanie' : 'Software'}</option>
+                        <option value="furniture">${language === 'pl' ? 'Meble' : 'Furniture'}</option>
+                        <option value="accessories">${language === 'pl' ? 'Akcesoria' : 'Accessories'}</option>
+                        <option value="other" selected>${language === 'pl' ? 'Inne' : 'Other'}</option>
                     </select>
                 </td>
                 <td>
@@ -552,9 +568,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
-            `;
-            
+            `;            
             productTableBody.appendChild(row);
+            
+            // Update translations for newly added row
+            if (typeof updateInventoryTranslations === 'function') {
+                const currentLang = document.documentElement.getAttribute('data-language') || 'en';
+                updateInventoryTranslations(currentLang);
+            }
             
             // Dodaj obsługę przycisków do nowego wiersza
             const selectBtn = row.querySelector('.select-product');
@@ -596,8 +617,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const confirmMsg = language === 'pl' ? 
                         'Czy na pewno chcesz usunąć ten element?' : 
                         'Are you sure you want to remove this item?';
-                    
-                    if (confirmMsg) {
+                      if (confirm(confirmMsg)) {
                         row.remove();
                     }
                 });
