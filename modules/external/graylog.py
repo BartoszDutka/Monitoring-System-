@@ -32,17 +32,6 @@ def get_message(key, lang='pl', *args):
     return message
 
 def extract_nested_json(message_str: str) -> dict:
-    """
-    Extract and parse nested JSON from message string.
-    
-    Args:
-        message_str (str): Raw message string containing process ID and JSON
-        
-    Returns:
-        dict: Parsed JSON data with process_id added, or None if parsing fails
-        
-    Example input: '3248 - { "formsSessionName": "...", ...}'
-    """
     try:
         dash_pos = message_str.find('-')
         if dash_pos == -1:
@@ -63,15 +52,6 @@ def extract_nested_json(message_str: str) -> dict:
         return None
 
 def parse_log_message(raw_message) -> dict:
-    """
-    Parse raw log message and extract all relevant fields.
-    
-    Args:
-        raw_message (str|dict): Raw message from Graylog
-        
-    Returns:
-        dict: Structured log data with extracted fields
-    """
     try:
         # Parse outer JSON if needed
         message_data = json.loads(raw_message) if isinstance(raw_message, str) else raw_message
@@ -256,7 +236,7 @@ def get_logs(time_range_minutes: int = 5, force_refresh: bool = False, lang: str
                     "level": level,
                     "severity": severity,
                     "category": category,
-                    "details": {k: v for k, v in parsed_data.items() if k != 'message' and v is not None},
+                    "details": {k: v for k, v in parsed_data.items() if k != 'message' and v is noseverity_mappingt None},
                     "message": parsed_data.get('message', '').strip()
                 })
 

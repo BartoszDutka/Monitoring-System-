@@ -155,7 +155,7 @@ def add_equipment():
                     WHERE name = %s
                 ''', (data.get('assignTo'),))
                 if not cursor.fetchone():
-                    return jsonify({'error': 'Invalid department selected'}), 400            # Determine if we need to set the assigned_date
+                    return jsonify({'error': 'Invalid department selected'}), 400
             assigned_date = None
             if data.get('assignTo'):
                 assigned_date = datetime.now().strftime('%Y-%m-%d')
