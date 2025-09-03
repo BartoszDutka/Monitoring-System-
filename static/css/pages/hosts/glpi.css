@@ -1,0 +1,440 @@
+/* Simple, clean, modern GLPI Category styles */
+
+/* Apply box-sizing to all elements to prevent overflow */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --glpi-primary: #4a6cf7;
+  --glpi-secondary: #6c757d;
+  --glpi-accent: #ff6b6b;
+  --glpi-light: #f8f9fa;
+  --glpi-dark: #212529;
+  --glpi-success: #28a745;
+  --glpi-border: #e9ecef;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Simplified dashboard header */
+.glpi-dashboard-header {
+  background: var(--glpi-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(74, 108, 247, 0.2);
+  position: relative; /* Added for proper positioning of pseudo-elements */
+  overflow: hidden; /* Prevent decorative elements from causing overflow */
+  width: 100%;
+}
+
+.glpi-dashboard-header::before {
+  content: '';
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  top: -125px;
+  right: -50px;
+}
+
+.glpi-dashboard-header::after {
+  content: '';
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  bottom: -90px;
+  left: -30px;
+}
+
+.glpi-dashboard-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.glpi-header-actions {
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* Search control with frosted glass effect */
+.search-container {
+  position: relative;
+  min-width: 260px;
+}
+
+.search-container .search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+}
+
+.device-search {
+  width: 100%;
+  padding: 0.8rem 1rem 0.8rem 2.8rem;
+  border: none;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  color: white;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.device-search::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.device-search:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+/* Refresh buttons with hover effects */
+.refresh-controls {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.refresh-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.2rem;
+  border-radius: 30px;
+  border: none;
+  background: white;
+  color: var(--glpi-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+}
+
+.refresh-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+.refresh-button:active {
+  transform: translateY(1px);
+}
+
+.refresh-button.secondary {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.refresh-button.secondary:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.refresh-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.refresh-button i {
+  font-size: 0.9rem;
+}
+
+/* Clean, modern card grid */
+.glpi-hosts-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Changed from auto-fill to auto-fit and reduced min width */
+  gap: 1.2rem;
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 0;
+}
+
+/* Simplified card design */
+.glpi-host-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden; /* Ensure content stays within the card */
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  height: auto;
+  margin-bottom: 20px; /* Prevent overlapping */
+  width: 100%; /* Ensure cards don't exceed container width */
+  max-width: 100%;
+}
+
+.glpi-host-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--card-hover-shadow);
+  z-index: 2; /* Ensure hover cards are above others */
+}
+
+/* Clean card content */
+.card-content {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+/* Clean header with status dot */
+.glpi-host-card h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--glpi-dark);
+  margin: 0 0 1.2rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+}
+
+/* Simple status dot */
+.device-status {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.status-active {
+  background-color: var(--glpi-success);
+}
+
+.status-inactive {
+  background-color: var(--glpi-accent);
+}
+
+/* Simple category tag */
+.device-category {
+  display: inline-block;
+  margin-left: auto;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: var(--glpi-light);
+  color: var(--glpi-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Clean device details container */
+.device-details {
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5rem;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden; /* Prevent horizontal scrolling in details */
+  max-height: 420px; /* Increased from 320px to reduce scrolling */
+  padding-right: 6px;
+  width: 100%;
+}
+
+/* Minimal scrollbar */
+.device-details::-webkit-scrollbar {
+  width: 4px;
+}
+
+.device-details::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.device-details::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+/* Clean detail items with improved alignment */
+.device-details p {
+  margin: 0;
+  padding: 6px 0; /* Reduced from 8px to fit more content */
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+  align-items: flex-start; /* Align to top for multi-line content */
+  width: 100%; /* Ensure full width */
+}
+
+/* Consistent styling for ALL label elements */
+.device-details p strong {
+  flex: 0 0 100px; /* Reduced from 110px to prevent potential overflow */
+  width: 100px;
+  min-width: 100px; /* Ensure minimum width */
+  font-weight: 600;
+  color: var(--glpi-secondary);
+  font-size: 0.85rem;
+  padding-right: 10px; /* Add some spacing between label and value */
+  text-align: left; /* Left-align the text */
+  display: block; /* For better alignment */
+  vertical-align: top; /* Align to top */
+  flex-basis: 100px;
+  flex-shrink: 0;
+  flex-grow: 0;
+  box-sizing: border-box;
+}
+
+/* Consistent styling for ALL value elements */
+.device-details p span {
+  color: var(--glpi-dark);
+  flex: 1;
+  word-break: break-word;
+  line-height: 1.4; /* Added line-height for better readability */
+  text-align: left; /* Left-align the text */
+  padding-left: 5px; /* Add a bit of padding between label and value */
+  display: block; /* For better alignment */
+  vertical-align: top; /* Align to top */
+}
+
+.device-details p:last-child {
+  border-bottom: none;
+}
+
+/* Simplified key fields highlight with better alignment */
+.field-id, .field-serial, .field-otherserial, .field-owner {
+  background-color: rgba(0,0,0,0.01);
+  border-radius: 6px;
+  padding: 8px 12px !important;
+  margin-bottom: 4px;
+  display: flex !important; /* Ensure flex layout */
+}
+
+.field-id strong, .field-serial strong, .field-otherserial strong, .field-owner strong {
+  color: var(--glpi-dark);
+}
+
+/* Clean action area */
+.device-actions {
+  background: var(--glpi-light);
+  border-top: 1px solid rgba(0,0,0,0.05);
+  padding: 1rem 1.25rem;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex; /* Ensure flex layout */
+  justify-content: center; /* Center the button */
+  align-items: center; /* Center the button */
+  position: relative;
+  z-index: 1;
+  margin-top: auto; /* Push to the bottom of the card */
+}
+
+/* Debug outline for troubleshooting */
+.device-actions::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--glpi-primary);
+  opacity: 0.3;
+}
+
+/* Clean button with improved visibility */
+.vnc-button {
+  width: 100%;
+  padding: 0.8rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  border: none;
+  border-radius: 8px;
+  background: var(--glpi-primary);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Added shadow for better visibility */
+}
+
+/* Clean no results message */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  color: var(--glpi-secondary);
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .glpi-dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .glpi-header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .search-container {
+    width: 100%;
+  }
+  
+  .refresh-controls {
+    width: 100%;
+  }
+  
+  .refresh-button {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .glpi-hosts-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Media query adjustments */
+@media (min-width: 1600px) {
+  .glpi-hosts-container {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* Adjusted for better fit */
+  }
+  
+  .device-details {
+    max-height: 480px; /* More space on large screens */
+  }
+}
+
+/* Add a container constraint to prevent overflow */
+.content-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+/* Hide debug info */
+.debug-info {
+  display: none !important;
+}

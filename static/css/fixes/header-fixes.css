@@ -1,0 +1,25 @@
+/* Dodatkowe poprawki dla nagłówków tabeli */
+.equipment-table th {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    min-width: 80px;
+    padding: 8px 10px;
+    line-height: 1.2;
+    height: auto;
+    font-weight: 600;
+}
+
+/* Upewnij się, że cała tabela jest odpowiednio wyświetlana */
+.equipment-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+/* Responsywność tabeli dla małych ekranów */
+@media screen and (max-width: 1200px) {
+    .equipment-table th,
+    .equipment-table td {
+        padding: 0.75rem 0.4rem;
+    }
+}

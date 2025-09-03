@@ -1,0 +1,198 @@
+{% extends "layout/layout.html" %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1 data-en="User Profile" data-pl="Profil użytkownika">User Profile</h1>
+    <p data-en="Manage your account information and preferences" data-pl="Zarządzaj informacjami o koncie i preferencjami">Manage your account information and preferences</p>
+</div>
+
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar">
+                {% if user_info and user_info.avatar_path %}
+                    <img src="{{ url_for('static', filename='avatars/' + user_info.avatar_path) }}?t={{ time.time() }}" alt="Profile Picture">
+                {% else %}
+                    <i class="fas fa-user"></i>
+                {% endif %}
+                
+                <!-- Avatar upload form -->
+                <div class="avatar-upload">
+                    <form action="{{ url_for('upload_avatar') }}" method="POST" enctype="multipart/form-data" id="avatarForm">
+                        <label for="avatar" class="btn-upload">
+                            <i class="fas fa-camera"></i>
+                            <span data-en="Change Photo" data-pl="Zmień zdjęcie">Change Photo</span>
+                        </label>
+                        <input type="file" id="avatar" name="avatar" accept="image/png,image/jpeg,image/gif" style="display: none">
+                    </form>
+                </div>
+            </div>
+            
+            <div class="profile-section">
+                <h3 data-en="Account Information" data-pl="Informacje o koncie">Account Information</h3>
+                
+                <!-- Profile info form -->
+                <form action="{{ url_for('update_profile') }}" method="POST" class="profile-form">
+                    <div class="form-group">
+                        <label data-en="Username:" data-pl="Nazwa użytkownika:">Username:</label>
+                        <input type="text" name="username" value="{{ user_info.username or '' }}" disabled>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label data-en="Email:" data-pl="Email:">Email:</label>
+                        <input type="email" name="email" value="{{ user_info.email or '' }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label data-en="Department:" data-pl="Dział:">Department:</label>
+                        <select name="department" class="form-control">
+                            <option value="" data-en="Select Department" data-pl="Wybierz dział">Select Department</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.name }}" {% if dept.name == user_info.department %}selected{% endif %}
+                                data-dept-en="{{ dept.description.en }}"
+                                data-dept-pl="{{ dept.description.pl }}">
+                                {{ dept.name }} (<span class="dept-description">{{ dept.description.en }}</span>)
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label data-en="Role:" data-pl="Rola:">Role:</label>
+                        <input type="text" value="{{ user_info.role }}" disabled>
+                    </div>
+
+                    {% if user_info.role == 'admin' %}
+                        <div class="admin-controls">
+                            <a href="{{ url_for('manage_users') }}" class="btn-manage-users">
+                                <i class="fas fa-users-cog"></i>
+                                <span data-en="Manage Users" data-pl="Zarządzaj użytkownikami">Manage Users</span>
+                            </a>
+                        </div>
+                    {% endif %}
+                    
+                    <button type="submit" class="btn-save" data-en="Save Changes" data-pl="Zapisz zmiany">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Preview image before upload
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const profileAvatar = document.getElementById('profileAvatar');
+                if (profileAvatar.querySelector('img')) {
+                    profileAvatar.querySelector('img').src = e.target.result;
+                } else {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = "Profile Preview";
+                    
+                    // Remove the icon if it exists
+                    const icon = profileAvatar.querySelector('i');
+                    if (icon) {
+                        profileAvatar.removeChild(icon);
+                    }
+                    
+                    profileAvatar.appendChild(img);
+                }
+            };
+            
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function validateAndSubmit(input) {
+        const file = input.files[0];
+        if (!file) return;
+        
+        // Get current language
+        const lang = document.documentElement.getAttribute('data-language') || 'en';
+
+        // Check size
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            const sizeErrorMsg = lang === 'pl' ? 
+                'Plik jest zbyt duży. Maksymalny rozmiar to 5MB.' : 
+                'File is too large. Maximum size is 5MB.';
+            alert(sizeErrorMsg);
+            input.value = '';
+            return;
+        }
+
+        // Check file type
+        const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
+        if (!validTypes.includes(file.type)) {
+            const typeErrorMsg = lang === 'pl' ? 
+                'Nieprawidłowy typ pliku. Dozwolone typy: PNG, JPG, JPEG, GIF' : 
+                'Invalid file type. Allowed types: PNG, JPG, JPEG, GIF';
+            alert(typeErrorMsg);
+            input.value = '';
+            return;
+        }
+
+        // Preview the image first
+        previewImage(input);
+
+        // Show loading indicator
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'loading-indicator';
+        const uploadingText = lang === 'pl' ? 'Przesyłanie...' : 'Uploading...';
+        loadingIndicator.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${uploadingText}`;
+        document.body.appendChild(loadingIndicator);
+
+        // Submit the form
+        const form = document.getElementById('avatarForm');
+        form.submit();
+    }
+
+    // Connect function to the input
+    const avatarInput = document.getElementById('avatar');
+    if (avatarInput) {
+        avatarInput.addEventListener('change', function() {
+            validateAndSubmit(this);
+        });
+    }
+
+    // Function to update department descriptions based on the selected language
+    function updateDepartmentDescriptions() {
+        const lang = document.documentElement.getAttribute('data-language') || 'en';
+        const deptOptions = document.querySelectorAll('select[name="department"] option');
+        
+        deptOptions.forEach(option => {
+            if (option.value) { // Skip the placeholder option
+                const descSpan = option.querySelector('.dept-description');
+                if (descSpan) {
+                    // Get description based on language
+                    const description = option.getAttribute(`data-dept-${lang}`);
+                    descSpan.textContent = description;
+                }
+            }
+        });
+    }
+
+    // Update descriptions when page loads
+    updateDepartmentDescriptions();
+
+    // Also update when language changes (assuming you have a language switcher)
+    document.addEventListener('language-changed', updateDepartmentDescriptions);
+
+    // If you have a language switcher with click events
+    const languageSwitchers = document.querySelectorAll('.language-switcher');
+    if (languageSwitchers.length) {
+        languageSwitchers.forEach(switcher => {
+            switcher.addEventListener('click', function() {
+                // Allow a moment for the language to update
+                setTimeout(updateDepartmentDescriptions, 100);
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

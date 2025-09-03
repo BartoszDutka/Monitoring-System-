@@ -79,3 +79,87 @@ yarn-error.log*
 config.ini
 secrets.json
 credentials.json
+
+# User data and generated content
+data/user_data.json
+data/*.json
+data/*.csv
+data/*.xlsx
+
+# Generated reports (all formats)
+reports/
+modules/reports/*.html
+modules/reports/*.pdf
+modules/reports/*.xlsx
+modules/reports/*.csv
+*.html
+*.pdf
+*.xlsx
+*.csv
+
+# Attachments and uploads
+static/attachments/
+static/avatars/
+modules/static/attachments/
+uploads/
+
+# Runtime and cache files
+*.pid
+*.seed
+*.lock
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Environment and virtual environment files
+.env.development
+.env.production
+.env.test
+
+# Windows specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS specific
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor files
+*~
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+*.swp
+*.swo
+
+# Backup files
+*.backup
+*.bak
+*.orig
+
+# Application specific logs and temp files
+tmp/
+temp/
+*.tmp
+monitoring.log
+error.log
+access.log
+
+# Firebase (if used)
+.firebaserc
+firebase-debug.log
+.firebase/
