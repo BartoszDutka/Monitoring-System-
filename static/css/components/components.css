@@ -1,0 +1,138 @@
+.card-header {
+  padding: 1.5rem;
+  display: flex;
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)) !important;
+  gap: 1rem;
+  align-items: center;
+  color: #fff;
+  border-left: none !important;
+  border-right: none !important;
+  position: relative !important;
+  box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3) !important;
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
+}
+
+.card-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.card-header i {
+  font-size: 1.5rem;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-weight: 500;
+  font-size: 1.5rem;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.02em;
+}
+
+.card-content {
+  padding: 1.5rem
+}
+
+.search-container {
+  max-width: 400px;
+  position: relative;
+  min-width: 250px;
+  flex: 1;
+  margin: 10px 0;
+  width: 100%;
+  padding: 0 10px;
+  flex: 1
+}
+
+.host-search {
+  width: 100%;
+  padding: 8px 15px 8px 45px; /* Adjusted padding to accommodate search icon */
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  font-size: 14px;
+  background-color: #f8f9fa;
+  color: var(--text-color);
+  transition: .3s;
+  border: 1px solid #ddd
+}
+
+.host-search:focus {
+  box-shadow: 0 0 5px rgba(76,175,80,.3);
+  box-shadow: 0 0 0 3px rgba(33,150,243,.1);
+  border-color: #4caf50;
+  outline: 0;
+  background-color: #fff
+}
+
+.search-icon {
+  color: #666;
+  pointer-events: none;
+  position: absolute;
+  left: 20px; /* Set only left position, not both left and right */
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.refresh-button {
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  padding: .5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-left: auto;
+  transition: .3s
+}
+
+.refresh-button:hover {
+  background: var(--gradient-end)
+}
+
+.refresh-button:disabled {
+  opacity: .7;
+  cursor: not-allowed
+}
+
+.refresh-controls {
+  margin-left: auto;
+  display: flex;
+  gap: .5rem;
+  gap: 1rem
+}
+
+.refresh-button.secondary {
+  color: #fff;
+  border: 1px solid var(--border-color)
+}
+
+.refresh-button.secondary:hover {
+  background: var(--hover-bg)
+}
+
+/* Card header hover effects */
+.card-header:hover {
+  box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4) !important;
+  transform: translateY(-2px);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card-header:hover::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+}

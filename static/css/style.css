@@ -1,43 +1,43 @@
 /* Main stylesheet that imports all modular CSS files */
 
 /* Base styles and variables */
-@import 'base.css';
+@import 'base/base.css';
 
 /* Layout and structure */
-@import 'layout.css';
+@import 'base/layout.css';
 
 /* Navigation components */
-@import 'navigation.css';
+@import 'components/navigation/navigation.css';
 
 /* Reusable UI components */
-@import 'components.css';
+@import 'components/components.css';
 
 /* Status indicators */
-@import 'status.css';
+@import 'base/status.css';
 
 /* Dashboard specific styles */
-@import 'dashboard.css';
+@import 'pages/dashboard/dashboard.css';
 
 /* Host displays */
-@import 'hosts.css';
+@import 'pages/hosts/hosts.css';
 
 /* GLPI category styles */
-@import 'glpi.css';
+@import 'pages/hosts/glpi.css';
 
 /* Log entries and displays */
-@import 'logs.css';
+@import 'pages/logs/logs.css';
 
 /* Alerts and notifications */
 @import 'alerts.css';
 
 /* Forms and inputs */
-@import 'forms.css';
+@import 'components/forms/forms.css';
 
 /* Login page */
-@import 'login.css';
+@import 'pages/auth/login.css';
 
 /* User profiles */
-@import 'profile.css';
+@import 'pages/auth/profile.css';
 
 /* Detail views */
 @import 'details.css';
@@ -48,9 +48,17 @@
 /* Message displays */
 @import 'messages.css';
 
-/* Timeline visualizations */
-@import 'timeline.css';
+/* Reports styling */
+@import 'pages/reports/reports.css';
 
-/* Dark theme overrides */
-@import 'theme-dark.css';
+/* Timeline visualizations */
+@import 'components/timeline.css';
+
+/* CSS fixes */
+@import 'fixes/fixes.css';
+@import 'fixes/search-fixes.css';
+@import 'fixes/file-icon-fixes.css';
+
+/* Theme overrides */
+@import 'themes/theme-dark.css';
 

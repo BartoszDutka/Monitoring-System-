@@ -1,0 +1,348 @@
+{% extends "layout/layout.html" %}
+
+{% block title %}Inventory Management{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/inventory/inventory.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fixes/inventory-fixes.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fixes/file-icon-fixes.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fixes/header-fixes.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fixes/inventory-table-fix.css') }}">
+<!-- Skrypt naprawiający format działów - musi być wczytany jako pierwszy -->
+<script src="{{ url_for('static', filename='js/modules/inventory/dept-fix.js') }}"></script>
+<!-- Następnie moduł językowy -->
+<script src="{{ url_for('static', filename='js/localization/language.js') }}"></script>
+<!-- Niestandardowy select, który rozwiązuje problem z przeskakiwaniem kursora -->
+<script src="{{ url_for('static', filename='js/components/custom-select.js') }}"></script>
+<!-- Shared invoice processing functionality -->
+<script src="{{ url_for('static', filename='js/modules/inventory/invoice_processing.js') }}"></script>
+<!-- Skrypt inventory.js z defer - zoptymalizowana wersja -->
+<script src="{{ url_for('static', filename='js/modules/inventory/inventory.js') }}" defer></script>
+<!-- Enhanced department change functionality -->
+<script src="{{ url_for('static', filename='js/modules/inventory/department-change.js') }}" defer></script>
+<script>    // User permissions for JavaScript access
+    window.userPermissions = [{% for permission in session.get('permissions', []) %}'{{ permission }}'{% if not loop.last %}, {% endif %}{% endfor %}];
+    console.log('User Permissions in inventory.html:', window.userPermissions);
+    
+    // Create people options variable that will be used in the JavaScript file
+    const peopleOptions = `
+        {% for person in people %}
+        <option value="{{ person.id }}">{{ person.name }} ({{ person.department }})</option>
+        {% endfor %}
+    `;
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="fas fa-boxes"></i> <span data-en="Inventory Management" data-pl="Zarządzanie inwentarzem">Inventory Management</span></h1>
+</div>
+
+<div class="inventory-container">
+    <div class="input-method-selector">
+        <div class="method-options">
+            {% if has_permission('manage_inventory') %}
+            <button class="method-btn" data-method="manual">
+                <i class="fas fa-pen"></i> 
+                <span data-en="Manual Input" data-pl="Wprowadzanie ręczne">Manual Input</span>
+            </button>
+            <button class="method-btn" data-method="invoice">
+                <i class="fas fa-file-invoice"></i>
+                <span data-en="Invoice Import" data-pl="Import faktury">Invoice Import</span>
+            </button>
+            {% endif %}
+            <button class="method-btn" data-method="equipment">
+                <i class="fas fa-laptop"></i>
+                <span data-en="User Equipment" data-pl="Sprzęt użytkowników">User Equipment</span>
+            </button>
+        </div>
+    </div>
+
+    {% if has_permission('manage_inventory') %}
+    <!-- Invoice Input Section -->
+    <div class="input-section invoice-section" style="display: none;">
+        <div class="form-container" id="invoiceFormContainer">
+            <h2><i class="fas fa-file-invoice"></i> <span data-en="Import from PDF Invoice" data-pl="Import z faktury PDF">Import from PDF Invoice</span></h2>
+            <p class="section-description" data-en="Upload an invoice PDF to automatically extract item details." data-pl="Prześlij fakturę PDF, aby automatycznie wyodrębnić szczegóły produktów.">
+                Upload an invoice PDF to automatically extract item details.
+            </p>
+            <form id="invoiceForm">
+                <div class="form-group">
+                    <label for="invoicePdf" data-en="Upload Invoice PDF" data-pl="Prześlij fakturę PDF">Upload Invoice PDF</label>
+                    <div class="file-upload">
+                        <input type="file" id="invoicePdf" name="invoice_pdf" accept=".pdf">                        <label for="invoicePdf" class="file-upload-btn">
+                           <span data-en="Select Invoice PDF" data-pl="Wybierz fakturę PDF">Select Invoice PDF</span>
+                        </label>
+                        <div class="selected-files" id="selectedInvoiceFile" data-en="No file selected" data-pl="Nie wybrano pliku">No file selected</div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn primary"><i class="fas fa-file-import"></i> <span data-en="Process Invoice" data-pl="Przetwórz fakturę">Process Invoice</span></button>
+                </div>
+            </form>
+            
+            <!-- Processing indicator -->
+            <div id="processingIndicator" class="pdf-processing" style="display: none;">
+                <i class="fas fa-spinner"></i>
+                <p data-en="Processing invoice..." data-pl="Przetwarzanie faktury...">Processing invoice...</p>
+            </div>
+
+            <!-- Invoice Preview -->
+            <div id="invoicePreview" class="invoice-preview" style="display: none;">
+                <h3 data-en="Invoice Data" data-pl="Dane faktury">Invoice Data</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-en="Invoice Number" data-pl="Numer faktury">Invoice Number</label>
+                        <div id="invoiceNumber" class="form-control"></div>
+                    </div>
+                    <div class="form-group">
+                        <label data-en="Date" data-pl="Data">Date</label>
+                        <div id="invoiceDate" class="form-control"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-en="Vendor" data-pl="Sprzedawca">Vendor</label>
+                    <div id="invoiceVendor" class="form-control"></div>
+                </div>
+                
+                <h4 data-en="Detected Items" data-pl="Wykryte produkty">Detected Items</h4>                <div class="product-categories">
+                    <div class="category-toggle">
+                        <label><input type="checkbox" id="toggleHardware" checked> <span data-en="Hardware" data-pl="Sprzęt">Hardware</span></label>
+                        <label><input type="checkbox" id="toggleSoftware" checked> <span data-en="Software" data-pl="Oprogramowanie">Software</span></label>
+                        <label><input type="checkbox" id="toggleFurniture" checked> <span data-en="Furniture" data-pl="Meble">Furniture</span></label>
+                        <label><input type="checkbox" id="toggleAccessories" checked> <span data-en="Accessories" data-pl="Akcesoria">Accessories</span></label>
+                        <label><input type="checkbox" id="toggleOther" checked> <span data-en="Other" data-pl="Inne">Other</span></label>
+                        <label><input type="checkbox" id="hideImportedItems"> <span data-en="Hide Imported" data-pl="Ukryj zaimportowane">Hide Imported</span></label>
+                    </div>
+                    <div class="selected-counter">
+                        <span id="selectedProductsCounter" data-en="Selected: 0" data-pl="Wybrano: 0">Selected: 0</span>
+                    </div>
+                </div><table class="invoice-data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 30px;"><input type="checkbox" id="selectAllProducts"></th>
+                            <th data-en="Name" data-pl="Nazwa">Name</th>
+                            <th data-en="Category" data-pl="Kategoria">Category</th>
+                            <th data-en="Quantity" data-pl="Ilość">Quantity</th>
+                            <th data-en="Unit Price" data-pl="Cena jedn.">Unit Price</th>
+                            <th data-en="Total Price" data-pl="Cena całk.">Total Price</th>
+                            <th data-en="Assign To" data-pl="Przypisz do">Assign To</th>
+                            <th data-en="Action" data-pl="Akcja">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <!-- Template for product row -->
+                        <template id="productRowTemplate">
+                            <tr>
+                                <td>%NAME%</td>
+                                <td>
+                                    <select class="product-category-select">
+                                        <option value="hardware" data-en="Hardware" data-pl="Sprzęt">Hardware</option>
+                                        <option value="software" data-en="Software" data-pl="Oprogramowanie">Software</option>
+                                        <option value="furniture" data-en="Furniture" data-pl="Meble">Furniture</option>
+                                        <option value="accessories" data-en="Accessories" data-pl="Akcesoria">Accessories</option>
+                                        <option value="other" data-en="Other" data-pl="Inne">Other</option>
+                                    </select>
+                                </td>
+                                <td><input type="number" class="quantity-input" value="%QUANTITY%"></td>
+                                <td>%UNIT_PRICE%</td>
+                                <td>%TOTAL_PRICE%</td>
+                                <td>
+                                    <select class="assign-to-select form-control">
+                                        <option value="" data-en="Select Department" data-pl="Wybierz dział">Select Department</option>
+                                        {% for dept in departments %}
+                                        <option value="{{ dept.name }}" {% if dept.name == current_department %}selected{% endif %}>
+                                            {{ dept.name }} ({{ dept.equipment_count }} {% if lang == 'pl' %}elementów{% else %}items{% endif %})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    <button class="btn-icon edit-product" title="Edit" data-en-title="Edit" data-pl-title="Edytuj"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-icon delete-product" title="Delete" data-en-title="Delete" data-pl-title="Usuń"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+                  <div class="form-actions">
+                    <button type="button" id="importSelectedProducts" class="btn primary" style="display: none;">
+                        <i class="fas fa-file-import"></i> <span data-en="Import Selected" data-pl="Importuj wybrane">Import Selected</span>
+                    </button>
+                    <button type="button" id="importAllProducts" class="btn primary">
+                        <i class="fas fa-file-import"></i> <span data-en="Import All Items" data-pl="Importuj wszystkie">Import All Items</span>
+                    </button>
+                    <button type="button" id="addMissingProduct" class="btn secondary">
+                        <i class="fas fa-plus"></i> <span data-en="Add Missing Item" data-pl="Dodaj brakującą pozycję">Add Missing Item</span>
+                    </button>
+                    <button type="button" id="tryAlternativeMethod" class="btn secondary">
+                        <i class="fas fa-sync"></i> <span data-en="Try Alternative Method" data-pl="Wypróbuj alternatywną metodę">Try Alternative Method</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Input Section -->
+    <div class="input-section manual-section" style="display: none;">
+        <div class="form-container" id="manualFormContainer">
+            <h2><i class="fas fa-pen"></i> <span data-en="Add Item Manually" data-pl="Dodaj element ręcznie">Add Item Manually</span></h2>
+            <p class="section-description" data-en="Fill in the details below to add a new item to your inventory." data-pl="Wypełnij poniższe informacje, aby dodać nowy element do inwentarza.">
+                Fill in the details below to add a new item to your inventory.
+            </p>
+            <form id="itemForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemName" data-en="Item Name *" data-pl="Nazwa elementu *">Item Name *</label>
+                        <input type="text" id="itemName" name="itemName" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemCategory" data-en="Category *" data-pl="Kategoria *">Category *</label>
+                        <select id="itemCategory" name="itemCategory" class="form-control" required>
+                            <option value="" data-en="Select Category" data-pl="Wybierz kategorię">Select Category</option>
+                            <option value="hardware" data-en="Hardware" data-pl="Sprzęt">Hardware</option>
+                            <option value="software" data-en="Software" data-pl="Oprogramowanie">Software</option>
+                            <option value="furniture" data-en="Office Furniture" data-pl="Meble biurowe">Office Furniture</option>
+                            <option value="accessories" data-en="Accessories" data-pl="Akcesoria">Accessories</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemStatus" data-en="Status *" data-pl="Status *">Status *</label>
+                        <select id="itemStatus" name="itemStatus" class="form-control" required>
+                            <option value="available" data-en="Available" data-pl="Dostępny">Available</option>
+                            <option value="in-use" data-en="In Use" data-pl="W użyciu">In Use</option>
+                            <option value="maintenance" data-en="Maintenance" data-pl="Konserwacja">Maintenance</option>
+                            <option value="disposed" data-en="Disposed" data-pl="Zutylizowany">Disposed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemLocation" data-en="Location *" data-pl="Lokalizacja *">Location *</label>
+                        <input type="text" id="itemLocation" name="itemLocation" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="acquisitionDate" data-en="Acquisition Date" data-pl="Data nabycia">Acquisition Date</label>
+                        <input type="date" id="acquisitionDate" name="acquisitionDate" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemValue" data-en="Value (PLN)" data-pl="Wartość (PLN)">Value (PLN)</label>
+                        <input type="number" id="itemValue" name="itemValue" class="form-control" step="0.01">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="itemDescription" data-en="Description" data-pl="Opis">Description</label>
+                    <textarea id="itemDescription" name="itemDescription" class="form-control" rows="3"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemManufacturer" data-en="Manufacturer" data-pl="Producent">Manufacturer</label>
+                        <input type="text" id="itemManufacturer" name="itemManufacturer" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemModel" data-en="Model" data-pl="Model">Model</label>
+                        <input type="text" id="itemModel" name="itemModel" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="itemSerial" data-en="Serial Number" data-pl="Numer seryjny">Serial Number</label>
+                    <input type="text" id="itemSerial" name="itemSerial" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="itemNotes" data-en="Notes" data-pl="Notatki">Notes</label>
+                    <textarea id="itemNotes" name="itemNotes" class="form-control" rows="2"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label data-en="Attachments" data-pl="Załączniki">Attachments</label>
+                    <div class="file-upload">
+                        <input type="file" id="itemAttachments" name="itemAttachments" multiple>
+                        <label for="itemAttachments" class="file-upload-btn">
+                            <i class="fas fa-cloud-upload-alt"></i> <span data-en="Choose Files" data-pl="Wybierz pliki">Choose Files</span>
+                        </label>
+                        <div class="selected-files" id="selectedFiles" data-en="No files selected" data-pl="Nie wybrano plików">No files selected</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemQuantity" data-en="Quantity *" data-pl="Ilość *">Quantity *</label>
+                        <input type="number" id="itemQuantity" name="itemQuantity" class="form-control" required min="1" value="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="assignTo" data-en="Assign To Department" data-pl="Przypisz do działu">Assign To Department</label>
+                        <select id="assignTo" name="assignTo" class="form-control">
+                            <option value="" data-en="Unassigned" data-pl="Nieprzypisane">Unassigned</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.name }}" {% if dept.name == current_department %}selected{% endif %}>
+                                {{ dept.name }} ({{ dept.equipment_count }} {% if lang == 'pl' %}elementów{% else %}items{% endif %})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn primary" id="saveItemBtn" data-en="Save Item" data-pl="Zapisz element">Save Item</button>
+                    <button type="reset" class="btn secondary" data-en="Reset Form" data-pl="Resetuj formularz">Reset Form</button>
+                </div>
+            </form>        </div>
+    </div>
+    {% endif %}
+
+    <!-- User Equipment Section -->
+    <div class="input-section equipment-section" style="display: none;">
+        <div class="form-container" id="equipmentContainer">
+            <h2><i class="fas fa-laptop"></i> <span data-en="Department Equipment" data-pl="Sprzęt działowy">Department Equipment</span></h2>
+            <p class="section-description" data-en="View and manage equipment assigned to departments." data-pl="Przeglądaj i zarządzaj sprzętem przypisanym do działów.">
+                View and manage equipment assigned to departments.
+            </p>
+            <div class="department-select">
+                <label for="departmentSelect" data-en="Select Department:" data-pl="Wybierz dział:">Select Department:</label>                <select id="departmentSelect" class="form-control">                    <option value="" data-en="Choose a department..." data-pl="Wybierz dział...">Choose a department...</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.name }}" {% if dept.name == current_department %}selected{% endif %} data-count="{{ dept.equipment_count or 0 }}">
+                        {{ dept.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div id="departmentEquipmentList" class="equipment-list" style="display: none;">
+                <h3 data-en="Department Equipment" data-pl="Sprzęt działu">Department Equipment</h3>
+                <table class="equipment-table{% if not has_permission('manage_inventory') %} no-actions{% endif %}">
+                    <thead>
+                        <tr>
+                            <th data-en="Item Name" data-pl="Nazwa elementu">Item Name</th>
+                            <th data-en="Type" data-pl="Typ">Type</th>
+                            <th data-en="Serial Number" data-pl="Numer seryjny">Serial Number</th>
+                            <th data-en="Quantity" data-pl="Ilość">Quantity</th>
+                            <th data-en="Assigned Date" data-pl="Data przypisania">Assigned Date</th>
+                            <th data-en="Status" data-pl="Status">Status</th>                            <th data-en="Users" data-pl="Użytkownicy">Users</th>
+                            {% if has_permission('manage_inventory') %}
+                            <th data-en="Actions" data-pl="Akcje">Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody id="equipmentTableBody">
+                        <!-- Equipment items will be loaded here -->
+                    </tbody>
+                </table>
+            </div>        </div>
+    </div>
+</div>
+
+{% endblock %}

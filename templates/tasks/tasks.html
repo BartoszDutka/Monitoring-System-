@@ -1,0 +1,884 @@
+{% extends "layout/layout.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/tasks/tasks.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1 data-en="Task Management" data-pl="Zarządzanie zadaniami">Task Management</h1>
+    <div class="header-actions">        {% if can_create %}
+        <button class="btn primary-btn" id="create-task-btn">
+            <i class="fas fa-plus"></i> <span data-en="New Task" data-pl="Nowe zadanie">New Task</span>
+        </button>
+        {% endif %}
+        {% if has_permission('manage_users') %}
+        <button class="btn secondary-btn" id="refresh-permissions" title="Refresh permissions">
+            <i class="fas fa-sync"></i>
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Task Filters -->
+<div class="filter-container">
+    <div class="filters">
+        <select id="status-filter" class="filter-select">
+            <option value="all" data-en="All Statuses" data-pl="Wszystkie statusy">All Statuses</option>
+            <option value="new" data-en="New" data-pl="Nowe">New</option>
+            <option value="in_progress" data-en="In Progress" data-pl="W trakcie">In Progress</option>
+            <option value="completed" data-en="Completed" data-pl="Zakończone">Completed</option>
+            <option value="cancelled" data-en="Cancelled" data-pl="Anulowane">Cancelled</option>
+        </select>
+        
+        <select id="priority-filter" class="filter-select">
+            <option value="all" data-en="All Priorities" data-pl="Wszystkie priorytety">All Priorities</option>
+            <option value="low" data-en="Low" data-pl="Niski">Low</option>
+            <option value="medium" data-en="Medium" data-pl="Średni">Medium</option>
+            <option value="high" data-en="High" data-pl="Wysoki">High</option>
+            <option value="critical" data-en="Critical" data-pl="Krytyczny">Critical</option>
+        </select>
+        
+        {% if can_manage_all %}
+        <select id="assignee-filter" class="filter-select">
+            <option value="all" data-en="All Assignees" data-pl="Wszyscy przypisani">All Assignees</option>
+            {% for user in users %}
+            <option value="{{ user.username }}">{{ user.display_name or user.username }}</option>
+            {% endfor %}
+        </select>
+        {% endif %}
+    </div><div class="search-container">
+        <input type="text" id="task-search" placeholder="Search tasks..." data-en-placeholder="Search tasks..." data-pl-placeholder="Szukaj zadań...">
+        <i class="fas fa-search"></i>
+    </div>
+</div>
+
+<!-- Task List -->
+<div class="tasks-container">
+    {% if tasks %}
+    <div class="task-list">
+        <div class="task-header">
+            <div class="task-id">#</div>
+            <div class="task-title" data-en="Title" data-pl="Tytuł">Title</div>
+            <div class="task-assignee" data-en="Assignee" data-pl="Przypisane do">Assignee</div>
+            <div class="task-status" data-en="Status" data-pl="Status">Status</div>
+            <div class="task-priority" data-en="Priority" data-pl="Priorytet">Priority</div>
+            <div class="task-due-date" data-en="Due Date" data-pl="Termin">Due Date</div>
+            <div class="task-actions" data-en="Actions" data-pl="Akcje">Actions</div>
+        </div>
+        
+        {% for task in tasks %}
+        <div class="task-item" 
+             data-status="{{ task.status }}" 
+             data-priority="{{ task.priority }}" 
+             data-assignee="{{ task.assignee }}">
+            <div class="task-id">{{ task.task_id }}</div>
+            <div class="task-title">{{ task.title }}</div>
+            <div class="task-assignee">{{ task.assignee_name or task.assignee }}</div>
+            <div class="task-status">
+                <span class="status-badge {{ task.status }}">{{ task.status|replace('_', ' ')|title }}</span>
+            </div>
+            <div class="task-priority">
+                <span class="priority-badge {{ task.priority }}">
+                    <span data-en="{{ task.priority|title }}" data-pl="{% if task.priority == 'low' %}Niski{% elif task.priority == 'medium' %}Średni{% elif task.priority == 'high' %}Wysoki{% elif task.priority == 'critical' %}Krytyczny{% else %}{{ task.priority|title }}{% endif %}">{{ task.priority|title }}</span>
+                </span>
+            </div>
+            <div class="task-due-date">
+                {{ task.due_date|default('Not set', true) }}
+            </div>            <div class="task-actions">                {% if can_view %}
+                <button class="btn view-task" data-task-id="{{ task.task_id }}">
+                    <i class="fas fa-eye"></i>
+                </button>
+                {% endif %}
+                {% if can_delete %}
+                <button class="btn delete-task" data-task-id="{{ task.task_id }}">
+                    <i class="fas fa-trash"></i>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-tasks">
+        <i class="fas fa-tasks"></i>
+        <p data-en="No tasks found" data-pl="Nie znaleziono zadań">No tasks found</p>
+        {% if can_create %}
+        <button class="btn primary-btn" id="no-tasks-create-btn" data-en="Create New Task" data-pl="Utwórz nowe zadanie">Create New Task</button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Task Creation Modal -->
+{% if can_create %}
+<div id="create-task-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 data-en="Create New Task" data-pl="Utwórz nowe zadanie">Create New Task</h3>
+            <span class="close">&times;</span>
+        </div>
+        <form action="{{ url_for('tasks.create_task') }}" method="POST" class="modal-form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title" data-en="Title*" data-pl="Tytuł*">Title*</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description" data-en="Description" data-pl="Opis">Description</label>
+                <textarea id="description" name="description" rows="4"></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="assignee" data-en="Assignee*" data-pl="Przypisane do*">Assignee*</label>
+                    <select id="assignee" name="assignee" required>
+                        <option value="" data-en="Select Assignee" data-pl="Wybierz osobę">Select Assignee</option>
+                        {% for user in users %}
+                        <option value="{{ user.username }}">{{ user.display_name or user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group half">
+                    <label for="priority" data-en="Priority" data-pl="Priorytet">Priority</label>
+                    <select id="priority" name="priority">
+                        <option value="low" data-en="Low" data-pl="Niski">Low</option>
+                        <option value="medium" selected data-en="Medium" data-pl="Średni">Medium</option>
+                        <option value="high" data-en="High" data-pl="Wysoki">High</option>
+                        <option value="critical" data-en="Critical" data-pl="Krytyczny">Critical</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group half">
+                    <label for="due_date" data-en="Due Date" data-pl="Termin">Due Date</label>
+                    <input type="date" id="due_date" name="due_date">
+                </div>
+                <div class="form-group half">
+                    <label for="related_type" data-en="Related To" data-pl="Powiązane z">Related To</label>
+                    <select id="related_type" name="related_type">
+                        <option value="" data-en="Not Related" data-pl="Niepowiązane">Not Related</option>
+                        <option value="glpi_device" data-en="GLPI Device" data-pl="Urządzenie GLPI">GLPI Device</option>
+                        <option value="zabbix_alert" data-en="Zabbix Alert" data-pl="Alert Zabbix">Zabbix Alert</option>
+                    </select>
+                </div>
+            </div>
+            <div id="related-container" class="form-group" style="display: none;">
+                <div id="glpi-device-selector" style="display: none;">
+                    <label for="glpi_device_search" data-en="Search Device" data-pl="Wyszukaj urządzenie">Search Device</label>
+                    <input type="text" id="glpi_device_search" placeholder="Type to search devices..." data-en-placeholder="Type to search devices..." data-pl-placeholder="Wpisz, aby wyszukać urządzenia..." class="device-search">
+                    <div class="select-container">
+                        <select id="glpi_device_id" name="related_id" class="related-select" size="10">
+                            <option value="" data-en="Loading devices..." data-pl="Ładowanie urządzeń...">Loading devices...</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="zabbix-alert-selector" style="display: none;">
+                    <label for="zabbix_alert_search" data-en="Search Alert" data-pl="Wyszukaj alert">Search Alert</label>
+                    <input type="text" id="zabbix_alert_search" placeholder="Type to search alerts..." data-en-placeholder="Type to search alerts..." data-pl-placeholder="Wpisz, aby wyszukać alerty..." class="device-search">
+                    <div class="select-container">
+                        <select id="zabbix_alert_id" name="related_id" class="related-select" size="10">
+                            <option value="" data-en="Loading alerts..." data-pl="Ładowanie alertów...">Loading alerts...</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" id="related_data" name="related_data" value="{}">
+            </div>
+            <div class="form-group">
+                <label for="attachment" data-en="Attachment" data-pl="Załącznik">Attachment</label>
+                <input type="file" id="attachment" name="attachment" accept="image/*" class="file-input">
+                <div class="file-input-placeholder">
+                    <span data-en="Choose an image file" data-pl="Wybierz plik obrazu">Choose an image file</span>
+                </div>
+                <div class="file-preview-container" style="display: none;">
+                    <img id="file-preview" src="" alt="Preview">
+                    <button type="button" class="btn remove-file" id="remove-file" data-en="Remove" data-pl="Usuń">Remove</button>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn cancel-btn" id="cancel-create" data-en="Cancel" data-pl="Anuluj">Cancel</button>
+                <button type="submit" class="btn primary-btn" data-en="Create Task" data-pl="Utwórz zadanie">Create Task</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- Task View Modal -->
+<div id="view-task-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="view-task-title" data-en="Task Details" data-pl="Szczegóły zadania">Task Details</h3>
+            <span class="close">&times;</span>
+        </div>
+        <div class="task-details">
+            <div class="task-info-grid">
+                <div class="info-group">
+                    <label data-en="Status" data-pl="Status">Status</label>
+                    <span id="view-task-status" class="status-badge"></span>
+                </div>
+                <div class="info-group">
+                    <label data-en="Priority" data-pl="Priorytet">Priority</label>
+                    <span id="view-task-priority" class="priority-badge"></span>
+                </div>
+                <div class="info-group">
+                    <label data-en="Assignee" data-pl="Przypisane do">Assignee</label>
+                    <span id="view-task-assignee"></span>
+                </div>
+                <div class="info-group">
+                    <label data-en="Created By" data-pl="Utworzone przez">Created By</label>
+                    <span id="view-task-creator"></span>
+                </div>
+                <div class="info-group">
+                    <label data-en="Created At" data-pl="Data utworzenia">Created At</label>
+                    <span id="view-task-created"></span>
+                </div>
+                <div class="info-group">
+                    <label data-en="Due Date" data-pl="Termin">Due Date</label>
+                    <span id="view-task-due"></span>
+                </div>
+            </div>
+            <div class="task-description-container">
+                <h4 data-en="Description" data-pl="Opis">Description</h4>
+                <div id="view-task-description" class="task-description"></div>
+            </div>
+            <div id="view-task-attachment" class="task-attachment-container" style="display: none;"></div>
+            <div id="related-item-container" style="display:none;">
+                <h4 data-en="Related Item" data-pl="Powiązany element">Related Item</h4>
+                <div id="related-item-details" class="related-details"></div>
+            </div>            <div class="update-status-section">
+                {% if can_update %}
+                <form id="update-status-form" action="" method="POST">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <select id="new-status" name="status">
+                                <option value="new" data-en="New" data-pl="Nowe">New</option>
+                                <option value="in_progress" data-en="In Progress" data-pl="W trakcie">In Progress</option>
+                                <option value="completed" data-en="Completed" data-pl="Zakończone">Completed</option>
+                                <option value="cancelled" data-en="Cancelled" data-pl="Anulowane">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn primary-btn" data-en="Update" data-pl="Aktualizuj">Update</button>
+                        </div>
+                    </div>
+                </form>
+                {% endif %}
+            </div>            <div class="comments-section">
+                <h4 data-en="Comments" data-pl="Komentarze">Comments</h4>
+                <div id="task-comments" class="comments-list"></div>
+                {% if can_comment %}                <form id="add-comment-form" action="" method="POST">
+                    <div class="form-group">
+                        <textarea name="comment" placeholder="Add a comment..." data-en-placeholder="Add a comment..." data-pl-placeholder="Dodaj komentarz..." required></textarea>
+                    </div>
+                    <div class="form-group text-right">
+                        <button type="submit" class="btn primary-btn" data-en="Add Comment" data-pl="Dodaj komentarz">Add Comment</button>
+                    </div>
+                </form>
+                <script>
+                    // Add event listener to the comment form
+                    document.getElementById('add-comment-form').addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        const form = this;
+                        const comment = form.querySelector('textarea[name="comment"]').value;
+                        const taskId = form.action.split('/').pop();
+                        
+                        console.log('Form action:', form.action);
+                        console.log('Task ID:', taskId);
+                        console.log('Comment:', comment);
+                        
+                        // Submit using fetch API instead
+                        fetch(`/tasks/comment/${taskId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: `comment=${encodeURIComponent(comment)}`
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.href = '/tasks'; // Redirect back to tasks page
+                            } else {
+                                console.error('Error submitting comment:', response.status);
+                                alert('Error adding comment. Please try again.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error adding comment. Please try again.');
+                        });
+                    });
+                </script>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply language to all placeholders based on selected language
+    const currentLanguage = document.documentElement.getAttribute('data-language') || 'en';
+    
+    // Find all elements with language-specific placeholders and set them
+    document.querySelectorAll('[data-pl-placeholder]').forEach(function(element) {
+        if (currentLanguage === 'pl') {
+            element.setAttribute('placeholder', element.getAttribute('data-pl-placeholder'));
+        } else {
+            element.setAttribute('placeholder', element.getAttribute('data-en-placeholder'));
+        }
+    });
+    
+    // Task creation modal
+    const createTaskModal = document.getElementById('create-task-modal');
+    const createTaskBtn = document.getElementById('create-task-btn');
+    const noTasksCreateBtn = document.getElementById('no-tasks-create-btn');
+    const closeCreateModal = createTaskModal?.querySelector('.close');
+    const cancelCreateBtn = document.getElementById('cancel-create');
+
+    // Task view modal
+    const viewTaskModal = document.getElementById('view-task-modal');
+    const viewTaskBtns = document.querySelectorAll('.view-task');
+    const closeViewModal = viewTaskModal?.querySelector('.close');
+
+    // Task filtering
+    const statusFilter = document.getElementById('status-filter');
+    const priorityFilter = document.getElementById('priority-filter');
+    const assigneeFilter = document.getElementById('assignee-filter');
+    const taskSearch = document.getElementById('task-search');
+
+    // Related item selector
+    const relatedTypeSelect = document.getElementById('related_type');
+    const relatedContainer = document.getElementById('related-container');
+    const glpiDeviceSelector = document.getElementById('glpi-device-selector');
+    const zabbixAlertSelector = document.getElementById('zabbix-alert-selector');
+    const relatedDataInput = document.getElementById('related_data');
+
+    // Show/hide task creation modal
+    if (createTaskBtn) {
+        createTaskBtn.addEventListener('click', function() {
+            createTaskModal.style.display = 'block';
+        });
+    }
+
+    if (noTasksCreateBtn) {
+        noTasksCreateBtn.addEventListener('click', function() {
+            createTaskModal.style.display = 'block';
+        });
+    }
+
+    if (closeCreateModal) {
+        closeCreateModal.addEventListener('click', function() {
+            createTaskModal.style.display = 'none';
+        });
+    }
+
+    if (cancelCreateBtn) {
+        cancelCreateBtn.addEventListener('click', function() {
+            createTaskModal.style.display = 'none';
+        });
+    }
+
+    // Show task details modal
+    viewTaskBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const taskId = this.getAttribute('data-task-id');
+            loadTaskDetails(taskId);
+            viewTaskModal.style.display = 'block';
+        });
+    });
+
+    closeViewModal.addEventListener('click', function() {
+        viewTaskModal.style.display = 'none';
+    });
+
+    // Handle related item selection
+    if (relatedTypeSelect) {
+        relatedTypeSelect.addEventListener('change', function() {
+            const selectedType = this.value;
+            
+            if (selectedType === '') {
+                relatedContainer.style.display = 'none';
+                return;
+            }
+            
+            relatedContainer.style.display = 'block';
+            glpiDeviceSelector.style.display = 'none';
+            zabbixAlertSelector.style.display = 'none';
+            
+            if (selectedType === 'glpi_device') {
+                glpiDeviceSelector.style.display = 'block';
+                loadGlpiDevices();
+            } else if (selectedType === 'zabbix_alert') {
+                zabbixAlertSelector.style.display = 'block';
+                loadZabbixAlerts();
+            }
+        });
+    }
+
+    // Filter tasks function
+    function filterTasks() {
+        const status = statusFilter.value;
+        const priority = priorityFilter.value;
+        const assignee = assigneeFilter ? assigneeFilter.value : 'all';
+        const searchText = taskSearch.value.toLowerCase();
+        
+        const tasks = document.querySelectorAll('.task-item');
+        
+        tasks.forEach(function(task) {
+            const taskStatus = task.getAttribute('data-status');
+            const taskPriority = task.getAttribute('data-priority');
+            const taskAssignee = task.getAttribute('data-assignee');
+            const taskTitle = task.querySelector('.task-title').textContent.toLowerCase();
+            
+            const statusMatch = status === 'all' || taskStatus === status;
+            const priorityMatch = priority === 'all' || taskPriority === priority;
+            const assigneeMatch = assignee === 'all' || taskAssignee === assignee;
+            const searchMatch = taskTitle.includes(searchText);
+            
+            task.style.display = statusMatch && priorityMatch && assigneeMatch && searchMatch ? '' : 'none';
+        });
+    }
+
+    // Add event listeners for filtering
+    statusFilter.addEventListener('change', filterTasks);
+    priorityFilter.addEventListener('change', filterTasks);
+    if (assigneeFilter) {
+        assigneeFilter.addEventListener('change', filterTasks);
+    }
+    taskSearch.addEventListener('input', filterTasks);
+
+    // File upload preview functionality
+    const attachmentInput = document.getElementById('attachment');
+    const filePreview = document.getElementById('file-preview');
+    const filePreviewContainer = document.querySelector('.file-preview-container');
+    const filePlaceholder = document.querySelector('.file-input-placeholder');
+    const removeFileBtn = document.getElementById('remove-file');
+    
+    if (attachmentInput) {
+        attachmentInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    filePreview.src = e.target.result;
+                    filePreviewContainer.style.display = 'flex';
+                    filePlaceholder.style.display = 'none';
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    if (removeFileBtn) {
+        removeFileBtn.addEventListener('click', function() {
+            attachmentInput.value = '';
+            filePreview.src = '';
+            filePreviewContainer.style.display = 'none';
+            filePlaceholder.style.display = 'flex';
+        });
+    }
+
+    // Close modals when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === createTaskModal) {
+            createTaskModal.style.display = 'none';
+        }
+        if (event.target === viewTaskModal) {
+            viewTaskModal.style.display = 'none';
+        }
+    });
+
+    // Handle task deletion
+    const deleteTaskBtns = document.querySelectorAll('.delete-task');
+    deleteTaskBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const taskId = this.getAttribute('data-task-id');
+            const taskTitle = this.closest('.task-item').querySelector('.task-title').textContent;
+            
+            // Get current language for confirmation message
+            const currentLanguage = document.documentElement.getAttribute('data-language') || 'en';
+            const confirmMessage = currentLanguage === 'pl' ? 
+                `Czy na pewno chcesz usunąć zadanie "${taskTitle}"? Ta akcja nie może być cofnięta.` :
+                `Are you sure you want to delete task "${taskTitle}"? This action cannot be undone.`;
+            
+            if (confirm(confirmMessage)) {
+                // Create form for POST request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/tasks/delete/${taskId}`;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    });
+});
+
+// Function to load GLPI devices
+function loadGlpiDevices() {
+    const deviceSelect = document.getElementById('glpi_device_id');
+    const searchInput = document.getElementById('glpi_device_search');
+    
+    // Show loading state
+    deviceSelect.innerHTML = '<option value="">Loading devices...</option>';
+    
+    // Fetch devices from API
+    fetch('/tasks/api/devices')
+        .then(response => response.json())
+        .then(data => {
+            // Clear loading state
+            deviceSelect.innerHTML = '';
+            
+            // Check if we have devices
+            if (data.length === 0) {
+                deviceSelect.innerHTML = '<option value="">No devices found</option>';
+                return;
+            }
+            
+            // Add devices to select
+            data.forEach(device => {
+                const option = document.createElement('option');
+                option.value = device.id;
+                option.textContent = `${device.name} (${device.type}) - ${device.location || 'No location'}`;
+                option.setAttribute('data-name', device.name);
+                option.setAttribute('data-type', device.type);
+                option.setAttribute('data-location', device.location || '');
+                option.setAttribute('data-serial', device.serial_number || '');
+                deviceSelect.appendChild(option);
+            });
+            
+            // Add search functionality
+            searchInput.addEventListener('input', function() {
+                const searchText = this.value.toLowerCase();
+                Array.from(deviceSelect.options).forEach(option => {
+                    const optionText = option.text.toLowerCase();
+                    option.style.display = optionText.includes(searchText) ? '' : 'none';
+                });
+            });
+            
+            // Handle device selection
+            deviceSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                if (selectedOption) {
+                    const relatedData = {
+                        id: this.value,
+                        name: selectedOption.getAttribute('data-name'),
+                        type: selectedOption.getAttribute('data-type'),
+                        location: selectedOption.getAttribute('data-location'),
+                        serial: selectedOption.getAttribute('data-serial')
+                    };
+                    
+                    // Update hidden input with JSON data
+                    document.getElementById('related_data').value = JSON.stringify(relatedData);
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error loading devices:', error);
+            deviceSelect.innerHTML = '<option value="">Error loading devices</option>';
+        });
+}
+
+// Function to load Zabbix alerts
+function loadZabbixAlerts() {
+    const alertSelect = document.getElementById('zabbix_alert_id');
+    const searchInput = document.getElementById('zabbix_alert_search');
+    
+    // Show loading state
+    alertSelect.innerHTML = '<option value="">Loading alerts...</option>';
+    
+    // Fetch alerts from API
+    fetch('/tasks/api/zabbix_alerts')
+        .then(response => response.json())
+        .then(data => {
+            // Clear loading state
+            alertSelect.innerHTML = '';
+            
+            // Check if we have alerts
+            if (data.length === 0) {
+                alertSelect.innerHTML = '<option value="">No alerts found</option>';
+                return;
+            }
+            
+            // Store alerts data for search functionality
+            window.zabbixAlerts = data;
+            
+            // Add alerts to select
+            data.forEach(alert => {
+                const option = document.createElement('option');
+                option.value = alert.id;
+                option.textContent = `${alert.description} - ${alert.host_name} (${alert.priority})`;
+                option.setAttribute('data-description', alert.description);
+                option.setAttribute('data-host', alert.host_name);
+                option.setAttribute('data-priority', alert.priority);
+                option.setAttribute('data-last-change', alert.last_change);
+                alertSelect.appendChild(option);
+            });
+            
+            // Add search functionality
+            searchInput.addEventListener('input', function() {
+                const searchText = this.value.toLowerCase();
+                Array.from(alertSelect.options).forEach(option => {
+                    const alertData = window.zabbixAlerts.find(a => a.id == option.value);
+                    if (alertData) {
+                        const matches = alertData.search_text.includes(searchText);
+                        option.style.display = matches ? '' : 'none';
+                    }
+                });
+            });
+            
+            // Handle alert selection
+            alertSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    const relatedData = {
+                        id: this.value,
+                        description: selectedOption.getAttribute('data-description'),
+                        host_name: selectedOption.getAttribute('data-host'),
+                        priority: selectedOption.getAttribute('data-priority'),
+                        last_change: selectedOption.getAttribute('data-last-change')
+                    };
+                    
+                    // Update hidden input with JSON data
+                    document.getElementById('related_data').value = JSON.stringify(relatedData);
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error loading Zabbix alerts:', error);
+            alertSelect.innerHTML = '<option value="">Error loading alerts</option>';
+        });
+}
+
+// Load task details
+function loadTaskDetails(taskId) {
+    fetch(`/tasks/api/task/${taskId}`)
+        .then(response => response.json())
+        .then(data => {
+            const task = data.task;
+            const language = document.documentElement.getAttribute('data-language') || 'en';
+            
+            // Update task details
+            document.getElementById('view-task-title').textContent = task.title;
+            
+            // Status translations
+            const statusTranslations = {
+                'new': { 'en': 'New', 'pl': 'Nowe' },
+                'in_progress': { 'en': 'In Progress', 'pl': 'W trakcie' },
+                'completed': { 'en': 'Completed', 'pl': 'Zakończone' },
+                'cancelled': { 'en': 'Cancelled', 'pl': 'Anulowane' }
+            };
+            
+            // Priority translations
+            const priorityTranslations = {
+                'low': { 'en': 'Low', 'pl': 'Niski' },
+                'medium': { 'en': 'Medium', 'pl': 'Średni' },
+                'high': { 'en': 'High', 'pl': 'Wysoki' },
+                'critical': { 'en': 'Critical', 'pl': 'Krytyczny' }
+            };
+            
+            // Update status badge with translation
+            const statusBadge = document.getElementById('view-task-status');
+            const statusText = statusTranslations[task.status] ? 
+                statusTranslations[task.status][language] : 
+                task.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            statusBadge.textContent = statusText;
+            statusBadge.className = 'status-badge ' + task.status;
+            
+            // Update priority badge with translation
+            const priorityBadge = document.getElementById('view-task-priority');
+            const priorityText = priorityTranslations[task.priority] ? 
+                priorityTranslations[task.priority][language] : 
+                task.priority.replace(/\b\w/g, l => l.toUpperCase());
+            priorityBadge.textContent = priorityText;
+            priorityBadge.className = 'priority-badge ' + task.priority;
+            
+            // Update other fields
+            document.getElementById('view-task-assignee').textContent = task.assignee_name || task.assignee;
+            document.getElementById('view-task-creator').textContent = task.creator;
+            document.getElementById('view-task-created').textContent = task.created_at;
+            document.getElementById('view-task-due').textContent = task.due_date || (language === 'pl' ? 'Nie ustawiono' : 'Not set');
+            document.getElementById('view-task-description').textContent = task.description || (language === 'pl' ? 'Nie podano opisu' : 'No description provided');
+
+            // Handle attachment if present
+            const attachmentContainer = document.getElementById('view-task-attachment');
+            if (task.attachment_url) {
+                attachmentContainer.style.display = 'block';
+                attachmentContainer.innerHTML = `
+                    <div class="task-attachment">
+                        <h4>${language === 'pl' ? 'Załącznik' : 'Attachment'}</h4>
+                        <div class="attachment-wrapper">
+                            <a href="${task.attachment_url}" target="_blank" class="attachment-link">
+                                <img src="${task.attachment_url}" alt="${language === 'pl' ? 'Załącznik zadania' : 'Task attachment'}" class="task-attachment-img">
+                                <div class="attachment-overlay">
+                                    <i class="fas fa-search-plus"></i>
+                                    <span>${language === 'pl' ? 'Zobacz pełny rozmiar' : 'View Full Size'}</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            } else {
+                attachmentContainer.style.display = 'none';
+            }
+
+            // Handle related item if present
+            const relatedItemContainer = document.getElementById('related-item-container');
+            const relatedItemDetails = document.getElementById('related-item-details');
+            
+            if (task.related_type && task.related_id) {
+                // Show loading state
+                relatedItemContainer.style.display = 'block';
+                relatedItemDetails.innerHTML = `<p>${language === 'pl' ? 'Ładowanie powiązanych elementów...' : 'Loading related item details...'}</p>`;
+                
+                if (task.related_type === 'glpi_device') {
+                    // Fetch device details
+                    fetch(`/tasks/api/related_device/${task.related_id}`)
+                        .then(response => response.json())
+                        .then(device => {
+                            if (device.error) {
+                                relatedItemDetails.innerHTML = `<p class="text-danger">${language === 'pl' ? 'Błąd: ' : 'Error: '}${device.error}</p>`;
+                                return;
+                            }
+                            
+                            // Show device details with proper translations
+                            const typeLabel = language === 'pl' ? 'Typ' : 'Type';
+                            const locationLabel = language === 'pl' ? 'Lokalizacja' : 'Location';
+                            const serialLabel = language === 'pl' ? 'Nr seryjny' : 'Serial';
+                            const modelLabel = language === 'pl' ? 'Model' : 'Model';
+                            const ipLabel = language === 'pl' ? 'Adres IP' : 'IP Address';
+                            const lastSeenLabel = language === 'pl' ? 'Ostatnio widziany' : 'Last Seen';
+                            const notSpecifiedText = language === 'pl' ? 'Nie określono' : 'Not specified';
+                            const unknownText = language === 'pl' ? 'Nieznany' : 'Unknown';
+                            
+                            relatedItemDetails.innerHTML = `
+                                <div class="related-info">
+                                    <h5>${device.name}</h5>
+                                    <p><strong>${typeLabel}:</strong> ${device.type}</p>
+                                    <p><strong>${locationLabel}:</strong> ${device.location || notSpecifiedText}</p>
+                                    <p><strong>${serialLabel}:</strong> ${device.serial_number || notSpecifiedText}</p>
+                                    <p><strong>${modelLabel}:</strong> ${device.model || notSpecifiedText}</p>
+                                    <p><strong>${ipLabel}:</strong> ${device.ip_address || notSpecifiedText}</p>
+                                    <p><strong>${lastSeenLabel}:</strong> ${device.last_seen || unknownText}</p>
+                                </div>
+                            `;
+                        })
+                        .catch(error => {
+                            console.error('Error loading device details:', error);
+                            relatedItemDetails.innerHTML = `<p class="text-danger">${language === 'pl' ? 'Nie udało się załadować szczegółów urządzenia' : 'Failed to load device details'}</p>`;
+                        });                } else if (task.related_type === 'zabbix_alert') {
+                    // Fetch Zabbix alert details
+                    fetch(`/tasks/api/zabbix_alert/${task.related_id}`)
+                        .then(response => response.json())
+                        .then(alert => {
+                            if (alert.error) {
+                                relatedItemDetails.innerHTML = `<p class="text-danger">${language === 'pl' ? 'Błąd: ' : 'Error: '}${alert.error}</p>`;
+                                return;
+                            }
+                            
+                            // Show alert details with proper translations
+                            const priorityLabels = {
+                                'not_classified': { 'en': 'Not classified', 'pl': 'Nieklasyfikowany' },
+                                'information': { 'en': 'Information', 'pl': 'Informacja' },
+                                'warning': { 'en': 'Warning', 'pl': 'Ostrzeżenie' },
+                                'average': { 'en': 'Average', 'pl': 'Średni' },
+                                'high': { 'en': 'High', 'pl': 'Wysoki' },
+                                'disaster': { 'en': 'Disaster', 'pl': 'Kryzys' }
+                            };
+                            
+                            const descriptionLabel = language === 'pl' ? 'Opis alertu' : 'Alert Description';
+                            const hostLabel = language === 'pl' ? 'Host' : 'Host';
+                            const priorityLabel = language === 'pl' ? 'Priorytet' : 'Priority';
+                            const lastChangeLabel = language === 'pl' ? 'Ostatnia zmiana' : 'Last Change';
+                            
+                            const priorityText = priorityLabels[alert.priority] ? 
+                                priorityLabels[alert.priority][language] : 
+                                alert.priority;
+                                  relatedItemDetails.innerHTML = `
+                                <div class="related-info">
+                                    <h5>${alert.description}</h5>
+                                    <p><strong>${hostLabel}:</strong> ${alert.host_name}</p>
+                                    <p><strong>${priorityLabel}:</strong> <span class="priority-badge ${alert.priority}">${priorityText}</span></p>
+                                    <p><strong>${lastChangeLabel}:</strong> ${alert.last_change}</p>
+                                    <p><strong>ID:</strong> ${alert.id}</p>
+                                </div>
+                            `;
+                        })
+                        .catch(error => {
+                            console.error('Error loading alert details:', error);
+                            relatedItemDetails.innerHTML = `<p class="text-danger">${language === 'pl' ? 'Nie udało się załadować szczegółów alertu' : 'Failed to load alert details'}</p>`;
+                        });
+                }
+            } else {
+                relatedItemContainer.style.display = 'none';
+            }
+
+            // Set current status in the update form
+            const statusSelect = document.getElementById('new-status');
+            if (statusSelect) {
+                statusSelect.value = task.status;
+            }
+
+            // Update form action URL
+            const updateStatusForm = document.getElementById('update-status-form');
+            if (updateStatusForm) {
+                updateStatusForm.action = `/tasks/update/${taskId}`;
+            }            // Update comment form action URL
+            const addCommentForm = document.getElementById('add-comment-form');
+            if (addCommentForm) {
+                addCommentForm.action = `/tasks/comment/${taskId}`;
+                console.log('Set comment form action to:', addCommentForm.action);
+            }
+
+            // Load comments
+            const commentsContainer = document.getElementById('task-comments');
+            if (commentsContainer) {
+                if (data.comments && data.comments.length > 0) {
+                    const commentElements = data.comments.map(comment => `
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <span class="comment-author">${comment.display_name || comment.username}</span>
+                                <span class="comment-time">${comment.created_at}</span>
+                            </div>
+                            <div class="comment-text">${comment.comment}</div>
+                        </div>
+                    `).join('');
+                    
+                    commentsContainer.innerHTML = commentElements;
+                } else {
+                    commentsContainer.innerHTML = `<div class="no-comments">${language === 'pl' ? 'Brak komentarzy' : 'No comments yet'}</div>`;
+                }
+            }            // Show the modal
+            viewTaskModal.style.display = 'block';
+        })
+        .catch(error => console.error('Error loading task:', error));
+}
+
+// Function to refresh permissions when needed
+function refreshPermissions() {
+    fetch('/api/refresh_permissions')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Permissions refreshed successfully');
+                // Reload the page to reflect new permissions
+                window.location.reload();
+            } else {
+                console.error('Failed to refresh permissions:', data.error);
+            }
+        })
+        .catch(error => console.error('Error refreshing permissions:', error));
+}
+
+// Add event listener to refresh permissions button if it exists
+document.addEventListener('DOMContentLoaded', function() {
+    const refreshButton = document.getElementById('refresh-permissions');
+    if (refreshButton) {
+        refreshButton.addEventListener('click', refreshPermissions);
+    }
+});
+</script>
+
+{% endblock %}

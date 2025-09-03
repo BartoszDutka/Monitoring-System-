@@ -1,0 +1,469 @@
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, send_from_directory
+from ..core.database import get_db_cursor
+from datetime import datetime
+import json
+import os
+from werkzeug.utils import secure_filename
+from ..core.permissions import permission_required, has_permission
+
+# Import get_message function for translations
+from ..utils.translations import get_message
+
+# Define a path for task attachments
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static', 'attachments')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+# Ensure the upload folder exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
+
+def login_required(f):
+    """Decorator to check if user is logged in"""
+    from functools import wraps
+    from flask import session, redirect, url_for
+    
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    """Decorator to check if user is an admin"""
+    from functools import wraps
+    from flask import session, redirect, url_for, render_template
+    
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect(url_for('login'))
+        if session.get('user_info', {}).get('role') != 'admin':
+            return render_template('errors/403.html'), 403
+        return f(*args, **kwargs)
+    return decorated_function
+
+@tasks.route('/')
+@permission_required('tasks_view')
+def index():
+    """Show tasks page based on user role"""
+    username = session.get('username')
+    
+    with get_db_cursor() as cursor:
+        if has_permission('manage_all_tasks'):
+            # Users with manage_all permission see all tasks
+            cursor.execute("""
+                SELECT t.*, u.display_name as assignee_name 
+                FROM tasks t
+                LEFT JOIN users u ON t.assignee = u.username
+                ORDER BY t.created_at DESC
+            """)
+        else:
+            # Users see only their tasks
+            cursor.execute("""
+                SELECT t.*, u.display_name as assignee_name 
+                FROM tasks t
+                LEFT JOIN users u ON t.assignee = u.username
+                WHERE t.assignee = %s
+                ORDER BY t.created_at DESC
+            """, (username,))
+        
+        tasks_list = cursor.fetchall()
+          # Get users list for assignment
+    with get_db_cursor() as cursor:
+        cursor.execute("""
+            SELECT username, display_name, email, department
+            FROM users
+            ORDER BY username        """)
+        users = cursor.fetchall()
+        
+        return render_template('tasks/tasks.html', 
+                          tasks=tasks_list, 
+                          users=users, 
+                          can_create=has_permission('create_tasks'),
+                          can_manage_all=has_permission('manage_all_tasks'),
+                          can_update=has_permission('tasks_update'),
+                          can_comment=has_permission('tasks_comment'),
+                          can_delete=has_permission('tasks_delete'),
+                          can_view=has_permission('tasks_view'))
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@tasks.route('/create', methods=['POST'])
+@permission_required('create_tasks')
+def create_task():
+    """Create a new task"""
+    title = request.form.get('title')
+    description = request.form.get('description')
+    assignee = request.form.get('assignee')
+    priority = request.form.get('priority', 'medium')
+    due_date = request.form.get('due_date')
+    related_type = request.form.get('related_type')
+    related_id = request.form.get('related_id')
+    related_data = request.form.get('related_data', '{}')
+      # Validate input
+    if not title or not assignee:
+        flash(get_message('task_title_assignee_required'))
+        return redirect(url_for('tasks.index'))
+    
+    attachment_path = None
+    
+    # Handle file upload
+    if 'attachment' in request.files:
+        file = request.files['attachment']
+        if file and file.filename and allowed_file(file.filename):
+            # Create a secure filename with timestamp
+            filename = secure_filename(f"{int(datetime.now().timestamp())}_{file.filename}")
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(filepath)
+            attachment_path = filename
+    
+    with get_db_cursor() as cursor:
+        cursor.execute("""
+            INSERT INTO tasks (
+                title, description, assignee, creator, 
+                status, priority, due_date, 
+                related_type, related_id, related_data,
+                attachment_path
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            title, description, assignee, session.get('username'),
+            'new', priority, due_date if due_date else None,
+            related_type, related_id, related_data,
+            attachment_path        ))
+        
+    flash(get_message('task_created'))
+    return redirect(url_for('tasks.index'))
+
+@tasks.route('/update/<int:task_id>', methods=['POST'])
+@permission_required('tasks_update')
+def update_task(task_id):
+    """Update a task status"""
+    status = request.form.get('status')
+    comment = request.form.get('comment', '')
+    
+    username = session.get('username')
+      # Get current task details
+    with get_db_cursor() as cursor:
+        cursor.execute("""
+            SELECT * FROM tasks WHERE task_id = %s
+        """, (task_id,))
+        task = cursor.fetchone()
+    
+    if not task:
+        flash(get_message('task_not_found'))
+        return redirect(url_for('tasks.index'))
+    
+    # Only assignee can update task unless user has admin role
+    if username != task['assignee'] and not has_permission('manage_all_tasks'):
+        flash(get_message('cannot_update_task'))
+        return redirect(url_for('tasks.index'))
+    
+    # Update task status
+    with get_db_cursor() as cursor:
+        cursor.execute("""
+            UPDATE tasks SET
+            status = %s,
+            updated_at = CURRENT_TIMESTAMP
+            WHERE task_id = %s        """, (status, task_id))
+        
+    # Add comment if provided
+    if comment:
+        with get_db_cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO task_comments (
+                    task_id, username, comment
+                ) VALUES (%s, %s, %s)
+            """, (task_id, username, comment))
+    
+    flash(get_message('task_updated'))
+    return redirect(url_for('tasks.index'))
+
+@tasks.route('/delete/<int:task_id>', methods=['POST'])
+@permission_required('tasks_delete')
+def delete_task(task_id):
+    """Delete a task"""
+    username = session.get('username')
+    
+    # Get task details first to check ownership
+    with get_db_cursor() as cursor:
+        cursor.execute("""
+            SELECT assignee FROM tasks WHERE task_id = %s        """, (task_id,))
+        task = cursor.fetchone()
+        if not task:
+            flash(get_message('task_not_found'))
+            return redirect(url_for('tasks.index'))
+        
+        # Check if user can delete this task
+        # Users can delete their own tasks, or if they have manage_all_tasks permission
+        if task['assignee'] != username and not has_permission('manage_all_tasks'):
+            flash(get_message('cannot_delete_task'))
+            return redirect(url_for('tasks.index'))
+        
+        # Delete the task
+        cursor.execute("""
+            DELETE FROM tasks WHERE task_id = %s
+        """, (task_id,))
+        
+    flash(get_message('task_deleted'))
+    return redirect(url_for('tasks.index'))
+
+@tasks.route('/api/task/<int:task_id>')
+@permission_required('tasks_view')
+def get_task(task_id):
+    """Get task details"""
+    username = session.get('username')
+    
+    with get_db_cursor() as cursor:
+        cursor.execute("""
+            SELECT t.*, u.display_name as assignee_name 
+            FROM tasks t
+            LEFT JOIN users u ON t.assignee = u.username
+            WHERE t.task_id = %s
+        """, (task_id,))
+        task = cursor.fetchone()
+        if not task:
+            return jsonify({'error': 'Zadanie nie znalezione'}), 404
+        
+        # Check if user can view this task
+        # Users can view their own tasks, or if they have manage_all_tasks permission
+        if task['assignee'] != username and not has_permission('manage_all_tasks'):
+            return jsonify({'error': 'Dostęp zabroniony - możesz przeglądać tylko swoje zadania'}), 403
+            
+        # Get comments
+        cursor.execute("""
+            SELECT c.*, u.display_name
+            FROM task_comments c
+            LEFT JOIN users u ON c.username = u.username
+            WHERE c.task_id = %s
+            ORDER BY c.created_at
+        """, (task_id,))
+        comments = cursor.fetchall()
+        
+    # Convert to JSON-serializable format
+    task_data = dict(task)
+    task_data['created_at'] = task_data['created_at'].strftime('%Y-%m-%d %H:%M:%S')
+    task_data['updated_at'] = task_data['updated_at'].strftime('%Y-%m-%d %H:%M:%S') if task_data['updated_at'] else None
+    task_data['due_date'] = task_data['due_date'].strftime('%Y-%m-%d') if task_data['due_date'] else None
+    
+    # Add attachment URL if present
+    if task_data.get('attachment_path'):
+        task_data['attachment_url'] = url_for('tasks.get_attachment', filename=task_data['attachment_path'])
+    
+    if task_data.get('related_data'):
+        try:
+            task_data['related_data'] = json.loads(task_data['related_data'])
+        except (json.JSONDecodeError, TypeError):
+            task_data['related_data'] = {}
+    
+    comments_data = []
+    for comment in comments:
+        comment_dict = dict(comment)
+        comment_dict['created_at'] = comment_dict['created_at'].strftime('%Y-%m-%d %H:%M:%S')
+        comments_data.append(comment_dict)
+        
+    return jsonify({
+        'task': task_data,
+        'comments': comments_data
+    })
+
+@tasks.route('/attachments/<path:filename>')
+@permission_required('tasks_view')
+def get_attachment(filename):
+    """Serve task attachment files"""
+    return send_from_directory(UPLOAD_FOLDER, filename)
+
+@tasks.route('/comment/<int:task_id>', methods=['POST'])
+@permission_required('tasks_comment')
+def add_comment(task_id):
+    """Add a comment to a task"""
+    comment = request.form.get('comment', '').strip()
+    username = session.get('username')    
+    if not comment:
+        flash(get_message('comment_empty'))
+        return redirect(url_for('tasks.index'))
+      # Check if task exists and if user can comment on it
+    with get_db_cursor() as cursor:
+        cursor.execute("""
+            SELECT task_id, assignee FROM tasks WHERE task_id = %s        """, (task_id,))
+        task = cursor.fetchone()
+        
+        if not task:
+            flash(get_message('task_not_found'))
+            return redirect(url_for('tasks.index'))
+        
+        # Users can comment on their own tasks, or if they have manage_all_tasks permission
+        if task['assignee'] != username and not has_permission('manage_all_tasks'):
+            flash(get_message('cannot_comment_task'))
+            return redirect(url_for('tasks.index'))
+        
+        # Add comment
+        cursor.execute("""
+            INSERT INTO task_comments (
+                task_id, username, comment
+            ) VALUES (%s, %s, %s)
+        """, (task_id, username, comment))
+    
+    flash(get_message('comment_added'))
+    return redirect(url_for('tasks.index'))
+
+@tasks.route('/api/devices')
+@permission_required('tasks_view')
+def get_devices():
+    """Get all devices from assets table for task related items"""
+    try:
+        with get_db_cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    asset_id as id, 
+                    name, 
+                    type,
+                    serial_number, 
+                    model,
+                    manufacturer,
+                    location,
+                    ip_address
+                FROM assets
+                WHERE status = 'active'
+                ORDER BY name
+            """)
+            devices = cursor.fetchall()
+            
+            # Convert to list of dictionaries for JSON serialization
+            return jsonify(devices)
+    except Exception as e:
+        print(f"Error fetching devices: {e}")
+        return jsonify([]), 500
+
+@tasks.route('/api/related_device/<int:device_id>')
+@permission_required('tasks_view')
+def get_related_device(device_id):
+    """Get information about a related device"""
+    try:
+        with get_db_cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    asset_id,
+                    name, 
+                    type,
+                    serial_number, 
+                    model,
+                    manufacturer,
+                    location,
+                    ip_address,
+                    mac_address,
+                    os_info,
+                    last_seen
+                FROM assets
+                WHERE asset_id = %s
+            """, (device_id,))
+            device = cursor.fetchone()
+            
+            if not device:
+                return jsonify({"error": "Device not found"}), 404
+                
+            # Format dates for JSON serialization
+            if device.get('last_seen'):
+                device['last_seen'] = device['last_seen'].strftime('%Y-%m-%d %H:%M:%S')
+                
+            return jsonify(device)
+    except Exception as e:
+        print(f"Error fetching related device: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@tasks.route('/api/zabbix_alerts')
+@permission_required('tasks_view')
+def get_zabbix_alerts_api():
+    """Get Zabbix alerts for task creation"""
+    try:
+        from ..external.zabbix import get_zabbix_alerts
+        alerts = get_zabbix_alerts()
+        
+        # Format alerts for the frontend
+        formatted_alerts = []
+        for alert in alerts:
+            formatted_alerts.append({
+                'id': alert['triggerid'],
+                'description': alert['description'],
+                'priority': alert['priority'],
+                'host_name': alert['host_name'],
+                'last_change': alert['last_change'],
+                'search_text': f"{alert['description']} {alert['host_name']}".lower()
+            })
+        
+        return jsonify(formatted_alerts)
+        
+    except Exception as e:
+        print(f"Error fetching Zabbix alerts: {e}")
+        return jsonify([]), 500
+
+@tasks.route('/api/zabbix_alert/<alert_id>')
+@permission_required('tasks_view')
+def get_zabbix_alert_details(alert_id):
+    """Get details of a specific Zabbix alert"""
+    try:
+        from ..external.zabbix import get_zabbix_alerts
+        alerts = get_zabbix_alerts()
+        
+        # Find the specific alert
+        alert_details = None
+        for alert in alerts:
+            if alert['triggerid'] == alert_id:
+                alert_details = alert
+                break
+        
+        if alert_details:
+            return jsonify({
+                'id': alert_details['triggerid'],
+                'description': alert_details['description'], 
+                'priority': alert_details['priority'],
+                'priority_num': alert_details['priority_num'],
+                'host_name': alert_details['host_name'],
+                'last_change': alert_details['last_change'],
+                'status': alert_details['status'],
+                'state': alert_details['state'],
+                'value': alert_details['value']
+            })
+        else:
+            return jsonify({'error': 'Alert not found'}), 404
+            
+    except Exception as e:
+        print(f"Error fetching Zabbix alert details: {e}")
+        return jsonify({'error': str(e)}), 500
+
+def setup_tasks_tables():
+    """Create tasks tables if not exists"""
+    with get_db_cursor() as cursor:
+        # Tasks table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS tasks (
+                task_id INT AUTO_INCREMENT PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                assignee VARCHAR(100) NOT NULL,
+                creator VARCHAR(100) NOT NULL,
+                status ENUM('new', 'in_progress', 'completed', 'cancelled') NOT NULL DEFAULT 'new',
+                priority ENUM('low', 'medium', 'high', 'critical') NOT NULL DEFAULT 'medium',
+                due_date DATE,
+                related_type VARCHAR(50),
+                related_id VARCHAR(100),
+                related_data TEXT,
+                attachment_path VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP
+            )
+        """)
+        
+        # Task comments table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS task_comments (
+                comment_id INT AUTO_INCREMENT PRIMARY KEY,
+                task_id INT NOT NULL,
+                username VARCHAR(100) NOT NULL,
+                comment TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (task_id) REFERENCES tasks(task_id) ON DELETE CASCADE
+            )
+        """)

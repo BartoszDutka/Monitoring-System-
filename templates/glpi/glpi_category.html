@@ -1,0 +1,373 @@
+{% extends "layout/layout.html" %}
+
+{% block content %}
+<div class="glpi-dashboard-header">
+    <h1 data-en="{{ category_title }}" data-pl="{% if category_title == 'Workstations (KS)' %}Stacje robocze (KS){% elif category_title == 'Terminals (KT)' %}Terminale (KT){% elif category_title == 'Servers' %}Serwery{% elif category_title == 'Network Devices' %}Urządzenia sieciowe{% elif category_title == 'Printers' %}Drukarki{% elif category_title == 'Monitors' %}Monitory{% elif category_title == 'Racks' %}Szafy serwerowe{% elif category_title == 'Other Devices' %}Inne urządzenia{% else %}{{ category_title }}{% endif %}">{{ category_title }}</h1>
+    <div class="glpi-header-actions">
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" 
+                   id="deviceSearch" 
+                   class="device-search" 
+                   placeholder="Szukaj urządzeń..." 
+                   data-en-placeholder="Search devices..."
+                   data-pl-placeholder="Szukaj urządzeń..."                   autocomplete="off">        </div>        {% if has_permission('view_glpi') %}
+        <div class="refresh-controls">
+            <button id="refresh-current" class="refresh-button">
+                <i class="fas fa-sync-alt"></i> <span data-en="Refresh {{ category_title }}" data-pl="Odśwież {% if category_title == 'Workstations (KS)' %}stacje robocze (KS){% elif category_title == 'Terminals (KT)' %}terminale (KT){% elif category_title == 'Servers' %}serwery{% elif category_title == 'Network Devices' %}urządzenia sieciowe{% elif category_title == 'Printers' %}drukarki{% elif category_title == 'Monitors' %}monitory{% elif category_title == 'Racks' %}szafy serwerowe{% elif category_title == 'Other Devices' %}inne urządzenia{% else %}{{ category_title }}{% endif %}">Refresh {{ category_title }}</span>
+            </button>
+            <button id="refresh-all" class="refresh-button secondary">
+                <i class="fas fa-sync-alt"></i> <span data-en="Refresh All" data-pl="Odśwież wszystkie">Refresh All</span>
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="glpi-hosts-container">
+    {% for device in devices %} 
+    <div class="glpi-host-card">
+        <div class="card-content">
+            <h3>
+                <div class="device-status {% if device.status == 'active' %}status-active{% else %}status-inactive{% endif %}" 
+                     title="{% if device.status == 'active' %}{% if lang == 'pl' %}Urządzenie aktywne{% else %}Device Active{% endif %}{% else %}{% if lang == 'pl' %}Urządzenie nieaktywne{% else %}Device Inactive{% endif %}{% endif %}"></div>
+                {{ device.name }}
+                <span class="device-category">{{ device.type|default('unknown') }}</span>
+            </h3>
+            <div class="device-details">
+                
+                {# ID field with more flexible detection #}
+                {% if device.id or device.ID or device.device_id or device.asset_id or (device.specifications and device.specifications.id) %}
+                <p class="field-id"><strong data-en="ID" data-pl="ID">ID</strong> <span>
+                    {{ device.id or device.ID or device.device_id or device.asset_id or device.specifications.id if device.specifications else "" }}
+                </span></p>
+                {% endif %}
+                
+                {# Serial Number with more detection #}
+                {% if device.serial_number or device.serial or (device.specifications and device.specifications.serial) %}
+                <p class="field-serial"><strong data-en="Serial" data-pl="Nr seryjny">Serial</strong> <span>
+                    {{ device.serial_number or device.serial or (device.specifications.serial if device.specifications else "") }}
+                </span></p>
+                {% endif %}
+                
+                {# Other Serial Number with enhanced detection #}
+                {% if device.otherserial or device.other_serial or device.alt_serial or device.inventory_number or (device.specifications and device.specifications.otherserial) %}
+                <p class="field-otherserial"><strong data-en="Other S/N" data-pl="Drugi nr seryjny">Other S/N</strong> <span>
+                    {{ device.otherserial or device.other_serial or device.alt_serial or device.inventory_number or (device.specifications.otherserial if device.specifications else "") }}
+                </span></p>
+                {% endif %}
+                
+                {# Owner/User with enhanced detection #}
+                {% if device.owner_name or device.tech_owner_name or device.contact or device.owner or device.user or device.contact_num or (device.users_id and device.users_id is not number) or (device.users_id_tech and device.users_id_tech is not number) or (device.specifications and device.specifications.contact) %}
+                <p class="field-owner"><strong data-en="Owner" data-pl="Właściciel">Owner</strong> <span>
+                    {{ device.owner_name or device.tech_owner_name or device.contact or device.owner or device.user or device.contact_num or (device.users_id if device.users_id is not number else "") or (device.users_id_tech if device.users_id_tech is not number else "") or (device.specifications.contact if device.specifications else "") }}
+                </span></p>
+                {% endif %}
+                
+                {# Model information #}
+                {% if device.model_name %}
+                <p class="field-owner"><strong data-en="Model" data-pl="Model">Model</strong> <span>{{ device.model_name }}</span></p>
+                {% elif device.computermodels_id and device.computermodels_id is not number %}
+                <p class="field-owner"><strong data-en="Model" data-pl="Model">Model</strong> <span>{{ device.computermodels_id }}</span></p>
+                {% endif %}
+                
+                {# Manufacturer information #}
+                {% if device.manufacturer_name %}
+                <p><strong data-en="Manufacturer" data-pl="Producent">Manufacturer</strong> <span>{{ device.manufacturer_name }}</span></p>
+                {% elif device.manufacturers_id and device.manufacturers_id is not number %}
+                <p><strong data-en="Manufacturer" data-pl="Producent">Manufacturer</strong> <span>{{ device.manufacturers_id }}</span></p>
+                {% endif %}
+                
+                {# IP address #}
+                {% if device.ip_address %}
+                <p><strong data-en="IP Address" data-pl="Adres IP">IP Address</strong> <span>{{ device.ip_address }}</span></p>
+                {% elif device.ip %}
+                <p><strong data-en="IP Address" data-pl="Adres IP">IP Address</strong> <span>{{ device.ip }}</span></p>
+                {% endif %}
+                
+                {# MAC Address #}
+                {% if device.mac_address %}
+                <p><strong data-en="MAC" data-pl="MAC">MAC</strong> <span>{{ device.mac_address }}</span></p>
+                {% elif device.mac %}
+                <p><strong data-en="MAC" data-pl="MAC">MAC</strong> <span>{{ device.mac }}</span></p>
+                {% endif %}
+                
+                {# Operating System #}
+                {% if device.os_name %}
+                <p><strong data-en="OS" data-pl="System operacyjny">OS</strong> <span>{{ device.os_name }}</span></p>
+                {% elif device.operatingsystems_id and device.operatingsystems_id is not number %}
+                <p><strong data-en="OS" data-pl="System operacyjny">OS</strong> <span>{{ device.operatingsystems_id }}</span></p>
+                {% endif %}
+                
+                {# Last update #}
+                {% if device.date_mod %}
+                <p><strong data-en="Last Modified" data-pl="Ostatnia modyfikacja">Last Modified</strong> <span>{{ device.date_mod }}</span></p>
+                {% endif %}
+                
+                {# Check for location name in various potential fields #}
+                {% if device.location_name %}
+                <p class="field-owner"><strong data-en="Location" data-pl="Lokalizacja">Location</strong> <span>{{ device.location_name }}</span></p>
+                {% elif device.location and device.location|string|lower != "none" and not (device.location|string)[0:]|isdigit %}
+                <p class="field-owner"><strong data-en="Location" data-pl="Lokalizacja">Location</strong> <span>{{ device.location }}</span></p>
+                {% elif device.location_name_full %}
+                <p class="field-owner"><strong data-en="Location" data-pl="Lokalizacja">Location</strong> <span>{{ device.location_name_full }}</span></p>
+                {% elif device.location_full_name %}
+                <p class="field-owner"><strong data-en="Location" data-pl="Lokalizacja">Location</strong> <span>{{ device.location_full_name }}</span></p>
+                {% elif device.locations_name %}
+                <p class="field-owner"><strong data-en="Location" data-pl="Lokalizacja">Location</strong> <span>{{ device.locations_name }}</span></p>
+                {% elif device.glpi_location %}
+                <p class="field-owner"><strong data-en="Location" data-pl="Lokalizacja">Location</strong> <span>{{ device.glpi_location }}</span></p>
+                {% endif %}
+                
+                {# Status information - showing only the main device status #}
+                {% if device.status %}
+                <p class="field-owner"><strong data-en="Status" data-pl="Status">Status</strong> <span>{{ device.status }}</span></p>
+                {% endif %}
+                
+                {# Comments #}
+                {% if device.comment %}
+                <p><strong data-en="Comments" data-pl="Komentarze">Comments</strong> <span>{{ device.comment }}</span></p>
+                {% endif %}
+                
+                {% if not device.id and not device.ID and 
+                    not device.serial_number and not device.serial and 
+                    not device.otherserial and 
+                    not device.contact and not device.owner and not device.user and 
+                    not device.location_name and not device.location and 
+                    not device.location_name_full and not device.location_full_name and
+                    not device.locations_name and not device.glpi_location %}
+                <p><strong data-en="Notice" data-pl="Uwaga">Notice</strong> <span data-en="This device has no detailed information available" data-pl="To urządzenie nie ma dostępnych szczegółowych informacji">This device has no detailed information available</span></p>
+                {% endif %}
+            </div>
+        </div>
+          {% if category_title in ['Workstations (KS)', 'Terminals (KT)', 'Servers (SRV)'] or device.name.upper().startswith(('KS', 'KT', 'SRV')) %}
+        {% if has_permission('vnc_connect') %}
+        <div class="device-actions">
+            <button class="vnc-button" onclick="connectToVNC('{{ device.name }}')"
+                    title="{% if lang == 'pl' %}Połącz z {{ device.name }} przez UltraVNC{% else %}Connect to {{ device.name }} via UltraVNC{% endif %}">
+                <i class="fas fa-desktop"></i> <span data-en="Connect UltraVNC" data-pl="Połącz UltraVNC">Connect UltraVNC</span>
+            </button>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+// User permissions for JavaScript
+window.userPermissions = [{% for permission in session.get('user_permissions', []) %}'{{ permission }}'{% if not loop.last %}, {% endif %}{% endfor %}];
+
+// Dodaj funkcję wyszukiwania
+function filterDevices() {
+    const searchTerm = document.getElementById('deviceSearch').value.toLowerCase();
+    const cards = document.querySelectorAll('.glpi-host-card');
+    let hasResults = false;
+
+    cards.forEach(card => {
+        const name = card.querySelector('h3').textContent.toLowerCase();
+        const details = card.querySelector('.device-details').textContent.toLowerCase();
+        const isVisible = name.includes(searchTerm) || details.includes(searchTerm);
+        
+        card.style.display = isVisible ? '' : 'none';
+        if (isVisible) hasResults = true;
+    });
+
+    // Pokaż informację gdy nie ma wyników
+    const noResults = document.getElementById('noResults');
+    if (!hasResults && searchTerm) {
+        if (!noResults) {
+            const message = document.createElement('div');
+            message.id = 'noResults';
+            message.className = 'no-results';
+            
+            // Użyj odpowiedniego tekstu zależnie od języka
+            const lang = document.documentElement.getAttribute('data-language') || 'en';
+            const noResultsText = lang === 'pl' ? 'Nie znaleziono urządzeń' : 'No devices found';
+            
+            message.innerHTML = `<i class="fas fa-search"></i> ${noResultsText}`;
+            document.querySelector('.glpi-hosts-container').appendChild(message);
+        }
+    } else if (noResults) {
+        noResults.remove();
+    }
+}
+
+document.getElementById('deviceSearch').addEventListener('input', filterDevices);
+
+function refreshData(type) {
+    const currentButton = document.getElementById('refresh-current');
+    const allButton = document.getElementById('refresh-all');
+    const buttons = [currentButton, allButton];
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    
+    // Disable both buttons
+    buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.dataset.originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (language === 'pl' ? 'Odświeżanie...' : 'Refreshing...');
+    });
+
+    const category = '{{ request.path.split("/")[-1] }}';
+    const url = type === 'current' 
+        ? `/api/glpi/refresh/${category}?force_api=1`
+        : '/api/glpi/refresh?force_api=1';
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.reload();
+            } else {
+                throw new Error(data.message || 'Refresh failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error refreshing data:', error);
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.innerHTML = btn.dataset.originalText;
+            });
+            alert(language === 'pl' ? 'Nie udało się odświeżyć danych. Spróbuj ponownie.' : 'Failed to refresh data. Please try again.');
+        });
+}
+
+document.getElementById('refresh-current').addEventListener('click', () => refreshData('current'));
+document.getElementById('refresh-all').addEventListener('click', () => refreshData('all'));
+
+function connectToVNC(hostname) {
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    fetch('/connect_vnc', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ hostname: hostname })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('VNC connection initiated');
+        } else {
+            alert(language === 'pl' ? 
+                'Błąd podczas łączenia z VNC: ' + data.message : 
+                'Error connecting to VNC: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert(language === 'pl' ? 'Nie udało się połączyć z VNC' : 'Failed to connect to VNC');
+    });
+}
+
+// Check if device details containers need scroll indicators
+document.addEventListener('DOMContentLoaded', function() {
+    // Update all text elements with data-en/data-pl attributes
+    const language = document.documentElement.getAttribute('data-language') || 'en';
+    document.querySelectorAll('[data-en][data-pl]').forEach(el => {
+        el.textContent = el.getAttribute(`data-${language}`);
+    });
+
+    const detailsContainers = document.querySelectorAll('.device-details');
+    
+    function checkScrollable(container) {
+        if (container.scrollHeight > container.clientHeight) {
+            container.classList.add('scrollable');
+        } else {
+            container.classList.remove('scrollable');
+        }
+    }
+    
+    // Initial check
+    detailsContainers.forEach(container => {
+        checkScrollable(container);
+        
+        // Update the scrollable class when scrolling
+        container.addEventListener('scroll', function() {
+            if (this.scrollTop + this.clientHeight >= this.scrollHeight - 10) {
+                this.classList.remove('scrollable');
+            } else {
+                this.classList.add('scrollable');
+            }
+        });
+    });
+    
+    // Re-check on window resize
+    window.addEventListener('resize', function() {
+        detailsContainers.forEach(checkScrollable);
+    });
+
+    // Simplified debugging - only show essential info
+    detailsContainers.forEach(container => {
+        // Check if any text is visible - only critical debug code kept
+        if (container.textContent.trim() === '') {
+            console.warn('No visible text in device details container');
+            container.innerHTML = '<p><strong>Debug</strong> <span>No content visible - check CSS</span></p>';
+        }
+    });
+    
+    // Listen for language changes
+    document.addEventListener('languageChanged', function(e) {
+        document.querySelectorAll('[data-en][data-pl]').forEach(el => {
+            const lang = e.detail.language;
+            el.textContent = el.getAttribute(`data-${lang}`);
+        });
+    });
+});
+
+// Add debug code to check VNC button visibility
+document.addEventListener('DOMContentLoaded', function() {
+    // Count how many VNC buttons should be visible
+    const hosts = document.querySelectorAll('.glpi-host-card');
+    let vncButtonCount = 0;
+      hosts.forEach(host => {
+        const name = host.querySelector('h3').textContent.trim();
+        // Check if the device name matches the criteria for VNC
+        if (name.toUpperCase().startsWith('KS') || 
+            name.toUpperCase().startsWith('KT') || 
+            name.toUpperCase().startsWith('SRV')) {
+            
+            // Check if user has VNC permissions
+            if (window.userPermissions && window.userPermissions.includes('vnc_connect')) {
+                vncButtonCount++;
+                
+                // Make sure the device-actions container exists
+                let actions = host.querySelector('.device-actions');
+                if (!actions) {
+                    console.error(`Missing device-actions for ${name}`);
+                    // Create it if missing
+                    actions = document.createElement('div');
+                    actions.className = 'device-actions';
+                    actions.innerHTML = `
+                        <button class="vnc-button" onclick="connectToVNC('${name}')"
+                                title="Connect to ${name} via UltraVNC">
+                            <i class="fas fa-desktop"></i> Connect UltraVNC
+                        </button>
+                    `;
+                    host.appendChild(actions);
+                }
+                
+                // Add debug outline
+                actions.style.outline = '2px dashed green';
+                  // Check if the button is hidden by CSS
+                const button = actions.querySelector('.vnc-button');
+                if (button) {
+                    const style = window.getComputedStyle(button);
+                    if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+                        console.error(`VNC button for ${name} is hidden by CSS`);
+                        
+                        // Force display
+                        button.style.display = 'flex';
+                        button.style.visibility = 'visible';
+                        button.style.opacity = '1';
+                    }
+                }
+            } // End VNC permission check
+        } // End device type check
+    });
+    
+    console.log(`Expected VNC buttons: ${vncButtonCount}`);
+    console.log(`Actual VNC buttons visible: ${document.querySelectorAll('.device-actions').length}`);
+});
+</script>
+{% endblock %}

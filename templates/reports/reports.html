@@ -1,0 +1,554 @@
+{% extends "layout/layout.html" %}
+
+{% block title %}Reports | Monitoring System{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/reports/reports.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1 data-en="Reports Generator" data-pl="Generator raportów">Reports Generator</h1>    <div class="header-actions">
+        {% if has_permission('create_reports') %}
+        <button id="generate-report" class="btn accent-btn">
+            <i class="fas fa-plus"></i> <span data-en="Generate New Report" data-pl="Wygeneruj nowy raport">Generate New Report</span>
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card full-width">
+        <div class="card-header">
+            <i class="fas fa-filter"></i>
+            <h2 data-en="Filter Reports" data-pl="Filtruj raporty">Filter Reports</h2>
+        </div>
+        <div class="card-content">
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label for="report-type" data-en="Report Type:" data-pl="Typ raportu:">Report Type:</label>
+                    <select id="report-type">
+                        <option value="all" data-en="All Types" data-pl="Wszystkie typy">All Types</option>
+                        <option value="messages" data-en="Messages" data-pl="Wiadomości">Messages</option>
+                        <option value="errors" data-en="Errors" data-pl="Błędy">Errors</option>
+                        <option value="performance" data-en="Performance" data-pl="Wydajność">Performance</option>
+                        <option value="summary" data-en="Summary" data-pl="Podsumowanie">Summary</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="date-range" data-en="Date Range:" data-pl="Zakres dat:">Date Range:</label>
+                    <select id="date-range">
+                        <option value="all" data-en="All Time" data-pl="Cały okres">All Time</option>
+                        <option value="today" data-en="Today" data-pl="Dzisiaj">Today</option>
+                        <option value="week" data-en="Last 7 Days" data-pl="Ostatnie 7 dni">Last 7 Days</option>
+                        <option value="month" data-en="Last 30 Days" data-pl="Ostatnie 30 dni">Last 30 Days</option>
+                        <option value="custom" data-en="Custom Range" data-pl="Niestandardowy zakres">Custom Range</option>
+                    </select>
+                </div>
+                <div class="filter-group" id="custom-date" style="display: none;">
+                    <label for="start-date" data-en="From:" data-pl="Od:">From:</label>
+                    <input type="date" id="start-date">
+                    <label for="end-date" data-en="To:" data-pl="Do:">To:</label>
+                    <input type="date" id="end-date">
+                </div>
+                <button id="filter-button" class="btn primary-btn">
+                    <i class="fas fa-search"></i> <span data-en="Apply Filters" data-pl="Zastosuj filtry">Apply Filters</span>
+                </button>
+                <button id="reset-button" class="btn secondary-btn">
+                    <i class="fas fa-undo"></i> <span data-en="Reset" data-pl="Resetuj">Reset</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-card full-width">
+        <div class="card-header">
+            <i class="fas fa-file-alt"></i>
+            <h2 data-en="Available Reports" data-pl="Dostępne raporty">Available Reports</h2>
+        </div>
+        <div class="card-content">
+            <div class="reports-list">
+                {% if reports %}
+                    <table class="reports-table">
+                        <thead>
+                            <tr>
+                                <th data-en="Report Name" data-pl="Nazwa raportu">Report Name</th>
+                                <th data-en="Type" data-pl="Typ">Type</th>
+                                <th data-en="Generated Date" data-pl="Data wygenerowania">Generated Date</th>
+                                <th data-en="Records" data-pl="Rekordy">Records</th>
+                                <th data-en="Actions" data-pl="Akcje">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in reports %}
+                            <tr>
+                                <td>{{ report.name }}</td>
+                                <td class="report-type" data-type="{{ report.type }}">
+                                    <span data-en="Messages" data-pl="Wiadomości" {% if report.type != 'messages' %}style="display:none"{% endif %}>Messages</span>
+                                    <span data-en="Errors" data-pl="Błędy" {% if report.type != 'errors' %}style="display:none"{% endif %}>Errors</span>
+                                    <span data-en="Performance" data-pl="Wydajność" {% if report.type != 'performance' %}style="display:none"{% endif %}>Performance</span>
+                                    <span data-en="Summary" data-pl="Podsumowanie" {% if report.type != 'summary' %}style="display:none"{% endif %}>Summary</span>
+                                    <span {% if report.type in ['messages', 'errors', 'performance', 'summary'] %}style="display:none"{% endif %}>{{ report.type|capitalize }}</span>
+                                </td>
+                                <td>{{ report.date }}</td>
+                                <td>{{ report.records }}</td>                                <td class="actions">                                    <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn view-btn" title="View" data-en-title="View" data-pl-title="Podgląd"><i class="fas fa-eye"></i></a>
+                                    <a href="{{ url_for('download_report', report_id=report.id) }}" class="btn download-btn" title="Download" data-en-title="Download" data-pl-title="Pobierz"><i class="fas fa-download"></i></a>
+                                    {% if has_permission('delete_reports') %}
+                                    <button class="btn delete-btn" data-id="{{ report.id }}" title="Delete" data-en-title="Delete" data-pl-title="Usuń"><i class="fas fa-trash"></i></button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="no-reports">
+                        <i class="fas fa-file-alt no-data-icon"></i>
+                        <p data-en="No reports available" data-pl="Brak dostępnych raportów">No reports available</p>
+                        <p class="sub-message" data-en="Generate a new report to see it here" data-pl="Wygeneruj nowy raport, aby zobaczyć go tutaj">Generate a new report to see it here</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Generation Modal -->
+<div id="report-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 data-en="Generate New Report" data-pl="Wygeneruj nowy raport">Generate New Report</h2>
+        <form id="report-form" action="{{ url_for('generate_report') }}" method="POST">
+            <div class="form-group">
+                <label for="modal-report-type" data-en="Report Type:" data-pl="Typ raportu:">Report Type:</label>
+                <select id="modal-report-type" name="reportType" required>
+                    <option value="" data-en="Select a report type" data-pl="Wybierz typ raportu">Select a report type</option>
+                    <option value="messages" data-en="Messages Report" data-pl="Raport wiadomości">Messages Report</option>
+                    <option value="performance" data-en="Performance Report" data-pl="Raport wydajności">Performance Report</option>
+                    <option value="errors" data-en="Errors Report" data-pl="Raport błędów">Errors Report</option>
+                    <option value="summary" data-en="Summary Report" data-pl="Raport podsumowujący">Summary Report</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modal-date-range" data-en="Time Range:" data-pl="Zakres czasu:">Time Range:</label>
+                <select id="modal-date-range" name="dateRange" required>
+                    <option value="today" data-en="Today" data-pl="Dzisiaj">Today</option>
+                    <option value="week" data-en="Last 7 Days" data-pl="Ostatnie 7 dni">Last 7 Days</option>
+                    <option value="month" data-en="Last 30 Days" data-pl="Ostatnie 30 dni">Last 30 Days</option>
+                    <option value="custom" data-en="Custom Range" data-pl="Niestandardowy zakres">Custom Range</option>
+                </select>
+            </div>
+            <div class="form-group modal-custom-date" style="display: none;">
+                <label for="modal-start-date" data-en="From:" data-pl="Od:">From:</label>
+                <input type="date" id="modal-start-date" name="startDate">
+                <label for="modal-end-date" data-en="To:" data-pl="Do:">To:</label>
+                <input type="date" id="modal-end-date" name="endDate">
+            </div>
+            <div class="form-group">
+                <label for="output-format" data-en="Output Format:" data-pl="Format wyjściowy:">Output Format:</label>
+                <select id="output-format" name="outputFormat">
+                    <option value="pdf">PDF</option>
+                    <option value="excel">Excel</option>
+                    <option value="csv">CSV</option>
+                    <option value="html">HTML</option>
+                </select>
+                <span class="format-hint" data-en="Note: PDF generation requires WeasyPrint or pdfkit package to be installed." data-pl="Uwaga: Generowanie PDF wymaga zainstalowanego pakietu WeasyPrint lub pdfkit.">Note: PDF generation requires WeasyPrint or pdfkit package to be installed.</span>
+            </div>
+            <div class="form-group">
+                <label for="report-language" data-en="Report Language:" data-pl="Język raportu:">Report Language:</label>
+                <select id="report-language" name="reportLanguage">
+                    <option value="current" data-en="Current Interface Language" data-pl="Bieżący język interfejsu">Current Interface Language</option>
+                    <option value="en" data-en="English" data-pl="Angielski">English</option>
+                    <option value="pl" data-en="Polish" data-pl="Polski">Polish</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" id="cancel-report" class="btn secondary-btn" data-en="Cancel" data-pl="Anuluj">Cancel</button>
+                <button type="submit" class="btn accent-btn" data-en="Generate Report" data-pl="Wygeneruj raport">Generate Report</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .format-hint {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.8rem;
+        color: #888;
+        font-style: italic;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle custom date range based on selection
+        const dateRangeSelect = document.getElementById('date-range');
+        const customDateDiv = document.getElementById('custom-date');
+        
+        dateRangeSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customDateDiv.style.display = 'flex';
+            } else {
+                customDateDiv.style.display = 'none';
+            }
+        });
+
+        // Obsługa filtrowania raportów
+        const filterButton = document.getElementById('filter-button');
+        const resetButton = document.getElementById('reset-button');
+        const reportTypeSelect = document.getElementById('report-type');
+        const dateRangeFilter = document.getElementById('date-range');
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+
+        // Ustawienie domyślnych dat dla zakresu niestandardowego
+        const today = new Date();
+        const lastWeek = new Date();
+        lastWeek.setDate(lastWeek.getDate() - 7);
+        
+        startDateInput.valueAsDate = lastWeek;
+        endDateInput.valueAsDate = today;
+
+        // Funkcja do filtrowania raportów
+        function filterReports() {
+            const reportType = reportTypeSelect.value;
+            const dateRange = dateRangeFilter.value;
+            const startDate = startDateInput.value ? new Date(startDateInput.value) : null;
+            const endDate = endDateInput.value ? new Date(endDateInput.value) : null;
+            
+            // Pobierz wszystkie wiersze z tabeli raportów
+            const reportRows = document.querySelectorAll('.reports-table tbody tr');
+            
+            // Przekształć w tablicę i pobierz właściwe dane
+            const reports = Array.from(reportRows).map(row => {
+                const typeCell = row.querySelector('.report-type');
+                const type = typeCell ? typeCell.getAttribute('data-type') : '';
+                const dateCell = row.querySelector('td:nth-child(3)');
+                const dateStr = dateCell ? dateCell.textContent : '';
+                const date = dateStr ? new Date(dateStr) : null;
+                
+                return {
+                    row: row,
+                    type: type,
+                    date: date
+                };
+            });
+            
+            // Zastosuj filtry
+            reports.forEach(report => {
+                let visible = true;
+                
+                // Filtr typu raportu
+                if (reportType !== 'all' && report.type !== reportType) {
+                    visible = false;
+                }
+                
+                // Filtr daty
+                if (visible && dateRange !== 'all' && report.date) {
+                    if (dateRange === 'today') {
+                        const today = new Date();
+                        visible = report.date.toDateString() === today.toDateString();
+                    } else if (dateRange === 'week') {
+                        const weekAgo = new Date();
+                        weekAgo.setDate(weekAgo.getDate() - 7);
+                        visible = report.date >= weekAgo;
+                    } else if (dateRange === 'month') {
+                        const monthAgo = new Date();
+                        monthAgo.setDate(monthAgo.getDate() - 30);
+                        visible = report.date >= monthAgo;
+                    } else if (dateRange === 'custom' && startDate && endDate) {
+                        // Dodaj 1 dzień do endDate, aby uwzględnić cały dzień
+                        const endDatePlus = new Date(endDate);
+                        endDatePlus.setDate(endDatePlus.getDate() + 1);
+                        visible = report.date >= startDate && report.date < endDatePlus;
+                    }
+                }
+                
+                // Pokaż lub ukryj wiersz na podstawie filtrów
+                report.row.style.display = visible ? '' : 'none';
+            });
+            
+            // Sprawdź czy po filtrowaniu są widoczne jakieś raporty
+            const visibleReports = reports.filter(report => report.row.style.display !== 'none');
+            
+            // Pokaż komunikat "brak raportów" jeśli nie ma widocznych raportów
+            const reportsTable = document.querySelector('.reports-table');
+            const reportsListDiv = document.querySelector('.reports-list');
+            const existingNoReports = document.querySelector('.no-reports');
+            
+            if (visibleReports.length === 0) {
+                if (!existingNoReports) {
+                    const language = document.documentElement.getAttribute('data-language') || 'en';
+                    const noReportsDiv = document.createElement('div');
+                    noReportsDiv.className = 'no-reports filtered';
+                    
+                    const noReportsIcon = document.createElement('i');
+                    noReportsIcon.className = 'fas fa-filter no-data-icon';
+                    
+                    const noReportsText = document.createElement('p');
+                    noReportsText.textContent = language === 'pl' ? 'Brak raportów spełniających kryteria' : 'No reports match your filters';
+                    
+                    const subMessage = document.createElement('p');
+                    subMessage.className = 'sub-message';
+                    subMessage.textContent = language === 'pl' ? 'Zmień filtry, aby zobaczyć więcej raportów' : 'Change your filters to see more reports';
+                    
+                    noReportsDiv.appendChild(noReportsIcon);
+                    noReportsDiv.appendChild(noReportsText);
+                    noReportsDiv.appendChild(subMessage);
+                    
+                    if (reportsTable) {
+                        reportsTable.style.display = 'none';
+                        reportsListDiv.appendChild(noReportsDiv);
+                    }
+                }
+            } else {
+                if (reportsTable) {
+                    reportsTable.style.display = '';
+                }
+                const filteredNoReports = document.querySelector('.no-reports.filtered');
+                if (filteredNoReports) {
+                    filteredNoReports.remove();
+                }
+            }
+        }
+
+        // Obsługa przycisków
+        filterButton.addEventListener('click', filterReports);
+        
+        resetButton.addEventListener('click', function() {
+            // Resetuj wszystkie filtry
+            reportTypeSelect.value = 'all';
+            dateRangeFilter.value = 'all';
+            customDateDiv.style.display = 'none';
+            
+            // Pokaż wszystkie raporty
+            const reportRows = document.querySelectorAll('.reports-table tbody tr');
+            reportRows.forEach(row => {
+                row.style.display = '';
+            });
+            
+            // Ukryj komunikat "brak raportów"
+            const filteredNoReports = document.querySelector('.no-reports.filtered');
+            if (filteredNoReports) {
+                filteredNoReports.remove();
+            }
+            
+            // Pokaż tabelę raportów
+            const reportsTable = document.querySelector('.reports-table');
+            if (reportsTable) {
+                reportsTable.style.display = '';
+            }
+        });
+
+        // Modal functionality
+        const modal = document.getElementById('report-modal');
+        const generateBtn = document.getElementById('generate-report');
+        const closeBtn = document.getElementsByClassName('close')[0];
+        const cancelBtn = document.getElementById('cancel-report');
+        const modalDateRange = document.getElementById('modal-date-range');
+        const modalCustomDate = document.querySelector('.modal-custom-date');
+
+        // Only set up report generation if the button exists (user has permission)
+        if (generateBtn) {
+            generateBtn.addEventListener('click', function() {
+                modal.style.display = 'block';
+                
+                // Set default dates for custom range
+                const today = new Date();
+                const lastWeek = new Date();
+                lastWeek.setDate(lastWeek.getDate() - 7);
+        
+            
+            document.getElementById('modal-end-date').valueAsDate = today;
+            document.getElementById('modal-start-date').valueAsDate = lastWeek;
+        });
+
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+
+        cancelBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+
+        modalDateRange.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                modalCustomDate.style.display = 'flex';
+                
+                // Set default dates if they haven't been set
+                const startDateInput = document.getElementById('modal-start-date');
+                const endDateInput = document.getElementById('modal-end-date');
+                
+                if (!startDateInput.value || !endDateInput.value) {
+                    const today = new Date();
+                    const lastWeek = new Date();
+                    lastWeek.setDate(lastWeek.getDate() - 7);
+                    
+                    endDateInput.valueAsDate = today;
+                    startDateInput.valueAsDate = lastWeek;
+                }
+            } else {
+                modalCustomDate.style.display = 'none';
+            }
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';            }
+            });
+        } // Close the if (generateBtn) block
+        
+        // Delete button functionality
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const reportId = this.getAttribute('data-id');
+                const language = document.documentElement.getAttribute('data-language') || 'en';
+                
+                // Translated confirmation messages
+                const confirmMessages = {
+                    'en': 'Are you sure you want to delete this report?',
+                    'pl': 'Czy na pewno chcesz usunąć ten raport?'
+                };
+                
+                const errorMessages = {
+                    'en': {
+                        'failDelete': 'Failed to delete the report.',
+                        'error': 'An error occurred while deleting the report.'
+                    },
+                    'pl': {
+                        'failDelete': 'Nie udało się usunąć raportu.',
+                        'error': 'Wystąpił błąd podczas usuwania raportu.'
+                    }
+                };
+                
+                if (confirm(confirmMessages[language] || confirmMessages['en'])) {
+                    // Add AJAX call to delete the report
+                    fetch(`/delete-report/${reportId}`, {
+                        method: 'DELETE',
+                    }).then(response => response.json())
+                      .then(data => {
+                          if(data.success) {
+                              // Remove the row from the table
+                              this.closest('tr').remove();
+                              
+                              // If there are no more reports left, show the "no reports" message
+                              const tbody = document.querySelector('.reports-table tbody');
+                              if (tbody && tbody.children.length === 0) {
+                                  const reportsTable = document.querySelector('.reports-table');
+                                  const noReportsDiv = document.createElement('div');
+                                  noReportsDiv.className = 'no-reports';
+                                  
+                                  const noReportsIcon = document.createElement('i');
+                                  noReportsIcon.className = 'fas fa-file-alt no-data-icon';
+                                  
+                                  const noReportsText = document.createElement('p');
+                                  noReportsText.setAttribute('data-en', 'No reports available');
+                                  noReportsText.setAttribute('data-pl', 'Brak dostępnych raportów');
+                                  noReportsText.textContent = language === 'pl' ? 'Brak dostępnych raportów' : 'No reports available';
+                                  
+                                  const subMessage = document.createElement('p');
+                                  subMessage.className = 'sub-message';
+                                  subMessage.setAttribute('data-en', 'Generate a new report to see it here');
+                                  subMessage.setAttribute('data-pl', 'Wygeneruj nowy raport, aby zobaczyć go tutaj');
+                                  subMessage.textContent = language === 'pl' ? 'Wygeneruj nowy raport, aby zobaczyć go tutaj' : 'Generate a new report to see it here';
+                                  
+                                  noReportsDiv.appendChild(noReportsIcon);
+                                  noReportsDiv.appendChild(noReportsText);
+                                  noReportsDiv.appendChild(subMessage);
+                                  
+                                  const reportsListDiv = document.querySelector('.reports-list');
+                                  reportsListDiv.innerHTML = '';
+                                  reportsListDiv.appendChild(noReportsDiv);
+                              }
+                          } else {
+                              alert(errorMessages[language].failDelete || errorMessages['en'].failDelete);
+                          }
+                      }).catch(error => {
+                          console.error('Error:', error);
+                          alert(errorMessages[language].error || errorMessages['en'].error);
+                      });
+                }
+            });
+        });
+
+        // Form submission with improved error handling
+        document.getElementById('report-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const language = document.documentElement.getAttribute('data-language') || 'en';
+            const formActions = document.querySelector('.form-actions');
+            const originalContent = formActions.innerHTML;
+            
+            // Translated loading message
+            const loadingMessage = language === 'pl' ? 'Generowanie raportu...' : 'Generating report...';
+            
+            // Show loading state
+            formActions.innerHTML = '<div class="loading-spinner"></div><p>' + loadingMessage + '</p>';
+            
+            // Error messages in both languages
+            const errorMessages = {
+                'en': {
+                    'failGenerate': 'Failed to generate report: ',
+                    'unknownError': 'Unknown error',
+                    'error': 'An error occurred while generating the report: '
+                },
+                'pl': {
+                    'failGenerate': 'Nie udało się wygenerować raportu: ',
+                    'unknownError': 'Nieznany błąd',
+                    'error': 'Wystąpił błąd podczas generowania raportu: '
+                }
+            };
+            
+            // Collect form data
+            const formData = new FormData(this);
+            
+            // Submit form data
+            fetch('{{ url_for("generate_report") }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Report generation response:', data);
+                if (data.success) {
+                    // Close modal and redirect or show success
+                    modal.style.display = 'none';
+                    window.location.href = '{{ url_for("reports_page") }}';
+                } else {
+                    // Show error
+                    formActions.innerHTML = originalContent;
+                    alert(errorMessages[language].failGenerate + (data.message || errorMessages[language].unknownError));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                formActions.innerHTML = originalContent;
+                alert(errorMessages[language].error + error.message);
+            });
+        });
+
+        // Obsługa aktualizacji tekstów przy zmianie języka
+        document.addEventListener('languageChanged', function(e) {
+            const language = e.detail.language;
+            
+            // Aktualizujemy teksty w tabeli raportów zgodnie z wybranym językiem
+            document.querySelectorAll('[data-en][data-pl]').forEach(el => {
+                el.textContent = el.getAttribute(`data-${language}`);
+            });
+
+            // Aktualizujemy tytuły przycisków
+            document.querySelectorAll('[data-en-title][data-pl-title]').forEach(el => {
+                el.title = el.getAttribute(`data-${language}-title`);
+            });
+        });
+    });
+</script>
+{% endblock %}
