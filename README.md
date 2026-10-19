@@ -1,4 +1,4 @@
-# Monitoring System
+# Infrastructur Monitoring Platform
 
 A web-based monitoring and administration system built with Flask. The application brings together infrastructure monitoring, system logs, inventory, tasks, reports, and user permissions in one interface.
 
